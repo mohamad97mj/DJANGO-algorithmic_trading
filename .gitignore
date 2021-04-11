@@ -142,5 +142,4 @@ cython_debug/
 .idea
 
 test.py
-env.py
 env.sh
