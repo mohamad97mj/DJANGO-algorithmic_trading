@@ -1,2 +1,2 @@
-Django==3.2
-python-binance==0.7.10
+Django==3.2.2
+python-binance==1.0.9
