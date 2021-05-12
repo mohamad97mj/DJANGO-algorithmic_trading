@@ -11,4 +11,7 @@ class SpotBotClient:
         pprint(res)
         return res
 
-
+    def get_symbol_all_ordres(self, symbol='BTCUSDT'):
+        orders = client.get_all_orders(symbol=symbol)
+        print(orders)
+        return orders
