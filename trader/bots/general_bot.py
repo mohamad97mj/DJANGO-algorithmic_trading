@@ -19,4 +19,9 @@ class GeneralBot:
         print(status)
         return status
 
+    def get_exchange_info(self):
+        info = self._client.get_exchange_info()
+        pprint(info)
+        return info
+
 
