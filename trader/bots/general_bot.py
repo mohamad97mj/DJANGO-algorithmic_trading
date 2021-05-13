@@ -38,7 +38,4 @@ class GeneralBot:
         pprint(info)
         return info
 
-    def get_dayli_account_snapshot(self):
-        info = client.get_account_snapshot(type='SPOT')
-        pprint(info)
-        return info
+
