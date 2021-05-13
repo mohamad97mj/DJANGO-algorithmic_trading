@@ -14,3 +14,9 @@ class GeneralBot:
         pprint(time_res)
         return time_res
 
+    def get_system_status(self):
+        status = client.get_system_status()
+        print(status)
+        return status
+
+
