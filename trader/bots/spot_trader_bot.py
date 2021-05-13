@@ -2,7 +2,7 @@ from trader.client import client
 from pprint import pprint
 
 
-class SpotBotClient:
+class SpotTraderBot:
     def __init__(self):
         self._client = client
 
