@@ -1,13 +1,17 @@
 from trader.client import client
 from pprint import pprint
+from trader.global_utils import apply2all_methods, log
 
 
+@apply2all_methods(log)
 class GeneralBot:
     def __init__(self):
         self._client = client
 
     def ping_server(self):
-        self._client.ping()
+        res = self._client.ping()
+        print(res)
+        return res
 
     def get_server_time(self):
         time_res = self._client.get_server_time()
