@@ -29,4 +29,9 @@ class GeneralBot:
         pprint(info)
         return info
 
+    def get_all_coins_info(self):
+        info = client.get_all_tickers()
+        pprint(info)
+        return info
+
 
