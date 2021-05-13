@@ -13,12 +13,12 @@ def log(_func=None):
 
             """log function begining"""
             # logging.info("Begin function {}".format(func.__name__))
-            print('--Begin function {} - args:{}, kwargs:{}'.format(func.__name__, args, kwargs))
+            print('--Begin function {} - args: {}, kwargs: {}'.format(func.__name__, args, kwargs))
             try:
                 """ log return value from the function """
                 value = func(*args, **kwargs)
                 # logging.info(f"Returned: - End function {value!r}")
-                print('--End function {} - returned value: '.format(func.__name__, value))
+                print('--End function {} - returned value: {}'.format(func.__name__, value))
             except:
                 """log exception if occurs in function"""
                 logging.error(f"--Exception: {str(sys.exc_info()[1])}")
