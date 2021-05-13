@@ -1,4 +1,4 @@
-from binance.client import Client
+from binance.client import Client, AsyncClient
 import os
 
 api_key = os.environ.get('TEST_API_KEY')  # test
