@@ -24,4 +24,9 @@ class GeneralBot:
         pprint(info)
         return info
 
+    def get_symbol_info(self, symbol='BTCUSDT'):
+        info = self._client.get_symbol_info(symbol)
+        pprint(info)
+        return info
+
 
