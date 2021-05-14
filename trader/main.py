@@ -24,8 +24,8 @@ def main():
     # spot_bot.place_buy_limit_order(1.5, 150, symbol='ETHUSDT')
     # spot_bot.place_sell_limit_order(1.25, 210, symbol='ETHUSDT')
     # spot_bot.get_symbol_all_orders('ETHUSDT')
-    spot_bot.get_symbol_all_open_orders('ETHUSDT')
-    spot_bot.get_symbol_all_orders('ETHUSDT')
+    # spot_bot.get_symbol_all_open_orders('ETHUSDT')
+    # spot_bot.get_symbol_all_orders('ETHUSDT')
 
 
 if __name__ == "__main__":

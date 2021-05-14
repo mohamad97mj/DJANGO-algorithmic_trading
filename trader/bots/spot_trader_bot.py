@@ -14,10 +14,15 @@ class SpotTraderBot:
         pprint(info)
         return info
 
-    def get_symbol_all_orders(self, symbol='BTCUSDT', limit=10):
-        orders = client.get_all_orders(symbol=symbol, limit=limit)
-        pprint(orders)
-        return orders
+    def get_account_info(self):
+        info = client.get_account()
+        pprint(info)
+        return info
+
+    def get_asset_balance(self, asset='BTC'):
+        balance = client.get_asset_balance(asset=asset)
+        print(balance)
+        return balance
 
     def place_buy_limit_order(self, quantity, price, symbol='BTCUSDT'):
         order = client.order_limit_buy(
@@ -71,15 +76,15 @@ class SpotTraderBot:
         pprint(result)
         return result
 
+    def get_symbol_all_orders(self, symbol='BTCUSDT', limit=10):
+        orders = client.get_all_orders(symbol=symbol, limit=limit)
+        pprint(orders)
+        return orders
+
     def get_symbol_all_open_orders(self, symbol='BTCUSDT'):
         orders = client.get_open_orders(symbol=symbol)
         pprint(orders)
         return orders
-
-    def get_account_info(self):
-        info = client.get_account()
-        pprint(info)
-        return info
 
     def get_symbol_all_trades(self, symbol='BTCUSDT'):
         trades = client.get_my_trades(symbol=symbol)
