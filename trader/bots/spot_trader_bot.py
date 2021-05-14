@@ -52,4 +52,12 @@ class SpotTraderBot:
         print(order)
         return order
 
+    def place_sell_market_order(self, quantity, symbol='BTCUSDT'):
+        order = client.order_market_sell(
+            quantity=quantity,
+            symbol=symbol,
+        )
+        print(order)
+        return order
+
 
