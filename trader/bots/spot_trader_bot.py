@@ -1,6 +1,7 @@
 from trader.client import client
 from pprint import pprint
 from trader.global_utils import apply2all_methods, log
+from binance import enums
 
 
 @apply2all_methods(log)
@@ -17,3 +18,9 @@ class SpotTraderBot:
         info = client.get_account_snapshot(type='SPOT')
         pprint(info)
         return info
+
+    def get_all_orders(self, symbol='BTCUSDT', limit=10):
+        orders = client.get_all_orders(symbol=symbol, limit=limit)
+        print(orders)
+        return orders
+
