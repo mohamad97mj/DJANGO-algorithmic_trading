@@ -81,4 +81,7 @@ class SpotTraderBot:
         print(orders)
         return orders
 
-
+    def get_account_info(self):
+        info = client.get_account()
+        print(info)
+        return info
