@@ -11,3 +11,9 @@ class MarketDataBot:
         pprint(trades)
         return trades
 
+    def get_symbol_avg_price(self, symbol='BTCUSDT'):
+        avg_price = client.get_avg_price(symbol=symbol)
+        pprint(avg_price)
+        return avg_price
+
+
