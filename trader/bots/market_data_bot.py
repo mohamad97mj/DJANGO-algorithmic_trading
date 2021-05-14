@@ -16,4 +16,9 @@ class MarketDataBot:
         pprint(avg_price)
         return avg_price
 
+    def get24hr_ticker(self):
+        tickers = client.get_ticker()
+        pprint(tickers)
+        return tickers
+
 
