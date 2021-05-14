@@ -21,8 +21,13 @@ class SpotTraderBot:
 
     def get_asset_balance(self, asset='BTC'):
         balance = client.get_asset_balance(asset=asset)
-        print(balance)
+        pprint(balance)
         return balance
+
+    def get_asset_details(self):
+        details = client.get_asset_details()
+        pprint(details)
+        return details
 
     def place_buy_limit_order(self, quantity, price, symbol='BTCUSDT'):
         order = client.order_limit_buy(
