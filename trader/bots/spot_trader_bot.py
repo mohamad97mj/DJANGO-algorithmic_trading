@@ -68,12 +68,17 @@ class SpotTraderBot:
         print(order)
         return order
 
-    def cancel_an_order(self, order_id, symbol='BTCUSDT'):
+    def cancel_order(self, order_id, symbol='BTCUSDT'):
         result = client.cancel_order(
             orderId=order_id,
             symbol=symbol,
         )
         print(result)
         return result
+
+    def get_all_open_orders(self, symbol='BTCUSDT'):
+        orders = client.get_open_orders(symbol=symbol)
+        print(orders)
+        return orders
 
 
