@@ -60,4 +60,12 @@ class SpotTraderBot:
         print(order)
         return order
 
+    def check_order_status(self, order_id, symbol='BTCUSDT'):
+        order = client.get_order(
+            orderId=order_id,
+            symbol=symbol,
+        )
+        print(order)
+        return order
+
 
