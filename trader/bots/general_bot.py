@@ -26,6 +26,9 @@ class GeneralBot:
     def get_exchange_info(self):
         info = self._client.get_exchange_info()
         pprint(info)
+        f = open("result.txt", "w+")
+        f.write(str(info))
+        f.close()
         return info
 
     def get_symbol_info(self, symbol='BTCUSDT'):

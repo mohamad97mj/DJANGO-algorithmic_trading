@@ -9,19 +9,14 @@ class SpotTraderBot:
     def __init__(self):
         self._client = client
 
-    def get_symbol_all_ordres(self, symbol='BTCUSDT'):
-        orders = client.get_all_orders(symbol=symbol)
-        print(orders)
-        return orders
-
     def get_dayli_account_snapshot(self):
         info = client.get_account_snapshot(type='SPOT')
         pprint(info)
         return info
 
-    def get_all_orders(self, symbol='BTCUSDT', limit=10):
+    def get_symbol_all_orders(self, symbol='BTCUSDT', limit=10):
         orders = client.get_all_orders(symbol=symbol, limit=limit)
-        print(orders)
+        pprint(orders)
         return orders
 
     def place_buy_limit_order(self, quantity, price, symbol='BTCUSDT'):
@@ -31,7 +26,7 @@ class SpotTraderBot:
             symbol=symbol,
         )
 
-        print(order)
+        pprint(order)
         return order
 
     def place_sell_limit_order(self, quantity, price, symbol='BTCUSDT'):
@@ -49,7 +44,7 @@ class SpotTraderBot:
             quantity=quantity,
             symbol=symbol,
         )
-        print(order)
+        pprint(order)
         return order
 
     def place_sell_market_order(self, quantity, symbol='BTCUSDT'):
@@ -57,7 +52,7 @@ class SpotTraderBot:
             quantity=quantity,
             symbol=symbol,
         )
-        print(order)
+        pprint(order)
         return order
 
     def check_order_status(self, order_id, symbol='BTCUSDT'):
@@ -65,7 +60,7 @@ class SpotTraderBot:
             orderId=order_id,
             symbol=symbol,
         )
-        print(order)
+        pprint(order)
         return order
 
     def cancel_order(self, order_id, symbol='BTCUSDT'):
@@ -73,15 +68,20 @@ class SpotTraderBot:
             orderId=order_id,
             symbol=symbol,
         )
-        print(result)
+        pprint(result)
         return result
 
-    def get_all_open_orders(self, symbol='BTCUSDT'):
+    def get_symbol_all_open_orders(self, symbol='BTCUSDT'):
         orders = client.get_open_orders(symbol=symbol)
-        print(orders)
+        pprint(orders)
         return orders
 
     def get_account_info(self):
         info = client.get_account()
-        print(info)
+        pprint(info)
         return info
+
+    def get_symbol_all_trades(self, symbol='BTCUSDT'):
+        trades = client.get_my_trades(symbol=symbol)
+        pprint(trades)
+        return trades
