@@ -24,3 +24,13 @@ class SpotTraderBot:
         print(orders)
         return orders
 
+    def place_buy_limit_order(self, quantity, price, symbol='BTCUSDT'):
+        order = client.order_limit_buy(
+            quantity=quantity,
+            price=price,
+            symbol=symbol,
+        )
+
+        print(order)
+        return order
+
