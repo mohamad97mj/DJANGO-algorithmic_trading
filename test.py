@@ -32,46 +32,7 @@
 # bsm.start()
 # print(help(BinanceSocketManager))
 
-
-import sys
-import os
-import functools
-import logging
-
-logging.basicConfig(level=logging.INFO)
-
-
-def log_decorator(_func=None):
-    def log_decorator_info(func):
-        @functools.wraps(func)
-        def log_decorator_wrapper(*args, **kwargs):
-
-            """log function begining"""
-            # logging.info("Begin function {}".format(func.__name__))
-            print('--Begin function {} - args:{}, kwargs:{}'.format(func.__name__, args, kwargs))
-            try:
-                """ log return value from the function """
-                value = func(*args, **kwargs)
-                # logging.info(f"Returned: - End function {value!r}")
-                print('--End function {} - returned value: '.format(func.__name__, value))
-            except:
-                """log exception if occurs in function"""
-                logging.error(f"--Exception: {str(sys.exc_info()[1])}")
-                raise
-            return value
-
-        return log_decorator_wrapper
-
-    if _func is None:
-        return log_decorator_info
-    else:
-        return log_decorator_info(_func)
-
-
-@log_decorator
-def add_test(a, b):
-    print("hello, i am add")
-    return a + b
-
-
-add_test(2, 3)
+amount = 0.000234234
+precision = 5
+amt_str = "{:0.0{}f}".format(amount, precision)
+print(amt_str)

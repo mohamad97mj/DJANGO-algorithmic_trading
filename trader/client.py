@@ -5,7 +5,6 @@ api_key = os.environ.get('MAIN_API_KEY')  # test
 # api_key = ''  # test
 api_secret = os.environ.get('MAIN_SECRET_KEY')  # test
 # api_secret = '' # test
-print(api_key, api_secret)
 proxies = {
     'http': 'http://ck2.slike.vip:2087',
     'https': 'http://ck2.slike.vip:2087'
