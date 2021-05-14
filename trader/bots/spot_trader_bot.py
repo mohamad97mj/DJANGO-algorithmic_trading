@@ -34,6 +34,11 @@ class SpotTraderBot:
         pprint(fees)
         return fees
 
+    def get_symbol_trade_fees(self, symbol='BTCUSDT'):
+        fee = client.get_trade_fee(symbol=symbol)
+        pprint(fee)
+        return fee
+
     def place_buy_limit_order(self, quantity, price, symbol='BTCUSDT'):
         order = client.order_limit_buy(
             quantity=quantity,
