@@ -21,4 +21,7 @@ class MarketDataBot:
         pprint(tickers)
         return tickers
 
-
+    def get_all_prices(self):
+        info = client.get_all_tickers()
+        pprint(info)
+        return info
