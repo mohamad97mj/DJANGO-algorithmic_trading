@@ -26,6 +26,8 @@ def main():
     # spot_bot.get_symbol_all_orders('ETHUSDT')
     # spot_bot.get_symbol_all_open_orders('ETHUSDT')
     # spot_bot.get_symbol_all_orders('ETHUSDT')
+    spot_bot.get_trade_fees()
+    spot_bot.get_symbol_trade_fees()
 
 
 if __name__ == "__main__":
