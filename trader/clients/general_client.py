@@ -4,7 +4,7 @@ from trader.global_utils import apply2all_methods, log
 
 
 @apply2all_methods(log)
-class GeneralBot:
+class GeneralClient:
     def __init__(self):
         self._client = client
 

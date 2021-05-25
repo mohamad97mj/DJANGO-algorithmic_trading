@@ -5,7 +5,7 @@ from binance import enums
 
 
 @apply2all_methods(log)
-class SpotTraderBot:
+class SpotTraderClient:
     def __init__(self):
         self._client = client
 
