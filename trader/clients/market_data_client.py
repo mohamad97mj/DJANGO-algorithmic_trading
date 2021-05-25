@@ -5,7 +5,7 @@ from binance.client import Client
 
 
 @apply2all_methods(log)
-class MarketDataBot:
+class MarketDataClient:
 
     def get_recent_trades(self, symbol='BTCUSDT'):
         trades = client.get_recent_trades(symbol=symbol)
