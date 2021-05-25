@@ -10,7 +10,7 @@ proxies = {
     'https': 'http://ck2.slike.vip:2087'
 }
 
-client = Client(api_key, api_secret, testnet=True
+client = Client(api_key, api_secret, testnet=False
                 # {'proxies': proxies}
                 )
 # client.API_URL = 'https://testnet.binance.vision/api'

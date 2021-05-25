@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from trader.models import signal
+from trader.models import Signal
 
 
 class SignalSerializer(serializers.ModelSerializer):
     class Meta:
-        model = signal
+        model = Signal
         fiedls = '__all__'
