@@ -8,11 +8,12 @@ def main():
     # general_bot.get_symbol_info()
     # general_bot.get_exchange_info()
 
-    # market_bot = MarketDataBot()
+    market_bot = MarketDataBot()
     # market_bot.get_recent_trades()
     # market_bot.get24hr_ticker()
     # market_bot.get_symbol_avg_price(symbol='ETHUSDT')
     # market_bot.get_all_prices()
+    market_bot.get_candles()
 
     spot_bot = SpotTraderBot()
     # spot_bot.get_dayli_account_snapshot()
@@ -26,8 +27,8 @@ def main():
     # spot_bot.get_symbol_all_orders('ETHUSDT')
     # spot_bot.get_symbol_all_open_orders('ETHUSDT')
     # spot_bot.get_symbol_all_orders('ETHUSDT')
-    spot_bot.get_trade_fees()
-    spot_bot.get_symbol_trade_fees()
+    # spot_bot.get_trade_fees()
+    # spot_bot.get_symbol_trade_fees()
 
 
 if __name__ == "__main__":
