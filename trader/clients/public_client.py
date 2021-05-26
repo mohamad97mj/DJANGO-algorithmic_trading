@@ -12,5 +12,6 @@ class PublicClient:
     def get_exchanges(self):
         return ccxt.exchanges
 
-    def get_markets(self):
-        return self._exchange.load_markets()
+    async def get_markets(self):
+        markets = await self._exchange.load_markets()
+        return markets
