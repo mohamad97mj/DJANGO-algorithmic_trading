@@ -14,3 +14,5 @@ client = Client(api_key, api_secret, testnet=False
                 # {'proxies': proxies}
                 )
 # client.API_URL = 'https://testnet.binance.vision/api'
+
+
