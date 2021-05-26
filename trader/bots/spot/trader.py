@@ -1,4 +1,4 @@
-from trader.exchange_factory import ExchageFactory
+from trader.exchange.exchange_factory import ExchageFactory
 
 
 class SpotTrader:

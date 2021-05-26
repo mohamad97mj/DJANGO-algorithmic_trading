@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from trader.models import Signal
+from trader.bots.spot.models import Signal
 
 
 class SignalSerializer(serializers.ModelSerializer):
