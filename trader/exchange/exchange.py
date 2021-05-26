@@ -1,4 +1,5 @@
 import ccxt.async_support as ccxt
+from ccxt.base.errors import ExchangeError
 
 
 class Exchange:
@@ -9,8 +10,16 @@ class Exchange:
         markets = await self._third_party_exchange.load_markets(reload=reload)
         return markets
 
-    def get_markets(self):
+    async def get_markets(self):
+        if not self._third_party_exchange.markets:
+            await self._third_party_exchange.load_markets()
+
         return self._third_party_exchange.markets
+
+    async def get_market(self, symbol):
+        if not self._third_party_exchange.markets:
+            await self._third_party_exchange.load_markets()
+        return self._third_party_exchange.market(symbol)
 
     async def close(self):
         await self._third_party_exchange.close()

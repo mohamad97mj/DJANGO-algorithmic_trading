@@ -12,10 +12,8 @@ async def main():
     # print('exchanges are:', public_client.get_exchanges())
     exchange = ef.create_exchange(exchange_id='binance')
     public_client = PublicClient(exchange=exchange)
-    markets = await public_client.load_markets()
-    print(markets)
-    markets2 = public_client.get_markets()
-    pprint(markets2)
+    market = await public_client.get_market('BTC/USDT')
+    pprint(market)
     await ef.close_all_exchages()
 
 
