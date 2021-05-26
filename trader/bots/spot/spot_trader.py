@@ -1,0 +1,2 @@
+class SpotTrader:
+    pass

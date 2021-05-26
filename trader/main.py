@@ -1,4 +1,4 @@
-from trader.clients import GeneralClient, PublicClient, PrivateClient
+from trader.bots import SpotTrader
 
 
 def main():
