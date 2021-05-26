@@ -1,0 +1,4 @@
+
+
+class SpotStrategy:
+    pass
