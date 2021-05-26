@@ -6,7 +6,6 @@ def main():
     # public_client = PublicClient()
     # print('exchanges are:', public_client.get_exchanges())
 
-
     pass
 
 
