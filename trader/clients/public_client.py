@@ -16,5 +16,8 @@ class PublicClient:
         markets = await self._exchange.load_markets(reload)
         return markets
 
-    def get_markets(self):
-        return self._exchange.get_markets()
+    async def get_markets(self):
+        return await self._exchange.get_markets()
+
+    async def get_market(self, symbol='BTC/USDT'):
+        return await self._exchange.get_market(symbol)
