@@ -31,5 +31,15 @@ class Exchange:
         if (self._third_party_exchange.has['fetchTickers']):
             return await self._third_party_exchange.fetch_ticker(symbol=symbol)
 
+    async def fetch_ohlcv(self, symbol, timeframe, since, limit):
+        if (self._third_party_exchange.has['fetchOHLCV']):
+            return await self._third_party_exchange.fetch_ohlcv(symbol=symbol,
+                                                                timeframe=timeframe,
+                                                                since=since,
+                                                                limit=limit)
+
     async def close(self):
         await self._third_party_exchange.close()
+
+    def get_time_frames(self):
+        return self._third_party_exchange.timeframes

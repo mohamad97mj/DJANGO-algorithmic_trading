@@ -32,3 +32,11 @@ class PublicClient:
 
     async def fetch_ticker(self, symbol='BTC/USDT'):
         return await self._exchange.fetck_ticker(symbol=symbol)
+
+    async def fetch_ohlcv(self, symbol='BTC/USDT', timeframe='1m', since=None, limit=None):
+        if not limit:
+            limit = get_appropriate_limit(timeframe)
+        return await self._exchange.fetch_ohlcv(symbol=symbol, timeframe=timeframe, since=since, limit=limit)
+
+
+
