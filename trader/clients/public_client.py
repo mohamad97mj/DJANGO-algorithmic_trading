@@ -28,4 +28,7 @@ class PublicClient:
         if symbols is None:
             symbols = ['BTC/USDT', 'ETH/USDT']
 
-        return await self._exchange.fetch_tickers(symbols)
+        return await self._exchange.fetch_tickers(symbols=symbols)
+
+    async def fetch_ticker(self, symbol='BTC/USDT'):
+        return await self._exchange.fetck_ticker(symbol=symbol)
