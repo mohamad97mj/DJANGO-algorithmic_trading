@@ -38,8 +38,8 @@ class Exchange:
                                                                 since=since,
                                                                 limit=limit)
 
-    async def close(self):
-        await self._third_party_exchange.close()
-
     def get_timeframes(self):
         return self._third_party_exchange.timeframes
+
+    async def close(self):
+        await self._third_party_exchange.close()

@@ -1,5 +1,5 @@
 """
-ASGI config for binance_bot project.
+ASGI config for algorithmic_trading project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'binance_bot.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'algorithmic_trading.settings')
 
 application = get_asgi_application()
