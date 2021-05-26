@@ -41,5 +41,5 @@ class Exchange:
     async def close(self):
         await self._third_party_exchange.close()
 
-    def get_time_frames(self):
+    def get_timeframes(self):
         return self._third_party_exchange.timeframes

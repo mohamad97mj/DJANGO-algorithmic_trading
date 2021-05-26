@@ -39,4 +39,17 @@ class PublicClient:
         return await self._exchange.fetch_ohlcv(symbol=symbol, timeframe=timeframe, since=since, limit=limit)
 
 
+def get_appropriate_limit(timeframe):
+    return {
+        '1m': 24 * 60,
+        '3m': (24 * 60) / 3,
+        '5m': (24 * 60) / 5,
+        '15m': (24 * 60) / 15,
+        '30m': (24 * 60) / 30,
+        '1h': 24,
+        '2h': 12,
+        '4h': 6,
+        '6h': 4,
+        '8h': 3,
+    }[timeframe]
 
