@@ -7,13 +7,10 @@ from pprint import pprint
 
 async def main():
     ef = ExchageFactory()
-
-    # public_client = PublicClient()
-    # print('exchanges are:', public_client.get_exchanges())
     exchange = ef.create_exchange(exchange_id='binance')
     public_client = PublicClient(exchange=exchange)
-    market = await public_client.get_market('BTC/USDT')
-    pprint(market)
+    print(await public_client.get_markets())
+
     await ef.close_all_exchages()
 
 

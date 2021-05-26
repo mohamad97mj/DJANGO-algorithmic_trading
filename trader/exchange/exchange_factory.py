@@ -13,9 +13,11 @@ class ExchageFactory:
                         exchange_id: str = 'binance',
                         credential_id: str = None,
                         enable_rate_limit: bool = True,
+                        verbose: bool = True,
                         sandbox_mode: bool = False) -> Exchange:
         third_party_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
             'enableRateLimit': enable_rate_limit,
+            'verbos': verbose,
         })
 
         if credential_id:
