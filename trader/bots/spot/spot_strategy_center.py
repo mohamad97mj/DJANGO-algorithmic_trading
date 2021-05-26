@@ -1,2 +1,4 @@
 class SpotStrategyCenter:
-    pass
+
+    def get_trailing_stoploss_strategy(self):
+        pass
