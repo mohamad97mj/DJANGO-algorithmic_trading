@@ -24,4 +24,8 @@ class PublicClient:
     async def fetch_order_book(self, symbol='BTC/USDT', limit=None):
         return await self._exchange.fetch_order_book(symbol=symbol, limit=limit)
 
+    async def fetch_tickers(self, symbols=None):
+        if symbols is None:
+            symbols = ['BTC/USDT', 'ETH/USDT']
 
+        return await self._exchange.fetch_tickers(symbols)

@@ -23,5 +23,8 @@ class Exchange:
     async def fetch_order_book(self, symbol, limit):
         return await self._third_party_exchange.fetch_order_book(symbol=symbol, limit=limit)
 
+    async def fetch_tickers(self, symbols):
+        return await self._third_party_exchange.fetch_tickers(symbols=symbols)
+
     async def close(self):
         await self._third_party_exchange.close()
