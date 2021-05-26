@@ -2,8 +2,9 @@ import ccxt.async_support as ccxt
 
 
 class ExchageFactory:
-    def create_exchange(self, name='binance'):
-        exchange = getattr(ccxt, name)({
+    @staticmethod
+    def create_exchange(id='binance'):
+        exchange = getattr(ccxt, id)({
             'enableRateLimit': True,
         })
         return exchange
