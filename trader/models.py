@@ -8,7 +8,7 @@ from django.db import models
 #     name = models.CharField(max_length=200)
 #
 #     def __str__(self):
-#         return str(self.id)
+#         return str(self.exchange_id)
 #
 #
 # class Position(models.Model):
