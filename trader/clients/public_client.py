@@ -11,3 +11,6 @@ class PublicClient:
 
     def get_exchanges(self):
         return ccxt.exchanges
+
+    def get_markets(self):
+        return self._exchange.load_markets()
