@@ -1,11 +1,8 @@
-from trader.bots.spot_trader_bot import SpotBotClient
+from trader.bots import SpotTrader
 
 
 def main():
-    spot_bot = SpotBotClient()
-    # spot_bot.get_exchange_info()
-    spot_bot.get_symbol_info()
-    # spot_bot.get_symbol_all_ordres()
+    pass
 
 
 if __name__ == "__main__":
