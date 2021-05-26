@@ -9,10 +9,11 @@ class ExchageFactory:
                         credential_id='test',
                         enable_rate_limit=True,
                         sandbox_mode=True):
-        exchange = getattr(ccxt, exchange_id)({
+        third_party_exchange = getattr(ccxt, exchange_id)({
             'apiKey': credentials[credential_id]['api_key'],
             'secret': credentials[credential_id]['secret_key'],
             'enableRateLimit': enable_rate_limit,
         })
-        exchange.set_sandbox_mode(sandbox_mode)
-        return Exchange()
+        third_party_exchange.set_sandbox_mode(sandbox_mode)
+        exchange = Exchange(third_party_exchange=third_party_exchange)
+        return exchange
