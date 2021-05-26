@@ -21,7 +21,7 @@ class PublicClient:
     async def get_market(self, symbol='BTC/USDT'):
         return await self._exchange.get_market(symbol=symbol)
 
-    async def fetch_order_book(self, symbol='BTC/USDT'):
-        return await self._exchange.fetch_order_book(symbol=symbol)
+    async def fetch_order_book(self, symbol='BTC/USDT', limit=None):
+        return await self._exchange.fetch_order_book(symbol=symbol, limit=limit)
 
 
