@@ -9,7 +9,7 @@ async def main():
     ef = ExchageFactory()
     exchange = ef.create_exchange(exchange_id='binance')
     public_client = PublicClient(exchange=exchange)
-
+    pprint(await public_client.fetch_tickers())
     await ef.close_all_exchages()
 
 
