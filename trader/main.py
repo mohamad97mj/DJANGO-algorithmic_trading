@@ -2,6 +2,7 @@ import asyncio
 from trader.bots import SpotTrader
 from trader.clients import PublicClient
 from trader.exchange import ExchageFactory, Exchange
+from pprint import pprint
 
 
 async def main():
@@ -11,9 +12,10 @@ async def main():
     # print('exchanges are:', public_client.get_exchanges())
     exchange = ef.create_exchange(exchange_id='binance')
     public_client = PublicClient(exchange=exchange)
-    markets = await public_client.get_markets()
+    markets = await public_client.load_markets()
     print(markets)
-
+    markets2 = public_client.get_markets()
+    pprint(markets2)
     await ef.close_all_exchages()
 
 
