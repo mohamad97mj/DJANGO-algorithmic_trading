@@ -20,8 +20,8 @@ class Exchange:
             await self._third_party_exchange.load_markets()
         return self._third_party_exchange.market(symbol=symbol)
 
-    async def fetch_order_book(self, symbol):
-        return await self._third_party_exchange.fetch_order_book(symbol=symbol)
+    async def fetch_order_book(self, symbol, limit):
+        return await self._third_party_exchange.fetch_order_book(symbol=symbol, limit=limit)
 
     async def close(self):
         await self._third_party_exchange.close()

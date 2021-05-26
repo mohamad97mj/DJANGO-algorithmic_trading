@@ -9,7 +9,6 @@ async def main():
     ef = ExchageFactory()
     exchange = ef.create_exchange(exchange_id='binance')
     public_client = PublicClient(exchange=exchange)
-    print(await public_client.fetch_order_book())
 
     await ef.close_all_exchages()
 
