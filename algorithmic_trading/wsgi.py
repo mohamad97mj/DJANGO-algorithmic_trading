@@ -1,5 +1,5 @@
 """
-WSGI config for binance_bot project.
+WSGI config for algorithmic_trading project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'binance_bot.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'algorithmic_trading.settings')
 
 application = get_wsgi_application()
