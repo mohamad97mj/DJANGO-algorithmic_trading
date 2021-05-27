@@ -11,9 +11,12 @@ class SpotBot(models.Model):
         super(SpotBot, self).__init__(*args, **kwargs)
         self._exchange = exchange
         self._position = position
+        self.set_strategy(strategy_name)
 
-    def set_strategy(self):
-        self._strategy = SpotStrategyCenter.get_strategy(strategy_name, position)
+    def set_strategy(self, strategy_name):
+        self._strategy = SpotStrategyCenter.get_strategy(strategy_name, self._position)
+        self._strategy.bot = self
+        self._strategy.save()
 
     def run(self):
-        self._strategy = SpotStrategyCenter.get_trailing_stoploss_strategy()
+        pass
