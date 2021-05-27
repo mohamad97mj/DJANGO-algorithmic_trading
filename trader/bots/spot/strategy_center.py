@@ -1,5 +1,5 @@
 from .models.position import SpotPosition
-from .models.order import SpotOrder
+from .models.operation import Operation
 from typing import List
 
 
@@ -12,7 +12,7 @@ class SpotStrategyCenter:
     @staticmethod
     def get_trailing_stoploss_strategy(position: SpotPosition) -> List[SpotOrder]:
         return [
-            SpotOrder(),
+            Operation(),
         ]
 
 
