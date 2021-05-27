@@ -1,4 +1,4 @@
-from video_api.custom_exception import CustomException
+from trader.custom_exception import CustomException
 
 
 class DoesNotExistsException(CustomException):
