@@ -4,7 +4,12 @@ from trader.bots.spot.models import SpotPosition
 from trader.bots.spot.strategy_center import SpotStrategyCenter
 
 
+class SpotBotManager():
+    pass
+
+
 class SpotBot(models.Model):
+    objects = SpotBotManager()
     credential = models.CharField(max_length=50)
 
     def __init__(self, exchange: Exchange, position: SpotPosition, strategy_name: str, *args, **kwargs):
@@ -17,6 +22,9 @@ class SpotBot(models.Model):
         self._strategy = SpotStrategyCenter.get_strategy(strategy_name, self._position)
         self._strategy.bot = self
         self._strategy.save()
+
+    def reload_bot(self):
+        pass
 
     def run(self):
         pass
