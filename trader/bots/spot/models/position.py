@@ -1,9 +1,7 @@
-from .strategy import SpotStrategy
-from .signal import Signal
+from django.db import models
 
 
-class SpotPosition:
-    def __init__(self, signal: Signal, volume: float, strategy: SpotStrategy):
-        self.signal = signal
-        self.volume = volume
-        self.strategy = strategy
+class SpotPosition(models.Model):
+    signal = models.ForeignKey('SpotSignal', related_name='positions', on_delete=models.RESTRICT)
+    volume = models.FloatField()
+    strategy = models.OneToOneField('SpotStrategy', related_name='position', on_delete=models.RESTRICT)
