@@ -10,7 +10,7 @@ class ExchageFactory:
         self._exchanges: List[Exchange] = []
 
     def create_exchange(self,
-                        exchange_id: str = 'binance',
+                        exchange_id: str,
                         credential_id: str = None,
                         enable_rate_limit: bool = True,
                         verbose: bool = True,

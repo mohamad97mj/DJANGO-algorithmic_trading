@@ -41,5 +41,8 @@ class Exchange:
     def get_timeframes(self):
         return self._third_party_exchange.timeframes
 
+    async def fetch_total_balance(self):
+        return self._third_party_exchange.fetch_total_balance()
+
     async def close(self):
         await self._third_party_exchange.close()
