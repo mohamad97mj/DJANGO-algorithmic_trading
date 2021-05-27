@@ -9,5 +9,5 @@ class PrivateClient:
         self._exchange = ef.create_exchange(exchange_id=exchange_id,
                                             credential_id=credential_id)
 
-    async def fetch_balance(self):
-        pass
+    async def fetch_total_balance(self):
+        return await self._exchange.fetch_total_balance()
