@@ -2,7 +2,7 @@ from django.db import models
 
 
 class SpotOrder(models.Model):
-    id = models.CharField(max_length=100)
+    id = models.CharField(max_length=100, primary_key=True)
     datetime = models.DateTimeField()
     timestamp = models.BigIntegerField()
     status = models.CharField(max_length=50)
