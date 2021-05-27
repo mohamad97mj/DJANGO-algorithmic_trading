@@ -2,7 +2,8 @@ from django.db import models
 
 
 class SpotOrder(models.Model):
-    order_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    order_id = models.CharField(max_length=100, unique=True)
+    exchange_order_id = models.CharField(max_length=100, null=True, blank=True)
     datetime = models.DateTimeField(null=True, blank=True)
     timestamp = models.BigIntegerField(null=True, blank=True)
     status = models.CharField(max_length=50, null=True, blank=True)
