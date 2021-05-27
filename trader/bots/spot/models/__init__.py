@@ -1,1 +1,1 @@
-from .spotsignal import SpotSignal
+from .signal import SpotSignal
