@@ -1,5 +1,5 @@
 from .models.position import SpotPosition
-from .models.operation import Operation
+from .models.strategy import SpotStrategy
 from typing import List
 
 
@@ -10,10 +10,8 @@ class SpotStrategyCenter:
         return strategy_mapper[strategy_id](position)
 
     @staticmethod
-    def get_trailing_stoploss_strategy(position: SpotPosition) -> List[SpotOrder]:
-        return [
-            Operation(),
-        ]
+    def get_trailing_stoploss_strategy(position: SpotPosition) -> SpotStrategy:
+        return SpotStrategy()
 
 
 strategy_mapper = {
