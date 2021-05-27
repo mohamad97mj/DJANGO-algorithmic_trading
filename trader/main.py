@@ -6,13 +6,9 @@ from pprint import pprint
 
 
 async def main():
-    public_client = PublicClient(exchange_id='binance')
+    # public_client = PublicClient(exchange_id='binance')
     private_client = PrivateClient(exchange_id='binance', credential_id='main')
     pprint(await private_client.fetch_total_balance())
 
     await ef.close_all_exchages()
     # pprint(exchange.get_timeframes())
-
-
-if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main())
