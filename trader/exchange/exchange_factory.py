@@ -22,7 +22,7 @@ class ExchageFactory:
 
         if credential_id:
             third_party_exchange.apiKey = credentials[credential_id]['api_key']
-            third_party_exchange.secret = credentials[credential_id]['secret']
+            third_party_exchange.secret = credentials[credential_id]['secret_key']
 
         third_party_exchange.set_sandbox_mode(sandbox_mode)
         exchange = Exchange(third_party_exchange=third_party_exchange)
