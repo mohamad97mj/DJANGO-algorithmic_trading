@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class SpotOrder:
+class SpotOrder(models.Model):
     id = models.CharField(max_length=100)
     datetime = models.DateTimeField()
     timestamp = models.BigIntegerField()
