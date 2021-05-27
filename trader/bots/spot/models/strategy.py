@@ -1,4 +1,5 @@
+from django.db import models
 
 
-class SpotStrategy:
+class SpotStrategy(models.Model):
     pass
