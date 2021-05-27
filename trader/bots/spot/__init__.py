@@ -1,1 +1,1 @@
-from .trader import SpotTrader
+from .bot import SpotBot

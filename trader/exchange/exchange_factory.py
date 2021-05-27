@@ -32,3 +32,6 @@ class ExchageFactory:
     async def close_all_exchages(self):
         for exchange in self._exchanges:
             await exchange.close()
+
+
+ef = ExchageFactory()
