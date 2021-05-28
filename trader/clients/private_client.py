@@ -36,7 +36,7 @@ class PrivateClient:
     async def create_limit_buy_order(self, symbol, amount, price):
         return await create_limit_buy_order(symbol=symbol, amount=amount, price=price)
 
-
-
+    async def craete_limit_sell_order(self, symbol, amount, price):
+        return await create_limit_sell_order(symbol=symbol, amount=amount, price=price)
         # async def create_market_buy_order_in_quote(self, symbol, amount):
         #     return await self._exchange.create_market_buy_order()
