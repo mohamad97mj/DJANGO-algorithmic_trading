@@ -44,5 +44,14 @@ class Exchange:
     async def fetch_total_balance(self):
         return await self._third_party_exchange.fetch_total_balance()
 
+    async def fetch_orders(self):
+        return await self._third_party_exchange.fetch_orders()
+
+    async def fetch_open_orders(self):
+        return await self._third_party_exchange.fetch_open_orders()
+
+    async def fetch_closed_orders(self):
+        return await self._third_party_exchange.fetch_closed_orders()
+
     async def close(self):
         await self._third_party_exchange.close()
