@@ -44,6 +44,9 @@ class Exchange:
     async def fetch_total_balance(self):
         return await self._third_party_exchange.fetch_total_balance()
 
+    async def fetch_balance(self, symbol='BTC/USDT'):
+        return await self._third_party_exchange.fetch_total_balance()[symbol]
+
     async def fetch_orders(self):
         return await self._third_party_exchange.fetch_orders()
 
