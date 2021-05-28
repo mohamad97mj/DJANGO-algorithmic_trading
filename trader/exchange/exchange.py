@@ -68,6 +68,8 @@ class Exchange:
     async def create_limit_buy_order(self, symbol, amount, price):
         return await self._third_party_exchange.create_limit_buy_order(symbol=symbol, amount=amount, price=price)
 
+    async def create_limit_sell_order(self, symbol, amount, price):
+        return await self._third_party_exchange.create_limit_sell_order(symbol=symbol, amount=amount, price=price)
 
     async def close(self):
         await self._third_party_exchange.close()
