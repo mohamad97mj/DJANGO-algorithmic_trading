@@ -29,3 +29,6 @@ class PrivateClient:
 
     async def create_market_buy_order(self, symbol, amount):
         return await self._exchange.create_market_buy_order(symbol=symbol, amount=amount)
+
+    async def create_market_sell_order(self, symbol, amount):
+        return await self._exchange.create_market_sell_order(symbol=symbol, amount=amount)

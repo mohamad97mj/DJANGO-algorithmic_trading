@@ -62,5 +62,8 @@ class Exchange:
     async def create_market_buy_order(self, symbol, amount):
         return await self._third_party_exchange.create_market_buy_order(symbol=symbol, amount=amount)
 
+    async def create_market_sell_order(self, symbol, amount):
+        return await self._third_party_exchange.create_market_sell_order(symbol=symbol, amount=amount)
+
     async def close(self):
         await self._third_party_exchange.close()
