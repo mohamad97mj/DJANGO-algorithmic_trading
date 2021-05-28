@@ -20,3 +20,6 @@ class PrivateClient:
 
     async def fetch_open_orders(self, symbol='BTC/USDT'):
         return await self._exchange.fetch_open_orders()
+
+    async def fetch_closed_orders(self):
+        return await self._exchange.fetch_closed_orders()
