@@ -53,5 +53,11 @@ class Exchange:
     async def fetch_closed_orders(self):
         return await self._third_party_exchange.fetch_closed_orders()
 
+    async def fetch_my_trades(self):
+        return await self._third_party_exchange.fetch_my_trades()
+
+    async def fetch_status(self):
+        return await self._third_party_exchange.fetch_status()
+
     async def close(self):
         await self._third_party_exchange.close()
