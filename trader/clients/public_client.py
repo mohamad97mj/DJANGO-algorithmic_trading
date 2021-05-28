@@ -39,6 +39,9 @@ class PublicClient:
             limit = get_appropriate_limit(timeframe)
         return await self._exchange.fetch_ohlcv(symbol=symbol, timeframe=timeframe, since=since, limit=limit)
 
+    async def fetch_status(self):
+        return await self._exchange.fetch_status()
+
 
 def get_appropriate_limit(timeframe):
     return int({

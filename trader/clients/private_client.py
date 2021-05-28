@@ -23,3 +23,7 @@ class PrivateClient:
 
     async def fetch_closed_orders(self):
         return await self._exchange.fetch_closed_orders()
+
+    async def fetch_my_trades(self):
+        return await self._exchange.fetch_my_trades()
+
