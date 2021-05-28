@@ -19,16 +19,19 @@ class PrivateClient:
         return await self._exchange.fetch_orders()
 
     async def fetch_open_orders(self, symbol='BTC/USDT'):
-        return await self._exchange.fetch_open_orders()
+        return await self._exchange.fetch_open_orders(symbol=symbol)
 
     async def fetch_closed_orders(self):
         return await self._exchange.fetch_closed_orders()
 
-    async def fetch_my_trades(self):
-        return await self._exchange.fetch_my_trades()
+    async def fetch_my_trades(self, symbol='BTC/USDT'):
+        return await self._exchange.fetch_my_trades(symbol=symbol)
 
     async def create_market_buy_order(self, symbol, amount):
         return await self._exchange.create_market_buy_order(symbol=symbol, amount=amount)
+
+    # async def create_market_buy_order_in_quote(self, symbol, amount):
+    #     return await self._exchange.create_market_buy_order()
 
     async def create_market_sell_order(self, symbol, amount):
         return await self._exchange.create_market_sell_order(symbol=symbol, amount=amount)

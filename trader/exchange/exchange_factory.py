@@ -26,6 +26,8 @@ class ExchageFactory:
         if credential_id == 'test':
             third_party_exchange.set_sandbox_mode(enabled=True)
 
+        # third_party_exchange.options['createMarketBuyOrderRequiresPrice'] = False
+
         exchange = Exchange(third_party_exchange=third_party_exchange)
         self._exchanges.append(exchange)
         return exchange
