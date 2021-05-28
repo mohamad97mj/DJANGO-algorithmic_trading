@@ -12,3 +12,6 @@ class PrivateClient:
     async def fetch_total_balance(self):
         return await self._exchange.fetch_total_balance()
 
+    async def fetch_orders(self, symbol='BTC/USDT'):
+        return await self._exchange.fetch_orders()
+
