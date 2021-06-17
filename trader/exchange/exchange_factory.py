@@ -14,21 +14,21 @@ class ExchageFactory:
                         credential_id: str = None,
                         enable_rate_limit: bool = True,
                         verbose: bool = True) -> Exchange:
-        third_party_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
+        ccxt_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
             'enableRateLimit': enable_rate_limit,
             'verbos': verbose,
         })
 
         if credential_id:
-            third_party_exchange.apiKey = credentials[credential_id]['api_key']
-            third_party_exchange.secret = credentials[credential_id]['secret_key']
+            ccxt_exchange.apiKey = credentials[credential_id]['api_key']
+            ccxt_exchange.secret = credentials[credential_id]['secret_key']
 
         if credential_id == 'test':
-            third_party_exchange.set_sandbox_mode(enabled=True)
+            ccxt_exchange.set_sandbox_mode(enabled=True)
 
-        # third_party_exchange.options['createMarketBuyOrderRequiresPrice'] = False
+        # ccxt_exchange.options['createMarketBuyOrderRequiresPrice'] = False
 
-        exchange = Exchange(third_party_exchange=third_party_exchange)
+        exchange = Exchange(ccxt_exchange=ccxt_exchange)
         self._exchanges.append(exchange)
         return exchange
 
