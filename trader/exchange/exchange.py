@@ -3,8 +3,9 @@ from ccxt.base.errors import ExchangeError
 
 
 class Exchange:
-    def __init__(self, ccxt_exchange: ccxt.Exchange):
+    def __init__(self, ccxt_exchange: ccxt.Exchange, pb_exchange):  # pb stands for python binance
         self._ccxt_exchange = ccxt_exchange
+        self._pb_exchange = pb_exchange
 
     async def load_markets(self, reload):
         return await self._ccxt_exchange.load_markets(reload=reload)

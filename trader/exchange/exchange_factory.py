@@ -1,4 +1,5 @@
 import ccxt.async_support as ccxt
+from binance.client import Client as PythonBinanceExchange
 from trader.auth import credentials
 from .exchange import Exchange
 from typing import List
@@ -22,13 +23,18 @@ class ExchageFactory:
         if credential_id:
             ccxt_exchange.apiKey = credentials[credential_id]['api_key']
             ccxt_exchange.secret = credentials[credential_id]['secret_key']
-
-        if credential_id == 'test':
-            ccxt_exchange.set_sandbox_mode(enabled=True)
+            ccxt_exchange.set_sandbox_mode(enabled=credential_id == 'test')
 
         # ccxt_exchange.options['createMarketBuyOrderRequiresPrice'] = False
+        pb_exchange = None
+        if exchange_id == 'binance':
+            pb_exchange = PythonBinanceExchange(
+                api_key=credentials[credential_id]['api_key'],
+                api_secret=credentials[credential_id]['api_key'],
+                testnet=credential_id == 'test',
+            )
 
-        exchange = Exchange(ccxt_exchange=ccxt_exchange)
+        exchange = Exchange(ccxt_exchange=ccxt_exchange, pb_exchange=pb_exchange)
         self._exchanges.append(exchange)
         return exchange
 
