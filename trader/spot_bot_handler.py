@@ -1,19 +1,21 @@
-from trader.models import Operation
+import time
+from trader.models import Operation, SpotPosition
 from trader.exchange import ef
 from trader.bots.spot.models import SpotBot
 from binance import ThreadedWebsocketManager
 
 
-class SpotBotGroupHandler:
+class SpotBotHandler:
 
-    def __init__(self, symbol):
-        self.symbol = symbol
+    def __init__(self):
         self.bots: SpotBot = []
 
-    def create_bot(self, exchange_id, credential_id, position):
+    def create_bot(self, exchange_id, credential_id, position: SpotPosition):
         new_bot = SpotBot.objects.create(exchange_id=exchange_id, credential_id=credential_id, position=position)
         self.bots.append(new_bot)
 
     def run_bots(self):
-        for bot in self.bots:
-            bot.run()
+        while True:
+            for bot in self.bots:
+                bot.run()
+            time.sleep(5)

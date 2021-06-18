@@ -14,8 +14,10 @@ class SpotStrategyCenter:
         return strategy_mapper[strategy_name](position=position)
 
     def get_trailing_stoploss_strategy(self, position: SpotPosition) -> SpotStrategy:
-        kindles = self._public_client.fetch_ticker()
-        print(kindles)
+        symbol = position.signal.symbol
+        # ticker = self._public_client.fetch_ticker(symbol=symbol)
+        # print(ticker)
+        ohlcv = self._public_client.fetch_ohlcv(symbol=symbol)
 
         return SpotStrategy()
 
