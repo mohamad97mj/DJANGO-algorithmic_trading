@@ -46,12 +46,12 @@ class SpotBot(models.Model):
         self._current_strategy: SpotStrategy = self.strategies.get(id=self.current_strategy_id)
         self._operations: SpotOperation = self._current_strategy.position.operations.all()
 
-    def update_strategy_operations(self):
+    def _update_strategy_operations(self):
         pass
 
-    def execute_strategy_operations(self):
+    def _execute_strategy_operations(self):
         pass
 
     def run(self):
-        self.update_strategy_operations()
-        self.execute_strategy_operations()
+        self._update_strategy_operations()
+        self._execute_strategy_operations()
