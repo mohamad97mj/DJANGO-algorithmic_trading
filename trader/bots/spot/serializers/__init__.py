@@ -1,1 +1,1 @@
-from .position import SpotSignalSerializer
+from .position import SpotPositionSerializer
