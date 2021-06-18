@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from djangorestframework_camel_case import render
 from django.conf import settings
+from trader.serializers import SpotPositionSerializer
+from trader.models import SpotPosition
 
 
 class MovieDetailView(APIView):
@@ -22,8 +24,8 @@ class MovieDetailView(APIView):
         Opens a new position.
         """
         data = request.data
-
-        movie = Movie.objects.find(movie_id=movie_id)
-        serializer = MovieFullSerializer(MovieFullDtoCreator.get_movie_full_dto(movie, lang=lang))
-        data = serializer.data
-        return Response(data)
+        serializer = SpotPositionSerializer(data=data)
+        validated_data = serializer.validated_data
+        spot_position = SpotPosition(**validated_data)
+        test_data = SpotPositionSerializer(instance=spot_position).data
+        return Response(test_data)
