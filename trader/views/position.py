@@ -7,7 +7,7 @@ from trader.serializers import SpotPositionSerializer
 from trader.models import SpotPosition
 
 
-class MovieDetailView(APIView):
+class PositionView(APIView):
     renderer_classes = (
         render.CamelCaseJSONRenderer,
         renderers.BrowsableAPIRenderer,
