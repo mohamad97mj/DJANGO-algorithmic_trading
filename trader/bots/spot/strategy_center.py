@@ -10,18 +10,15 @@ class SpotStrategyCenter:
     def __init__(self, exchange_id):
         self._public_client = PublicClient(exchange_id)
 
-    @staticmethod
-    def get_strategy(strategy_name, position: SpotPosition):
-        return strategy_mapper[strategy_name](position)
+    def get_strategy(self, strategy_name, position: SpotPosition):
+        return strategy_mapper[strategy_name](position=position)
 
-    @staticmethod
-    def get_trailing_stoploss_strategy(position: SpotPosition) -> SpotStrategy:
+    def get_trailing_stoploss_strategy(self, position: SpotPosition) -> SpotStrategy:
         kindles = self._public_client.fetch_ticker()
         print(kindles)
 
         return SpotStrategy()
 
-
-strategy_mapper = {
-    'trailing_stoploss': SpotStrategyCenter.get_trailing_stoploss_strategy,
-}
+    strategy_mapper = {
+        'trailing_stoploss': get_trailing_stoploss_strategy,
+    }
