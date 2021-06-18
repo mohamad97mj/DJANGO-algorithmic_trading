@@ -36,21 +36,22 @@ class SpotBot(models.Model):
         self.set_strategy(strategy_name, position)
 
     def set_strategy(self, strategy_name, position):
-        self._current_strategy = SpotStrategyCenter.get_strategy(strategy_name, position)
+        self._current_strategy = self._strategy_center.get_strategy(strategy_name, position)
         self._current_strategy.bot = self
         self._current_strategy.save()
         self.current_strategy_id = self._current_strategy.id
         self.save()
 
     def reload_bot(self):
-        self._reload_strategy()
-        self._reload_operations()
-
-    def _reload_strategy(self):
         self._current_strategy: SpotStrategy = self.strategies.get(id=self.current_strategy_id)
-
-    def _reload_operations(self):
         self._operations: SpotOperation = self._current_strategy.position.operations.all()
 
-    def run(self):
+    def update_strategy_operations(self):
         pass
+
+    def execute_strategy_operations(self):
+        pass
+
+    def run(self):
+        self.update_strategy_operations()
+        self.execute_strategy_operations()

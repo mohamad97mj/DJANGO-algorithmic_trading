@@ -18,19 +18,18 @@ class ExchageFactory:
         ccxt_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
             'enableRateLimit': enable_rate_limit,
             'verbos': verbose,
+            'apiKey': credentials[credential_id]['api_key'] if credential_id else None,
+            'secret': credentials[credential_id]['secret_key'] if credential_id else None,
         })
 
-        if credential_id:
-            ccxt_exchange.apiKey = credentials[credential_id]['api_key']
-            ccxt_exchange.secret = credentials[credential_id]['secret_key']
-            ccxt_exchange.set_sandbox_mode(enabled=credential_id == 'test')
+        ccxt_exchange.set_sandbox_mode(enabled=credential_id == 'test')
 
         # ccxt_exchange.options['createMarketBuyOrderRequiresPrice'] = False
         pb_exchange = None
         if exchange_id == 'binance':
             pb_exchange = PythonBinanceExchange(
-                api_key=credentials[credential_id]['api_key'],
-                api_secret=credentials[credential_id]['api_key'],
+                api_key=credentials[credential_id]['api_key'] if credential_id else None,
+                api_secret=credentials[credential_id]['api_key'] if credential_id else None,
                 testnet=credential_id == 'test',
             )
 
