@@ -1,5 +1,4 @@
-from trader.spot.bot_handler import SpotBotHandler
-from trader.models import SpotPosition
+from .bot_handler import SpotBotHandler
 
 
 class SpotTrader:

@@ -1,6 +1,4 @@
-from pprint import pprint
 from trader.global_utils import apply2all_methods, log
-from trader.exchange.exchange import Exchange
 # import ccxt.async_support as ccxt
 from trader.exchange import ef
 

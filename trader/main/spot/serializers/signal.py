@@ -1,6 +1,6 @@
-from rest_framework import serializers
 from datetime import datetime
-from trader.models import SpotSignal
+from rest_framework import serializers
+from ..models import SpotSignal
 
 
 class SpotSignalSerializer(serializers.Serializer):

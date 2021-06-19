@@ -1,8 +1,8 @@
+from datetime import datetime
 from rest_framework import serializers
 from .signal import SpotSignalSerializer
 from .strategy import SpotStrategySerializer
-from trader.models import SpotPosition
-from datetime import datetime
+from ..models import SpotPosition
 
 
 class SpotPositionSerializer(serializers.Serializer):

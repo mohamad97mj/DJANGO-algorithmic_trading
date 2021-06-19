@@ -1,4 +1,4 @@
-from trader.spot.trader import trader
+from .. import trader
 
 
 class SpotPositionService():

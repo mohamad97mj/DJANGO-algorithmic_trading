@@ -1,4 +1,4 @@
-from trader.custom_exception import CustomException
+from trader.global_utils import CustomException
 
 
 class DoesNotExistsException(CustomException):
