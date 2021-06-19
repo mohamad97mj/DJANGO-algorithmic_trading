@@ -1,4 +1,5 @@
-import ccxt.async_support as ccxt
+import ccxt
+from binance.client import Client as PythonBinanceExchange
 from trader.auth import credentials
 from .exchange import Exchange
 from typing import List
@@ -10,28 +11,40 @@ class ExchageFactory:
         self._exchanges: List[Exchange] = []
 
     def create_exchange(self,
-                        exchange_id: str = 'binance',
+                        exchange_id: str,
                         credential_id: str = None,
                         enable_rate_limit: bool = True,
-                        verbose: bool = True,
-                        sandbox_mode: bool = False) -> Exchange:
-        third_party_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
+                        verbose: bool = True) -> Exchange:
+
+        api_key = secret_key = None
+        if credential_id:
+            api_key = credentials[credential_id]['api_key']
+            secret_key = credentials[credential_id]['secret_key']
+
+        ccxt_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
             'enableRateLimit': enable_rate_limit,
             'verbos': verbose,
+            'apiKey': api_key,
+            'secret': secret_key,
         })
+        ccxt_exchange.set_sandbox_mode(enabled=credential_id == 'test')
+        # ccxt_exchange.options['createMarketBuyOrderRequiresPrice'] = False
 
-        if credential_id:
-            third_party_exchange.apiKey = credentials[credential_id]['api_key']
-            third_party_exchange.secret = credentials[credential_id]['secret']
+        pb_exchange = None
+        if exchange_id == 'binance':
+            pb_exchange = PythonBinanceExchange(
+                api_key=api_key,
+                api_secret=secret_key,
+                testnet=credential_id == 'test',
+            )
 
-        third_party_exchange.set_sandbox_mode(sandbox_mode)
-        exchange = Exchange(third_party_exchange=third_party_exchange)
+        exchange = Exchange(ccxt_exchange=ccxt_exchange, pb_exchange=pb_exchange)
         self._exchanges.append(exchange)
         return exchange
 
-    async def close_all_exchages(self):
+    def close_all_exchages(self):
         for exchange in self._exchanges:
-            await exchange.close()
+            exchange.close()
 
 
 ef = ExchageFactory()

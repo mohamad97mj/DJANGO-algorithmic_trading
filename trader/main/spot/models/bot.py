@@ -1,0 +1,50 @@
+from django.db import models
+from trader.clients import PrivateClient
+from .position import SpotPosition
+from .utils.strategy_center import SpotStrategyCenter
+from .utils.exceptions import BotDoesNotExistsException
+
+
+class SpotBotManager(models.Manager):
+    def find_from_db(self, bot_id):
+        try:
+            bot = self.get(bot_id=bot_id)
+            return bot
+        except models.ObjectDoesNotExist:
+            raise BotDoesNotExistsException()
+
+
+class SpotBot(models.Model):
+    objects = SpotBotManager()
+
+    bot_id = models.CharField(max_length=100, unique=True)
+    exchange_id = models.CharField(max_length=100)
+    credential_id = models.CharField(max_length=100)
+    position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.RESTRICT)
+
+    def __init__(self,
+                 exchange_id: str,
+                 credential_id: str,
+                 position: SpotPosition,
+                 *args,
+                 **kwargs):
+        super(SpotBot, self).__init__(exchange_id=exchange_id, credential_id=credential_id, *args, **kwargs)
+        self._private_client = PrivateClient(exchange_id=exchange_id, credential_id=credential_id)
+        self._strategy_center = SpotStrategyCenter(exchange_id=exchange_id)
+        self._set_strategy_operations(position)
+
+    def _set_strategy_operations(self, position: SpotPosition):
+        self._strategy_center.set_strategy_operations(position)
+
+    def reload_bot(self):
+        pass
+
+    def _update_strategy_operations(self):
+        pass
+
+    def _execute_strategy_operations(self):
+        pass
+
+    def run(self):
+        self._update_strategy_operations()
+        self._execute_strategy_operations()
