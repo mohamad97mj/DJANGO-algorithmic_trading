@@ -5,7 +5,6 @@ from trader.bots.spot.models import SpotPosition, SpotSignal, SpotStrategy
 
 
 class SpotPositionSerializer(serializers.Serializer):
-    position_id = serializers.CharField(max_length=100)
     signal = SpotSignalSerializer()
     volume = serializers.FloatField()
     strategy = SpotStrategySerializer()
