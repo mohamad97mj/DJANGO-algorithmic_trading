@@ -1,5 +1,5 @@
 import time
-from .models import SpotPosition, SpotBot
+from trader.main.spot.models import SpotPosition, SpotBot
 
 
 class SpotBotHandler:
@@ -7,8 +7,8 @@ class SpotBotHandler:
     def __init__(self):
         self.bots: SpotBot = []
 
-    def create_bot(self, exchange_id, credential_id, position: SpotPosition):
-        new_bot = SpotBot.objects.create()
+    def create_bot(self, exchange_id: str, credential_id: str, position: SpotPosition):
+        new_bot = SpotBot(exchange_id=exchange_id, credential_id=credential_id, position=position)
         self.bots.append(new_bot)
 
     def run_bots(self):
