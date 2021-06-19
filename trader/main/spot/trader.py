@@ -9,5 +9,8 @@ class SpotTrader:
     def open_position(self, exchange_id: str, credential_id: str, position: SpotPosition):
         self._bot_handler.create_bot(exchange_id=exchange_id, credential_id=credential_id, position=position)
 
+    async def start(self):
+        self._bot_handler.run_bots()
+
 
 trader = SpotTrader()

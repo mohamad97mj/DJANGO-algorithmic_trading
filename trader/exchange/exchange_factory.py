@@ -1,4 +1,4 @@
-import ccxt.async_support as ccxt
+import ccxt
 from binance.client import Client as PythonBinanceExchange
 from trader.auth import credentials
 from .exchange import Exchange
@@ -42,7 +42,7 @@ class ExchageFactory:
         self._exchanges.append(exchange)
         return exchange
 
-    async def close_all_exchages(self):
+    def close_all_exchages(self):
         for exchange in self._exchanges:
             await exchange.close()
 

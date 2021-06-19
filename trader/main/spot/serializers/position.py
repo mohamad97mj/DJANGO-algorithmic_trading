@@ -15,5 +15,5 @@ class SpotPositionSerializer(serializers.Serializer):
             signal = signal_serializer.save()
 
         return SpotPosition(signal=signal,
-                            volume=validated_data['volume'],
-                            strategy=validated_data['strategy'])
+                            **{k: validated_data[k] for k in ['volume', 'strategy']}
+                            )
