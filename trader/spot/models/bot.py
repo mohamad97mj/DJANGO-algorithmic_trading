@@ -1,7 +1,7 @@
 from django.db import models
 from .position import SpotPosition
 from .strategy import SpotStrategy
-from trader.bots.spot.strategy_center import SpotStrategyCenter
+from trader.spot import SpotStrategyCenter
 from .exceptions import BotDoesNotExistsException
 from trader.clients.private_client import PrivateClient
 

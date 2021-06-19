@@ -1,8 +1,6 @@
 import time
-from trader.models import Operation, SpotPosition
-from trader.exchange import ef
-from trader.bots.spot.models import SpotBot
-from binance import ThreadedWebsocketManager
+from trader.models import SpotPosition
+from trader.spot.models import SpotBot
 
 
 class SpotBotHandler:

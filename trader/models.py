@@ -1,1 +1,1 @@
-from trader.bots.spot.models import *
+from trader.spot.models import *
