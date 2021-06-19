@@ -10,6 +10,4 @@ class SpotSignalSerializer(serializers.Serializer):
     stop_loss = serializers.FloatField()
 
     def create(self, validated_data):
-        now = datetime.now()
-        signal_id = '{}|{}'.format(self.symbol, now)
-        return SpotSignal(signal_id=signal_id, **validated_data)
+        return SpotSignal(**validated_data)

@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import datetime
 
 
 class SpotStrategy(models.Model):
@@ -6,3 +7,8 @@ class SpotStrategy(models.Model):
     name = models.CharField(max_length=200)
     status = models.CharField(max_length=50)
     bot = models.ForeignKey('SpotBot', related_name='strategies', on_delete=models.RESTRICT, blank=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        now = datetime.now()
+        self.strategy_id = '{}|{}'.format('strategy', now)

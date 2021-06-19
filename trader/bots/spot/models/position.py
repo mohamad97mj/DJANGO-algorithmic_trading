@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import datetime
 
 
 class SpotPositionManager(models.Manager):
@@ -12,3 +13,8 @@ class SpotPosition(models.Model):
     signal = models.ForeignKey('SpotSignal', related_name='positions', on_delete=models.RESTRICT)
     volume = models.FloatField()
     strategy = models.OneToOneField('SpotStrategy', related_name='position', on_delete=models.RESTRICT)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        now = datetime.now()
+        self.position_id = '{}|{}'.format('position', now)
