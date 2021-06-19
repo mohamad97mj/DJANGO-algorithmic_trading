@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from datetime import datetime
 
 
 class SpotSignal(models.Model):
@@ -9,3 +10,7 @@ class SpotSignal(models.Model):
     targets = ArrayField(models.FloatField())
     stop_loss = models.FloatField()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        now = datetime.now()
+        self.signal_id = '{}|{}'.format('signal', now)
