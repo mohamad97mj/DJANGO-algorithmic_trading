@@ -1,6 +1,6 @@
 from trader.clients.public_client import PublicClient
-from .models import SpotPosition
-from .models import SpotStrategy
+from .. import SpotPosition
+from .. import SpotStrategy
 
 
 class SpotStrategyCenter:
@@ -8,17 +8,15 @@ class SpotStrategyCenter:
     def __init__(self, exchange_id):
         self._public_client = PublicClient(exchange_id)
 
-    def get_strategy(self, strategy_name, position: SpotPosition):
-        return strategy_mapper[strategy_name](position=position)
+    def set_strategy_operations(self, position: SpotPosition):
+        return strategy_mapper[position.strategy](position=position)
 
-    def get_trailing_stoploss_strategy(self, position: SpotPosition) -> SpotStrategy:
+    def set_trailing_stoploss_strategy(self, position: SpotPosition):
         symbol = position.signal.symbol
         # ticker = self._public_client.fetch_ticker(symbol=symbol)
         # print(ticker)
         ohlcv = self._public_client.fetch_ohlcv(symbol=symbol)
 
-        return SpotStrategy()
-
     strategy_mapper = {
-        'trailing_stoploss': get_trailing_stoploss_strategy,
+        'trailing_stoploss': set_trailing_stoploss_strategy,
     }

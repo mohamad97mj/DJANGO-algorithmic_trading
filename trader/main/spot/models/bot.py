@@ -1,9 +1,8 @@
 from django.db import models
-from .position import SpotPosition
-from .strategy import SpotStrategy
-from ..strategy_center import SpotStrategyCenter
-from trader.main.spot.models.utils.exceptions import BotDoesNotExistsException
 from trader.clients import PrivateClient
+from .position import SpotPosition
+from .utils.strategy_center import SpotStrategyCenter
+from .utils.exceptions import BotDoesNotExistsException
 
 
 class SpotBotManager(models.Manager):
@@ -21,30 +20,24 @@ class SpotBot(models.Model):
     bot_id = models.CharField(max_length=100, unique=True)
     exchange_id = models.CharField(max_length=100)
     credential_id = models.CharField(max_length=100)
-    current_strategy_id = models.BigIntegerField()
+    position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.RESTRICT)
 
     def __init__(self,
                  exchange_id: str,
                  credential_id: str,
                  position: SpotPosition,
-                 strategy_name: str, *args,
+                 *args,
                  **kwargs):
         super(SpotBot, self).__init__(exchange_id=exchange_id, credential_id=credential_id, *args, **kwargs)
         self._private_client = PrivateClient(exchange_id=exchange_id, credential_id=credential_id)
         self._strategy_center = SpotStrategyCenter(exchange_id=exchange_id)
-        self._current_strategy = None
-        self.set_strategy(strategy_name, position)
+        self._set_strategy_operations(position)
 
-    def set_strategy(self, strategy_name, position):
-        self._current_strategy = self._strategy_center.get_strategy(strategy_name, position)
-        self._current_strategy.bot = self
-        self._current_strategy.save()
-        self.current_strategy_id = self._current_strategy.id
-        self.save()
+    def _set_strategy_operations(self, position: SpotPosition):
+        self._strategy_center.set_strategy_operations(position)
 
     def reload_bot(self):
-        self._current_strategy: SpotStrategy = self.strategies.get(id=self.current_strategy_id)
-        self._operations: SpotOperation = self._current_strategy.position.operations.all()
+        pass
 
     def _update_strategy_operations(self):
         pass

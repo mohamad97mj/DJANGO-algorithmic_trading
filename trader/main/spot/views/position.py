@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from djangorestframework_camel_case import render
 from django.conf import settings
+from ..services import SpotPositionService
+from ..serializers import SpotPositionSerializer
 
 
 class PositionView(APIView):
@@ -22,14 +24,19 @@ class PositionView(APIView):
         Opens a new position.
         """
         data = request.data
-        position_data = data['position']
+        exchange_id = data['exchange_id']
         credential_id = data['credential_id']
+        position_data = data['position']
+
         serializer = SpotPositionSerializer(data=position_data)
 
         test_data = None
         if serializer.is_valid():
             spot_position = serializer.save()
-            trader.open_position(credential_id=credential_id, position=spot_position)
+            SpotPositionService.open_position(exchange_id=exchange_id,
+                                              credential_id=credential_id,
+                                              position=spot_position)
+
             test_data = SpotPositionSerializer(instance=spot_position).data
 
         return Response(test_data)

@@ -15,10 +15,6 @@ class SpotPositionSerializer(serializers.Serializer):
         if signal_serializer.is_valid():
             signal = signal_serializer.save()
 
-        strategy_serializer = SpotStrategySerializer(data=validated_data['strategy'])
-        if strategy_serializer.is_valid():
-            strategy = strategy_serializer.save()
-
         return SpotPosition(signal=signal,
                             volume=validated_data['volume'],
-                            strategy=strategy)
+                            strategy=validated_data['strategy'])
