@@ -1,3 +1,4 @@
+import asyncio
 from .bot_handler import SpotBotHandler
 from .models import SpotPosition
 
@@ -9,7 +10,8 @@ class SpotTrader:
     def open_position(self, exchange_id: str, credential_id: str, position: SpotPosition):
         self._bot_handler.create_bot(exchange_id=exchange_id, credential_id=credential_id, position=position)
 
-    async def start(self):
+    def start(self):
+        print("in start")
         self._bot_handler.run_bots()
 
 

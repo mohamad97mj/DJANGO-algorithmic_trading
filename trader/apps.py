@@ -7,5 +7,6 @@ class TraderConfig(AppConfig):
 
     def ready(self):
         import asyncio
-        from .test import main
-        # asyncio.get_event_loop().run_until_complete(main())
+        from .trade import trade
+        asyncio.run(trade())
+        print("after")
