@@ -1,14 +1,13 @@
 from datetime import datetime
 from rest_framework import serializers
 from .signal import SpotSignalSerializer
-from .strategy import SpotStrategySerializer
 from ..models import SpotPosition
 
 
 class SpotPositionSerializer(serializers.Serializer):
     signal = SpotSignalSerializer()
     volume = serializers.FloatField()
-    strategy = SpotStrategySerializer()
+    strategy = serializers.CharField(max_length=100)
 
     def create(self, validated_data):
         signal_serializer = SpotSignalSerializer(data=validated_data['signal'])
