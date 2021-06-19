@@ -11,7 +11,7 @@ class SpotBotHandler:
         self.bots: SpotBot = []
 
     def create_bot(self, exchange_id, credential_id, position: SpotPosition):
-        new_bot = SpotBot.objects.create(exchange_id=exchange_id, credential_id=credential_id, position=position)
+        new_bot = SpotBot.objects.create()
         self.bots.append(new_bot)
 
     def run_bots(self):

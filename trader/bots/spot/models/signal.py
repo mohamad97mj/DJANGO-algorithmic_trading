@@ -8,3 +8,4 @@ class SpotSignal(models.Model):
     steps = ArrayField(models.FloatField())
     targets = ArrayField(models.FloatField())
     stop_loss = models.FloatField()
+

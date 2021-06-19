@@ -6,7 +6,7 @@ from . import views
 app_name = 'trader'
 
 urlpatterns = [
-    path('positions/', views.PositionView.as_view(), name='position'),
+    path('positions', views.PositionView.as_view(), name='position'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'html'])

@@ -7,3 +7,7 @@ class SpotSignalSerializer(serializers.Serializer):
     steps = serializers.ListField(child=serializers.FloatField())
     targets = serializers.ListField(child=serializers.FloatField())
     stop_loss = serializers.FloatField()
+
+    def create(self, validated_data):
+        # signal_id =
+        pass

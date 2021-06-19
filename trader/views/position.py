@@ -25,7 +25,8 @@ class PositionView(APIView):
         """
         data = request.data
         serializer = SpotPositionSerializer(data=data)
-        validated_data = serializer.validated_data
-        spot_position = SpotPosition(**validated_data)
-        test_data = SpotPositionSerializer(instance=spot_position).data
+        test_data = None
+        if serializer.is_valid():
+            spot_position = serializer.save()
+            test_data = SpotPositionSerializer(instance=spot_position).data
         return Response(test_data)
