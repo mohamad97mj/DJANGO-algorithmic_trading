@@ -1,6 +1,5 @@
 from trader.clients.public_client import PublicClient
 from .. import SpotPosition
-from .. import SpotStrategy
 
 
 class SpotStrategyCenter:
