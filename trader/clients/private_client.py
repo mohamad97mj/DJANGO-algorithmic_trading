@@ -1,6 +1,5 @@
-from pprint import pprint
 from trader.global_utils import apply2all_methods, log
-from trader.exchange.exchange_factory import ef
+from trader.exchange import ef
 
 
 @apply2all_methods(log)

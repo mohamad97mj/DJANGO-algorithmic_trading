@@ -1,8 +1,3 @@
-import asyncio
-from trader.bots import SpotBot
-from trader.clients import PublicClient, PrivateClient
-from trader.exchange import ef, Exchange
-from pprint import pprint
 
 
 async def main():

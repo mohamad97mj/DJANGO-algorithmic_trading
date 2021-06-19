@@ -1,6 +1,5 @@
 import time
-from trader.models import SpotPosition
-from trader.spot.models import SpotBot
+from .models import SpotPosition, SpotBot
 
 
 class SpotBotHandler:

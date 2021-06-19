@@ -1,6 +1,6 @@
-from trader.spot.models import SpotPosition
-from trader.spot.models import SpotStrategy
 from trader.clients.public_client import PublicClient
+from .models import SpotPosition
+from .models import SpotStrategy
 
 
 class SpotStrategyCenter:

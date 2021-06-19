@@ -1,6 +1,6 @@
-from rest_framework import serializers
-from trader.models import SpotStrategy
 from datetime import datetime
+from rest_framework import serializers
+from ..models import SpotStrategy
 
 
 class SpotStrategySerializer(serializers.Serializer):
