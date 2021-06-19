@@ -63,14 +63,14 @@ class Exchange:
     async def create_market_buy_order(self, symbol, amount):
         return await self._ccxt_exchange.create_market_buy_order(symbol=symbol, amount=amount)
 
-    async def create_market_sell_order(self, symbol, amount):
-        return await self._ccxt_exchange.create_market_sell_order(symbol=symbol, amount=amount)
+    def create_market_sell_order(self, symbol, amount):
+        return self._ccxt_exchange.create_market_sell_order(symbol=symbol, amount=amount)
 
-    async def create_limit_buy_order(self, symbol, amount, price):
-        return await self._ccxt_exchange.create_limit_buy_order(symbol=symbol, amount=amount, price=price)
+    def create_limit_buy_order(self, symbol, amount, price):
+        return self._ccxt_exchange.create_limit_buy_order(symbol=symbol, amount=amount, price=price)
 
-    async def create_limit_sell_order(self, symbol, amount, price):
-        return await self._ccxt_exchange.create_limit_sell_order(symbol=symbol, amount=amount, price=price)
+    def create_limit_sell_order(self, symbol, amount, price):
+        return self._ccxt_exchange.create_limit_sell_order(symbol=symbol, amount=amount, price=price)
 
-    async def close(self):
-        await self._ccxt_exchange.close()
+    def close(self):
+        self._ccxt_exchange.close()
