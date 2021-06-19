@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .signal import SpotSignalSerializer
 from .strategy import SpotStrategySerializer
-from trader.bots.spot.models import SpotPosition, SpotSignal, SpotStrategy
+from trader.models import SpotPosition
 
 
 class SpotPositionSerializer(serializers.Serializer):
@@ -10,8 +10,8 @@ class SpotPositionSerializer(serializers.Serializer):
     strategy = SpotStrategySerializer()
 
     def create(self, validated_data):
-        signal = SpotSignal(**validated_data['signal'])
-        strategy = SpotStrategy(**validated_data['strategy'])
+        signal = SpotSignalSerializer(**validated_data['signal']).save()
+        strategy = SpotStrategySerializer(**validated_data['strategy']).save()
         return SpotPosition(position_id=validated_data['position_id'],
                             signal=signal,
                             volume=validated_data['volume'],

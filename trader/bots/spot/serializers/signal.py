@@ -11,5 +11,5 @@ class SpotSignalSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         now = datetime.now()
-        signal_id = '{}{}'.format(self.symbol, now)
+        signal_id = '{}|{}'.format(self.symbol, now)
         return SpotSignal(signal_id=signal_id, **validated_data)
