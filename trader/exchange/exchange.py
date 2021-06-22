@@ -21,6 +21,11 @@ class Exchange:
             self._ccxt_exchange.load_markets()
         return self._ccxt_exchange.market(symbol=symbol)
 
+    def get_symbols(self):
+        if not self._ccxt_exchange.markets:
+            self._ccxt_exchange.load_markets()
+        return self._ccxt_exchange.symbols
+
     def fetch_order_book(self, symbol, limit):
         return self._ccxt_exchange.fetch_order_book(symbol=symbol, limit=limit)
 
