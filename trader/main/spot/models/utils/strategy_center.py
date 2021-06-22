@@ -6,7 +6,7 @@ import numpy as np
 class SpotStrategyCenter:
 
     def __init__(self, exchange_id):
-        self._trailing_stoploss_strategy_developer = TrailingStoplossStrategyDeveolper()
+        self._trailing_stoploss_strategy_developer = TrailingStoplossStrategyDeveolper(exchange_id)
 
         self._strategy_mapper = {
             'trailing_stoploss': self._trailing_stoploss_strategy_developer.set_operations,
@@ -18,6 +18,9 @@ class SpotStrategyCenter:
 
 
 class TrailingStoplossStrategyDeveolper:
+    def __init__(self, exchange_id):
+        self._public_client = PublicClient(exchange_id)
+
     def set_operations(self, position: SpotPosition):
         optimum_symbol, optimum_limit_step_ratio, optimum_stoploss2limit_ratio = self._find_optimum_parameters()
 
@@ -35,7 +38,7 @@ class TrailingStoplossStrategyDeveolper:
                     selected_symbols.append(symbol)
 
         # selected_symbols = ['SUSHIUP/USDT']
-        limit = 100
+        limit = 1000
 
         # limit_step_ratios = np.arange(0.01, 0.05, 0.01)
         limit_step_ratios = [
