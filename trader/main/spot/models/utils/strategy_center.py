@@ -15,10 +15,11 @@ class SpotStrategyCenter:
         return self.strategy_mapper[position.strategy](position=position)
 
     def set_trailing_stoploss_strategy(self, position: SpotPosition):
-        # symbol = position.signal.symbol
-        # ticker = self._public_client.fetch_ticker(symbol=symbol)
-        # print(ticker)
+        optimum_symbol, optimum_limit_step_ratio, optimum_stoploss2limit_ratio = self.find_trailing_stoploss_strategy_optimum_parameters()
 
+        print("finished")
+
+    def find_trailing_stoploss_strategy_optimum_parameters(self):
         markets = self._public_client.get_markets()
         symbols = markets.keys()
         selected_quote = 'USDT'
@@ -124,4 +125,5 @@ class SpotStrategyCenter:
                             }
                         )
         sorted_results = sorted(results, key=lambda k: k['profit_rate'], reverse=True)
-        print("finished")
+        optimum_result = sorted_results[0]
+        return optimum_result['symbol'], optimum_result['limit_step_ratio'], optimum_result['stoploss2limit_ratio']
