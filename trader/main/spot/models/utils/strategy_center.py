@@ -1,5 +1,6 @@
 from trader.clients.public_client import PublicClient
 from .. import SpotPosition
+from trader.global_utils import truncate
 import numpy as np
 
 
@@ -79,17 +80,20 @@ class TrailingStoplossStrategyDeveolper:
         for symbol in selected_symbols:
 
             ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=limit)
+            price_precision = markets[symbol]['precision']['amount']
+            amount_precision = markets[symbol]['precision']['price']
 
             for mode in trailing_modes:
                 for r1 in limit_step_ratios:
                     for r2 in stoploss2limit_ratios:
+
                         amount_in_quote = 100
                         closing_price = ohlcvs[0][4]
-                        amount = (amount_in_quote * (1 - fee)) / closing_price
+                        amount = truncate(((amount_in_quote * (1 - fee)) / closing_price), amount_precision)
                         amount_in_quote = 0
-                        next_stoploss_price = closing_price * (1 - r1 * r2)
+                        next_stoploss_price = round(closing_price * (1 - r1 * r2), price_precision)
                         next_upper_buy_limit_price = closing_price
-                        next_lower_buy_limit_price = closing_price * (1 - r1)
+                        next_lower_buy_limit_price = round(closing_price * (1 - r1), price_precision)
                         number_of_upper_buy_limit_transactions = 0
                         number_of_lower_buy_limit_transactions = 0
                         number_of_stoploss_triggered_transactions = 0
@@ -99,12 +103,13 @@ class TrailingStoplossStrategyDeveolper:
                             if next_closing_price > closing_price:
                                 if next_closing_price > next_upper_buy_limit_price:
                                     if amount_in_quote:
-                                        amount = (amount_in_quote * (1 - fee)) / next_upper_buy_limit_price
+                                        amount = truncate(((amount_in_quote * (1 - fee)) / next_upper_buy_limit_price),
+                                                          amount_precision)
                                         amount_in_quote = 0
                                         number_of_upper_buy_limit_transactions += 1
-                                    next_stoploss_price = next_closing_price * (1 - r1 * r2)
+                                    next_stoploss_price = round(next_closing_price * (1 - r1 * r2), price_precision)
                                     next_upper_buy_limit_price = next_closing_price
-                                    next_lower_buy_limit_price = next_closing_price * (1 - r1)
+                                    next_lower_buy_limit_price = round(next_closing_price * (1 - r1), price_precision)
 
                             else:
                                 if amount:
@@ -114,12 +119,13 @@ class TrailingStoplossStrategyDeveolper:
                                         number_of_stoploss_triggered_transactions += 1
 
                                 if next_closing_price < next_lower_buy_limit_price:
-                                    amount = (amount_in_quote * (1 - fee)) / next_closing_price
+                                    amount = truncate((amount_in_quote * (1 - fee)) / next_closing_price,
+                                                      amount_precision)
                                     amount_in_quote = 0
                                     number_of_lower_buy_limit_transactions += 1
-                                    next_stoploss_price = next_closing_price * (1 - r1 * r2)
+                                    next_stoploss_price = round(next_closing_price * (1 - r1 * r2), price_precision)
                                     next_upper_buy_limit_price = next_closing_price
-                                    next_lower_buy_limit_price = next_closing_price * (1 - r1)
+                                    next_lower_buy_limit_price = round(next_closing_price * (1 - r1), price_precision)
 
                             closing_price = next_closing_price
                         total_number_of_transactions = number_of_lower_buy_limit_transactions + number_of_upper_buy_limit_transactions + number_of_stoploss_triggered_transactions
