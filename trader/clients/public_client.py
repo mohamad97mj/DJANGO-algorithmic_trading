@@ -19,6 +19,9 @@ class PublicClient:
     def get_market(self, symbol='BTC/USDT'):
         return self._exchange.get_market(symbol=symbol)
 
+    def get_symbols(self):
+        return self._exchange.get_symbols()
+
     def fetch_order_book(self, symbol='BTC/USDT', limit=None):
         return self._exchange.fetch_order_book(symbol=symbol, limit=limit)
 
