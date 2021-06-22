@@ -6,22 +6,22 @@ import numpy as np
 class SpotStrategyCenter:
 
     def __init__(self, exchange_id):
-        self.trailing_stoploss_strategy_developer = TrailingStoplossStrategyDeveolper()
+        self._trailing_stoploss_strategy_developer = TrailingStoplossStrategyDeveolper()
 
-        self.strategy_mapper = {
-            'trailing_stoploss': self.trailing_stoploss_strategy_developer.set_operations,
+        self._strategy_mapper = {
+            'trailing_stoploss': self._trailing_stoploss_strategy_developer.set_operations,
         }
         self._public_client = PublicClient(exchange_id)
 
     def set_strategy_operations(self, position: SpotPosition):
-        return self.strategy_mapper[position.strategy](position=position)
+        return self._strategy_mapper[position.strategy](position=position)
 
 
 class TrailingStoplossStrategyDeveolper:
     def set_operations(self, position: SpotPosition):
-        optimum_symbol, optimum_limit_step_ratio, optimum_stoploss2limit_ratio = self.find_optimum_parameters()
+        optimum_symbol, optimum_limit_step_ratio, optimum_stoploss2limit_ratio = self._find_optimum_parameters()
 
-    def find_optimum_parameters(self):
+    def _find_optimum_parameters(self):
         markets = self._public_client.get_markets()
         symbols = markets.keys()
         selected_quote = 'USDT'
