@@ -68,6 +68,9 @@ class Exchange:
     def create_market_buy_order(self, symbol, amount):
         return self._ccxt_exchange.create_market_buy_order(symbol=symbol, amount=amount)
 
+    def create_marke_buy_order_in_quote(self, symbol, amount, price):
+        return self._ccxt_exchange.create_order(symbol=symbol, type='market', side='buy', amount=amount, price=price)
+
     def create_market_sell_order(self, symbol, amount):
         return self._ccxt_exchange.create_market_sell_order(symbol=symbol, amount=amount)
 
