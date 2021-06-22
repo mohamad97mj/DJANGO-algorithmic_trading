@@ -28,14 +28,24 @@ class TrailingStoplossStrategyDeveolper:
         markets = self._public_client.get_markets()
         symbols = markets.keys()
         selected_quote = 'USDT'
-        selected_symbols = []
+        leveraged_symbols = []
         for symbol in symbols:
             splitted_symbol = symbol.split('/')
             base = splitted_symbol[0]
             quote = splitted_symbol[1]
             if quote == selected_quote:
                 if base.endswith('UP') or base.endswith('DOWN'):
-                    selected_symbols.append(symbol)
+                    leveraged_symbols.append(symbol)
+        tickers = self._public_client.fetch_tickers(symbols=leveraged_symbols)
+
+        selected_symbols = []
+        for symbol in leveraged_symbols:
+            sample_price = tickers[symbol]['bid']
+            integer_part_length = len(str(int(sample_price))) if int(sample_price) else 0
+            decmial_part_length = markets[symbol]['precision']['price']
+            total_length = integer_part_length + decmial_part_length
+            if total_length > 4:
+                selected_symbols.append(symbol)
 
         # selected_symbols = ['SUSHIUP/USDT']
         limit = 1000
