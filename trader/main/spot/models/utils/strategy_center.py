@@ -80,8 +80,8 @@ class TrailingStoplossStrategyDeveolper:
         for symbol in selected_symbols:
 
             ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=limit)
-            price_precision = markets[symbol]['precision']['amount']
-            amount_precision = markets[symbol]['precision']['price']
+            price_precision = markets[symbol]['precision']['price']
+            amount_precision = markets[symbol]['precision']['amount']
 
             for mode in trailing_modes:
                 for r1 in limit_step_ratios:
@@ -114,7 +114,8 @@ class TrailingStoplossStrategyDeveolper:
                             else:
                                 if amount:
                                     if next_closing_price < next_stoploss_price:
-                                        amount_in_quote = amount * (1 - fee) * next_stoploss_price
+                                        amount_in_quote = truncate(amount * (1 - fee) * next_stoploss_price,
+                                                                   amount_precision)
                                         amount = 0
                                         number_of_stoploss_triggered_transactions += 1
 
