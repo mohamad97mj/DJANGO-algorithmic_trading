@@ -15,6 +15,6 @@ class SpotBotHandler:
         while True:
             for bot in self.bots:
                 print("in loop in run_bots")
-                # bot.run()
+                bot.run()
             time.sleep(1)
             print('in run_bots')

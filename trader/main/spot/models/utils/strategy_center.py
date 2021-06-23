@@ -14,8 +14,8 @@ class SpotStrategyCenter:
         }
         self._public_client = PublicClient(exchange_id)
 
-    def set_strategy_operations(self, position: SpotPosition):
-        return self._strategy_mapper[position.strategy](position=position)
+    def set_strategy_operations(self, strategy: str, position: SpotPosition):
+        return self._strategy_mapper[strategy](position=position)
 
 
 class TrailingStoplossStrategyDeveolper:
