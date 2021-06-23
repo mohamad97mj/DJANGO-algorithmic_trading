@@ -5,7 +5,7 @@ from ..models import SpotPosition
 
 
 class SpotPositionSerializer(serializers.Serializer):
-    signal = SpotSignalSerializer(required=False, allow_null=True)
+    signal = SpotSignalSerializer(allow_null=True)
     volume = serializers.FloatField()
     strategy = serializers.CharField(max_length=100)
 
