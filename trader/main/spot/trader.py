@@ -7,8 +7,11 @@ class SpotTrader:
     def __init__(self):
         self._bot_handler = SpotBotHandler()
 
-    def open_position(self, exchange_id: str, credential_id: str, position: SpotPosition):
-        self._bot_handler.create_bot(exchange_id=exchange_id, credential_id=credential_id, position=position)
+    def open_position(self, exchange_id: str, credential_id: str, strategy: str, position: SpotPosition):
+        return self._bot_handler.create_bot(exchange_id=exchange_id,
+                                            credential_id=credential_id,
+                                            strategy=strategy,
+                                            position=position)
 
     def start(self):
         print("in start")

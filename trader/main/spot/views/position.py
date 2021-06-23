@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from djangorestframework_camel_case import render
 from django.conf import settings
 from ..services import SpotPositionService
-from ..serializers import SpotPositionSerializer
+from ..serializers import SpotPositionSerializer, SpotBotSerializer
 
 
 class PositionView(APIView):
@@ -26,17 +26,20 @@ class PositionView(APIView):
         data = request.data
         exchange_id = data['exchange_id']
         credential_id = data['credential_id']
+        strategy = data['strategy']
         position_data = data['position']
 
-        serializer = SpotPositionSerializer(data=position_data)
+        position_serializer = SpotPositionSerializer(data=position_data)
 
         test_data = None
-        if serializer.is_valid():
-            spot_position = serializer.save()
-            SpotPositionService.open_position(exchange_id=exchange_id,
-                                              credential_id=credential_id,
-                                              position=spot_position)
+        if position_serializer.is_valid():
+            spot_position = position_serializer.save()
+            bot_instance = SpotPositionService.open_position(exchange_id=exchange_id,
+                                                             credential_id=credential_id,
+                                                             strategy=strategy,
+                                                             position=spot_position)
 
-            test_data = SpotPositionSerializer(instance=spot_position).data
+            bot_serializer = SpotBotSerializer(instance=bot_instance)
+            test_data = bot_serializer.data
 
         return Response(test_data)
