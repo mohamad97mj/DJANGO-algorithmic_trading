@@ -25,8 +25,11 @@ class SpotBot(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(SpotBot, self).__init__(*args, **kwargs)
-        self._private_client = PrivateClient(exchange_id=kwargs['exchange_id'], credential_id=kwargs['credential_id'])
-        self._strategy_center = SpotStrategyCenter(exchange_id=kwargs['exchange_id'])
+        self._init_requirements()
+
+    def _init_requirements(self):
+        self._private_client = PrivateClient(exchange_id=self.exchange_id, credential_id=self.credential_id)
+        self._strategy_center = SpotStrategyCenter(exchange_id=self.exchange_id)
 
     def reload_bot(self):
         pass
