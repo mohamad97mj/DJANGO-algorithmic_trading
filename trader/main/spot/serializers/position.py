@@ -7,7 +7,6 @@ from ..models import SpotPosition
 class SpotPositionSerializer(serializers.Serializer):
     signal = SpotSignalSerializer(allow_null=True)
     volume = serializers.FloatField()
-    strategy = serializers.CharField(max_length=100)
 
     def create(self, validated_data):
         signal = None
@@ -17,4 +16,4 @@ class SpotPositionSerializer(serializers.Serializer):
                 signal = signal_serializer.save()
 
         return SpotPosition(signal=signal,
-                            **{k: validated_data[k] for k in ['volume', 'strategy']})
+                            **{k: validated_data[k] for k in ['volume']})
