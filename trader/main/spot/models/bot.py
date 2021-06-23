@@ -20,6 +20,7 @@ class SpotBot(models.Model):
     bot_id = models.CharField(max_length=100, unique=True)
     exchange_id = models.CharField(max_length=100)
     credential_id = models.CharField(max_length=100)
+    strategy = models.CharField(max_length=100)
     position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.RESTRICT)
 
     def __init__(self,
