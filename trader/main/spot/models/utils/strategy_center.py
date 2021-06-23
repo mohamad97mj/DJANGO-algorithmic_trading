@@ -49,7 +49,7 @@ class TrailingStoplossStrategyDeveolper:
                 selected_symbols.append(symbol)
 
         # selected_symbols = ['SUSHIUP/USDT']
-        limit = 1000
+        ohlcvs_limit = 1000
 
         # limit_step_ratios = np.arange(0.01, 0.05, 0.01)
         limit_step_ratios = [
@@ -69,6 +69,11 @@ class TrailingStoplossStrategyDeveolper:
             0.1,
             # 0.2
         ]
+
+        stoploss_safety_ratios = [
+            0.25,
+        ]
+
         fee = 0.001
 
         results = []
@@ -79,73 +84,86 @@ class TrailingStoplossStrategyDeveolper:
         ]
         for symbol in selected_symbols:
 
-            ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=limit)
+            ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=ohlcvs_limit)
             price_precision = markets[symbol]['precision']['price']
             amount_precision = markets[symbol]['precision']['amount']
 
             for mode in trailing_modes:
                 for r1 in limit_step_ratios:
                     for r2 in stoploss2limit_ratios:
+                        for r3 in stoploss_safety_ratios:
 
-                        amount_in_quote = 100
-                        closing_price = ohlcvs[0][4]
-                        amount = truncate(((amount_in_quote * (1 - fee)) / closing_price), amount_precision)
-                        amount_in_quote = 0
-                        next_stoploss_price = round(closing_price * (1 - r1 * r2), price_precision)
-                        next_upper_buy_limit_price = closing_price
-                        next_lower_buy_limit_price = round(closing_price * (1 - r1), price_precision)
-                        number_of_upper_buy_limit_transactions = 0
-                        number_of_lower_buy_limit_transactions = 0
-                        number_of_stoploss_triggered_transactions = 0
+                            amount_in_quote = 100
+                            closing_price = ohlcvs[0][4]
+                            amount = truncate(((amount_in_quote * (1 - fee)) / closing_price), amount_precision)
+                            amount_in_quote = 0
+                            next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price = self._get_setup_prices(
+                                closing_price, price_precision, r1, r2, r3)
+                            number_of_upper_buy_limit_transactions = 0
+                            number_of_lower_buy_limit_transactions = 0
+                            number_of_stoploss_triggered_transactions = 0
 
-                        for i in range(1, len(ohlcvs)):
-                            next_closing_price = ohlcvs[i][4]
-                            if next_closing_price > closing_price:
-                                if next_closing_price > next_upper_buy_limit_price:
-                                    if amount_in_quote:
-                                        amount = truncate(((amount_in_quote * (1 - fee)) / next_upper_buy_limit_price),
+                            for i in range(1, len(ohlcvs)):
+                                next_closing_price = ohlcvs[i][4]
+                                if next_closing_price > closing_price:
+                                    if next_closing_price > next_upper_buy_limit_price:
+                                        if amount_in_quote:
+                                            amount = truncate(
+                                                ((amount_in_quote * (1 - fee)) / next_upper_buy_limit_price),
+                                                amount_precision)
+                                            amount_in_quote = 0
+                                            number_of_upper_buy_limit_transactions += 1
+                                        next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price = self._get_setup_prices(
+                                            next_closing_price, price_precision, r1, r2, r3)
+
+                                else:
+                                    if amount:
+                                        if next_closing_price < next_stoploss_trigger_price:
+                                            amount_in_quote = truncate(amount * (1 - fee) * next_stoploss_price,
+                                                                       amount_precision)
+                                            amount = 0
+                                            number_of_stoploss_triggered_transactions += 1
+
+                                    if next_closing_price < next_lower_buy_limit_price:
+                                        amount = truncate((amount_in_quote * (1 - fee)) / next_closing_price,
                                                           amount_precision)
                                         amount_in_quote = 0
-                                        number_of_upper_buy_limit_transactions += 1
-                                    next_stoploss_price = round(next_closing_price * (1 - r1 * r2), price_precision)
-                                    next_upper_buy_limit_price = next_closing_price
-                                    next_lower_buy_limit_price = round(next_closing_price * (1 - r1), price_precision)
+                                        number_of_lower_buy_limit_transactions += 1
+                                        next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price = self._get_setup_prices(
+                                            next_closing_price, price_precision, r1, r2, r3)
 
-                            else:
-                                if amount:
-                                    if next_closing_price < next_stoploss_price:
-                                        amount_in_quote = truncate(amount * (1 - fee) * next_stoploss_price,
-                                                                   amount_precision)
-                                        amount = 0
-                                        number_of_stoploss_triggered_transactions += 1
+                                closing_price = next_closing_price
+                            total_number_of_transactions = number_of_lower_buy_limit_transactions + number_of_upper_buy_limit_transactions + number_of_stoploss_triggered_transactions
+                            if amount:
+                                amount_in_quote = amount * closing_price
 
-                                if next_closing_price < next_lower_buy_limit_price:
-                                    amount = truncate((amount_in_quote * (1 - fee)) / next_closing_price,
-                                                      amount_precision)
-                                    amount_in_quote = 0
-                                    number_of_lower_buy_limit_transactions += 1
-                                    next_stoploss_price = round(next_closing_price * (1 - r1 * r2), price_precision)
-                                    next_upper_buy_limit_price = next_closing_price
-                                    next_lower_buy_limit_price = round(next_closing_price * (1 - r1), price_precision)
-
-                            closing_price = next_closing_price
-                        total_number_of_transactions = number_of_lower_buy_limit_transactions + number_of_upper_buy_limit_transactions + number_of_stoploss_triggered_transactions
-                        if amount:
-                            amount_in_quote = amount * closing_price
-
-                        results.append(
-                            {
-                                'symbol': symbol,
-                                'trailing_mode': mode,
-                                'limit_step_ratio': r1,
-                                'stoploss2limit_ratio': r2,
-                                'profit_rate': ((amount_in_quote - 100) / 100) * 100,
-                                'total_number_of_transactions': total_number_of_transactions,
-                                'number_of_upper_buy_limit_transactions': number_of_upper_buy_limit_transactions,
-                                'number_of_lower_buy_limit_transactions': number_of_lower_buy_limit_transactions,
-                                'number_of_stoploss_triggered_transactions': number_of_stoploss_triggered_transactions,
-                            }
-                        )
+                            results.append(
+                                {
+                                    'symbol': symbol,
+                                    'trailing_mode': mode,
+                                    'limit_step_ratio': r1,
+                                    'stoploss2limit_ratio': r2,
+                                    'profit_rate': ((amount_in_quote - 100) / 100) * 100,
+                                    'total_number_of_transactions': total_number_of_transactions,
+                                    'number_of_upper_buy_limit_transactions': number_of_upper_buy_limit_transactions,
+                                    'number_of_lower_buy_limit_transactions': number_of_lower_buy_limit_transactions,
+                                    'number_of_stoploss_triggered_transactions': number_of_stoploss_triggered_transactions,
+                                }
+                            )
         sorted_results = sorted(results, key=lambda k: k['profit_rate'], reverse=True)
         optimum_result = sorted_results[0]
         return optimum_result['symbol'], optimum_result['limit_step_ratio'], optimum_result['stoploss2limit_ratio']
+
+    def _get_setup_prices(self, current_price,
+                          price_precision,
+                          limit_step_ratio,
+                          stoploss2limit_ratio,
+                          stoploss_safty_ratio):
+        next_stoploss_price = round(current_price * (1 - limit_step_ratio * stoploss2limit_ratio), price_precision)
+        next_stoploss_trigger_price = round(
+            current_price * (1 - limit_step_ratio * stoploss2limit_ratio * (1 - stoploss_safty_ratio)), price_precision)
+        next_upper_buy_limit_price = current_price
+        next_lower_buy_limit_price = round(current_price * (1 - limit_step_ratio),
+                                           price_precision)
+
+        return next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price
