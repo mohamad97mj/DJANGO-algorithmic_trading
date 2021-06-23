@@ -10,6 +10,7 @@ class SpotBotHandler:
     def create_bot(self, exchange_id: str, credential_id: str, position: SpotPosition):
         new_bot = SpotBot(exchange_id=exchange_id, credential_id=credential_id, position=position)
         self.bots.append(new_bot)
+        return new_bot
 
     def run_bots(self):
         while True:

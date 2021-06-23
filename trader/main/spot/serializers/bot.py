@@ -9,4 +9,3 @@ class SpotBotSerializer(serializers.Serializer):
     credential_id = serializers.CharField(max_length=100)
     strategy = serializers.CharField(max_length=100)
     position = SpotPositionSerializer()
-
