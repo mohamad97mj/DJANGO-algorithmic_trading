@@ -21,11 +21,12 @@ class SpotStrategyCenter:
 class TrailingStoplossStrategyDeveolper:
     def __init__(self, exchange_id):
         self._public_client = PublicClient(exchange_id)
+        self._init_optimum_parameters()
 
     def set_operations(self, position: SpotPosition):
-        optimum_symbol, optimum_limit_step_ratio, optimum_stoploss2limit_ratio = self._find_optimum_parameters()
+        pass
 
-    def _find_optimum_parameters(self):
+    def _init_optimum_parameters(self):
         markets = self._public_client.get_markets()
         symbols = markets.keys()
         selected_quote = 'USDT'
@@ -152,7 +153,9 @@ class TrailingStoplossStrategyDeveolper:
                         )
         sorted_results = sorted(results, key=lambda k: k['profit_rate'], reverse=True)
         optimum_result = sorted_results[0]
-        return optimum_result['symbol'], optimum_result['limit_step_ratio'], optimum_result['stoploss2limit_ratio']
+        self._optimum_symbol = optimum_result['symbol']
+        self._optimum_limit_step_ratio = optimum_result['limit_step_ratio']
+        self._optimum_stoploss2limit_ratio = optimum_result['stoploss2limit_ratio']
 
     def _get_setup_prices(self, current_price,
                           price_precision,
