@@ -26,6 +26,7 @@ class PositionView(APIView):
         data = request.data
         exchange_id = data['exchange_id']
         credential_id = data['credential_id']
+        strategy = data['strategy']
         position_data = data['position']
 
         position_serializer = SpotPositionSerializer(data=position_data)
@@ -35,10 +36,10 @@ class PositionView(APIView):
             spot_position = position_serializer.save()
             bot_instance = SpotPositionService.open_position(exchange_id=exchange_id,
                                                              credential_id=credential_id,
+                                                             strategy=strategy,
                                                              position=spot_position)
 
             bot_serializer = SpotBotSerializer(instance=bot_instance)
-            if bot_serializer.is_valid():
-                test_data = bot_serializer.data
+            test_data = bot_serializer.data
 
         return Response(test_data)

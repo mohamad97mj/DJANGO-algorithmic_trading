@@ -7,8 +7,8 @@ class SpotBotHandler:
     def __init__(self):
         self.bots: SpotBot = []
 
-    def create_bot(self, exchange_id: str, credential_id: str, position: SpotPosition):
-        new_bot = SpotBot(exchange_id=exchange_id, credential_id=credential_id, position=position)
+    def create_bot(self, exchange_id: str, credential_id: str, strategy: str, position: SpotPosition):
+        new_bot = SpotBot(exchange_id=exchange_id, credential_id=credential_id, strategy=strategy, position=position)
         self.bots.append(new_bot)
         return new_bot
 
