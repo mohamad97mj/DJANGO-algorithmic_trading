@@ -86,7 +86,13 @@ class TrailingStoplossStrategyDeveolper:
 
         for symbol in selected_symbols:
 
+            number_of_bad_candlestics = 0
             ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=ohlcvs_limit)
+            for ohlcv in ohlcvs:
+                if not ((ohlcv[1] == ohlcv[3] and ohlcv[4] == ohlcv[2]) or (
+                        ohlcv[1] == ohlcv[2] and ohlcv[4] == ohlcv[3])):
+                    number_of_bad_candlestics += 1
+
             price_precision = markets[symbol]['precision']['price']
             amount_precision = markets[symbol]['precision']['amount']
 
@@ -98,14 +104,20 @@ class TrailingStoplossStrategyDeveolper:
                         closing_price = ohlcvs[0][4]
                         amount = truncate(((amount_in_quote * (1 - fee)) / closing_price), amount_precision)
                         amount_in_quote = 0
-                        next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price = self._get_setup_prices(
+                        next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price = self._calculate_setup_prices(
                             closing_price, price_precision, r1, r2, r3)
                         number_of_upper_buy_limit_transactions = 0
                         number_of_lower_buy_limit_transactions = 0
                         number_of_stoploss_triggered_transactions = 0
 
                         for i in range(1, len(ohlcvs)):
+                            openin_price = ohlcvs[i][1]
+                            highest_price = ohlcvs[i][2]
+                            lowest_price = ohlcvs[i][3]
                             next_closing_price = ohlcvs[i][4]
+
+                            # .....................................................................
+
                             if next_closing_price > closing_price:
                                 if next_closing_price > next_upper_buy_limit_price:
                                     if amount_in_quote:
@@ -114,7 +126,7 @@ class TrailingStoplossStrategyDeveolper:
                                             amount_precision)
                                         amount_in_quote = 0
                                         number_of_upper_buy_limit_transactions += 1
-                                    next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price = self._get_setup_prices(
+                                    next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price = self._calculate_setup_prices(
                                         next_closing_price, price_precision, r1, r2, r3)
 
                             else:
@@ -130,7 +142,7 @@ class TrailingStoplossStrategyDeveolper:
                                                       amount_precision)
                                     amount_in_quote = 0
                                     number_of_lower_buy_limit_transactions += 1
-                                    next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price = self._get_setup_prices(
+                                    next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price = self._calculate_setup_prices(
                                         next_closing_price, price_precision, r1, r2, r3)
 
                             closing_price = next_closing_price
@@ -149,6 +161,7 @@ class TrailingStoplossStrategyDeveolper:
                                 'number_of_upper_buy_limit_transactions': number_of_upper_buy_limit_transactions,
                                 'number_of_lower_buy_limit_transactions': number_of_lower_buy_limit_transactions,
                                 'number_of_stoploss_triggered_transactions': number_of_stoploss_triggered_transactions,
+                                'number_of_bad_candlestics': number_of_bad_candlestics,
                             }
                         )
         sorted_results = sorted(results, key=lambda k: k['profit_rate'], reverse=True)
@@ -157,11 +170,11 @@ class TrailingStoplossStrategyDeveolper:
         self._optimum_limit_step_ratio = optimum_result['limit_step_ratio']
         self._optimum_stoploss2limit_ratio = optimum_result['stoploss2limit_ratio']
 
-    def _get_setup_prices(self, current_price,
-                          price_precision,
-                          limit_step_ratio,
-                          stoploss2limit_ratio,
-                          stoploss_safty_ratio):
+    def _calculate_setup_prices(self, current_price,
+                                price_precision,
+                                limit_step_ratio,
+                                stoploss2limit_ratio,
+                                stoploss_safty_ratio):
         next_stoploss_price = round(current_price * (1 - limit_step_ratio * stoploss2limit_ratio), price_precision)
         next_stoploss_trigger_price = round(
             current_price * (1 - limit_step_ratio * stoploss2limit_ratio * (1 - stoploss_safty_ratio)), price_precision)
@@ -170,3 +183,25 @@ class TrailingStoplossStrategyDeveolper:
                                            price_precision)
 
         return next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price
+
+    def _determine_senario(self,
+                           previous_closing_price,
+                           opening_price,
+                           highest_price,
+                           lowest_price,
+                           closing_price,
+                           nu,
+                           sl,
+                           nl):
+
+        senario = 0
+        if closing_price > previous_closing_price:
+            if opening_price == lowest_price:
+                if closing_price == highest_price:
+                    senario = 1
+                else:
+                    pass
+            else:
+                pass
+        else:
+            pass
