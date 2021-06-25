@@ -215,7 +215,10 @@ class TrailingStoplossStrategyDeveolper:
                             else:
                                 s = 7
                         else:
-                            pass
+                            if highest_price == nu:
+                                s = 9
+                            else:
+                                s = 10
             else:
                 pass
         else:
