@@ -111,7 +111,7 @@ class TrailingStoplossStrategyDeveolper:
                         number_of_stoploss_triggered_transactions = 0
 
                         for i in range(1, len(ohlcvs)):
-                            openin_price = ohlcvs[i][1]
+                            opening_price = ohlcvs[i][1]
                             highest_price = ohlcvs[i][2]
                             lowest_price = ohlcvs[i][3]
                             next_closing_price = ohlcvs[i][4]
@@ -185,8 +185,7 @@ class TrailingStoplossStrategyDeveolper:
         return next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price
 
     def _determine_senario(self,
-                           previous_closing_price,
-                           opening_price,
+                           starting_price,
                            highest_price,
                            lowest_price,
                            closing_price,
@@ -195,9 +194,9 @@ class TrailingStoplossStrategyDeveolper:
                            nl):
 
         s = 0
-        if previous_closing_price == nu:
-            if closing_price > previous_closing_price:
-                if lowest_price == opening_price:
+        if starting_price == nu:
+            if closing_price > starting_price:
+                if lowest_price == starting_price:
                     if highest_price == closing_price:
                         s = 1
                     else:
@@ -222,61 +221,61 @@ class TrailingStoplossStrategyDeveolper:
             else:
                 if lowest_price > sl:
                     if lowest_price == closing_price:
-                        if highest_price == opening_price:
+                        if highest_price == starting_price:
                             s = 12
                         else:
                             s = 13
                     else:
-                        if highest_price == opening_price:
+                        if highest_price == starting_price:
                             s = 14
                         else:
                             s = 15
                 else:
                     if closing_price > sl:
                         if lowest_price > nl:
-                            if highest_price == opening_price:
+                            if highest_price == starting_price:
                                 s = 17
                             else:
                                 s = 18
                         else:
-                            if highest_price == opening_price:
+                            if highest_price == starting_price:
                                 s = 20
                             else:
                                 s = 21
                     else:
                         if lowest_price > nl:
                             if lowest_price == closing_price:
-                                if highest_price == opening_price:
+                                if highest_price == starting_price:
                                     s = 23
                                 else:
                                     s = 24
                             else:
-                                if highest_price == opening_price:
+                                if highest_price == starting_price:
                                     s = 25
                                 else:
                                     s = 26
                         else:
                             if closing_price > nl:
-                                if highest_price == opening_price:
+                                if highest_price == starting_price:
                                     s = 28
                                 else:
                                     s = 29
                             else:
                                 if lowest_price == closing_price:
-                                    if highest_price == opening_price:
+                                    if highest_price == starting_price:
                                         s = 31
                                     else:
                                         s = 32
                                 else:
-                                    if highest_price == opening_price:
+                                    if highest_price == starting_price:
                                         s = 33
                                     else:
                                         s = 34
         else:
-            if previous_closing_price > sl:
+            if starting_price > sl:
                 if closing_price > nu:
                     if lowest_price > sl:
-                        if lowest_price == opening_price:
+                        if lowest_price == starting_price:
                             if highest_price == closing_price:
                                 s = 36
                             else:
@@ -299,23 +298,37 @@ class TrailingStoplossStrategyDeveolper:
                                 s = 45
                 else:
                     if closing_price > sl:
-                        if highest_price < nu:
-                            if lowest_price == closing_price:
-                                if highest_price == opening_price:
-                                    s = 47
+                        if lowest_price > sl:
+                            if highest_price < nu:
+                                if lowest_price == closing_price:
+                                    if highest_price == starting_price:
+                                        s = 47
+                                    else:
+                                        s = 48
                                 else:
-                                    s = 48
-                            else:
-                                if highest_price == opening_price:
-                                    s = 49
-                                else:
-                                    s = 50
+                                    if highest_price == starting_price:
+                                        s = 49
+                                    else:
+                                        s = 50
 
-                        else:
-                            if lowest_price == closing_price:
-                                s = 52
                             else:
-                                s = 53
+                                if lowest_price == closing_price:
+                                    s = 52
+                                else:
+                                    s = 53
+                        else:
+                            if lowest_price > nl:
+                                if highest_price < nu:
+                                    if highest_price == starting_price:
+                                        s = 55
+                                    else:
+                                        s = 56
+                                else:
+                                    s = 58
+
+                            else:
+                                pass
+
                     else:
                         pass
             else:
