@@ -275,16 +275,25 @@ class TrailingStoplossStrategyDeveolper:
         else:
             if previous_closing_price > sl:
                 if closing_price > nu:
-                    if lowest_price == opening_price:
-                        if highest_price == closing_price:
-                            s = 36
+                    if lowest_price > sl:
+                        if lowest_price == opening_price:
+                            if highest_price == closing_price:
+                                s = 36
+                            else:
+                                s = 37
                         else:
-                            s = 37
+                            if highest_price == closing_price:
+                                s = 38
+                            else:
+                                s = 39
                     else:
-                        if highest_price == closing_price:
-                            s = 38
+                        if lowest_price > nl:
+                            if highest_price == closing_price:
+                                s = 41
+                            else:
+                                s = 42
                         else:
-                            s = 39
+                            pass
                 else:
                     pass
             else:
