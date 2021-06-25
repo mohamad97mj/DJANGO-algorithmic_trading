@@ -194,13 +194,13 @@ class TrailingStoplossStrategyDeveolper:
                            sl,
                            nl):
 
-        senario = 0
+        s = 0
         if closing_price > previous_closing_price:
             if opening_price == lowest_price:
                 if closing_price == highest_price:
-                    senario = 1
+                    s = 1
                 else:
-                    pass
+                    s = 2
             else:
                 pass
         else:
