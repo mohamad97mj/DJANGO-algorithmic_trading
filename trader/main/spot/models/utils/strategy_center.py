@@ -327,8 +327,13 @@ class TrailingStoplossStrategyDeveolper:
                                     s = 58
 
                             else:
-                                pass
-
+                                if highest_price < nu:
+                                    if highest_price == starting_price:
+                                        s = 60
+                                    else:
+                                        s = 61
+                                else:
+                                    s = 63
                     else:
                         pass
             else:
