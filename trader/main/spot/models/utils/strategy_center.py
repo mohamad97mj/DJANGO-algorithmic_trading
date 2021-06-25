@@ -336,23 +336,34 @@ class TrailingStoplossStrategyDeveolper:
                                     s = 63
                     else:
                         if closing_price > nl:
-                            if highest_price < nu:
-                                if lowest_price == closing_price:
-                                    if highest_price == starting_price:
-                                        s = 65
+                            if lowest_price > nl:
+                                if highest_price < nu:
+                                    if lowest_price == closing_price:
+                                        if highest_price == starting_price:
+                                            s = 65
+                                        else:
+                                            s = 66
                                     else:
-                                        s = 66
+                                        if highest_price == starting_price:
+                                            s = 67
+                                        else:
+                                            s = 68
+
                                 else:
-                                    if highest_price == starting_price:
-                                        s = 67
+                                    if lowest_price == closing_price:
+                                        s = 69
                                     else:
-                                        s = 68
+                                        s = 70
 
                             else:
-                                if lowest_price == closing_price:
-                                    s = 69
+                                if highest_price == starting_price:
+                                    s = 71
                                 else:
-                                    s = 70
+                                    if highest_price < nu:
+                                        s = 72
+                                    else:
+                                        s = 73
+
                         else:
                             pass
             else:
