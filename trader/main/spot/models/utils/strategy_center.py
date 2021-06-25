@@ -228,8 +228,9 @@ class TrailingStoplossStrategyDeveolper:
                             s = 13
                     else:
                         if highest_price == opening_price:
+                            s = 14
                         else:
-                            pass
+                            s = 15
                 else:
                     pass
         else:
