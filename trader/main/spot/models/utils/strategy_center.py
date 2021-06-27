@@ -86,12 +86,220 @@ class TrailingStoplossStrategyDeveolper:
 
         for symbol in selected_symbols:
 
-            number_of_bad_candlestics = 0
             ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=ohlcvs_limit)
-            for ohlcv in ohlcvs:
-                if not ((ohlcv[1] == ohlcv[3] and ohlcv[4] == ohlcv[2]) or (
-                        ohlcv[1] == ohlcv[2] and ohlcv[4] == ohlcv[3])):
-                    number_of_bad_candlestics += 1
+
+            price_precision = markets[symbol]['precision']['price']
+            amount_precision = markets[symbol]['precision']['amount']
+
+            for r1 in limit_step_ratios:
+                for r2 in stoploss2limit_ratios:
+                    for r3 in stoploss_safety_ratios:
+                        amount_in_quote = 100
+                        starting_price = ohlcvs[0][1]
+                        highest_price = ohlcvs[0][2]
+                        lowest_price = ohlcvs[0][3]
+                        closing_price = ohlcvs[0][4]
+                        amount = truncate(((amount_in_quote * (1 - fee)) / closing_price), amount_precision)
+                        amount_in_quote = 0
+                        next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price = self._calculate_setup_prices(
+                            starting_price, price_precision, r1, r2, r3)
+
+                        next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price, amount, amount_in_quote = self._update_candlestick_setup(
+                            next_stoploss_price,
+                            next_stoploss_trigger_price,
+                            next_upper_buy_limit_price,
+                            next_lower_buy_limit_price,
+                            amount,
+                            amount_in_quote,
+                            starting_price,
+                            highest_price,
+                            lowest_price,
+                            closing_price
+                        )
+
+                        for i in range(1, len(ohlcvs)):
+                            previous_closing_price = closing_price
+                            # opening_price = ohlcvs[i][1]
+                            highest_price = ohlcvs[i][2]
+                            lowest_price = ohlcvs[i][3]
+                            closing_price = ohlcvs[i][4]
+
+                            next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price, amount, amount_in_quote = self._update_candlestick_setup(
+                                next_stoploss_price,
+                                next_stoploss_trigger_price,
+                                next_upper_buy_limit_price,
+                                next_lower_buy_limit_price,
+                                amount,
+                                amount_in_quote,
+                                previous_closing_price,
+                                highest_price,
+                                lowest_price,
+                                closing_price,
+                            )
+
+                        if amount:
+                            amount_in_quote = amount * closing_price
+
+                        results.append(
+                            {
+                                'symbol': symbol,
+                                'limit_step_ratio': r1,
+                                'stoploss2limit_ratio': r2,
+                                'stoploss_safety_ratio': r3,
+                                'profit_rate': ((amount_in_quote - 100) / 100) * 100,
+                                # 'total_number_of_transactions': total_number_of_transactions,
+                                # 'number_of_upper_buy_limit_transactions': number_of_upper_buy_limit_transactions,
+                                # 'number_of_lower_buy_limit_transactions': number_of_lower_buy_limit_transactions,
+                                # 'number_of_stoploss_triggered_transactions': number_of_stoploss_triggered_transactions,
+                            }
+                        )
+
+            sorted_results = sorted(results, key=lambda k: k['profit_rate'], reverse=True)
+            optimum_result = sorted_results[0]
+            self._optimum_symbol = optimum_result['symbol']
+            self._optimum_limit_step_ratio = optimum_result['limit_step_ratio']
+            self._optimum_stoploss2limit_ratio = optimum_result['stoploss2limit_ratio']
+
+    def _calculate_setup_prices(self, buy_price,
+                                price_precision,
+                                limit_step_ratio,
+                                stoploss2limit_ratio,
+                                stoploss_safty_ratio):
+        next_stoploss_price = round(buy_price * (1 - limit_step_ratio * stoploss2limit_ratio), price_precision)
+        next_stoploss_trigger_price = round(
+            buy_price * (1 - limit_step_ratio * stoploss2limit_ratio * (1 - stoploss_safty_ratio)), price_precision)
+        next_upper_buy_limit_price = buy_price
+        next_lower_buy_limit_price = round(buy_price * (1 - limit_step_ratio),
+                                           price_precision)
+
+        return next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price
+
+    def _update_candlestick_setup(self,
+                                  next_stoploss_price,
+                                  next_stoploss_trigger_price,
+                                  next_upper_buy_limit_price,
+                                  next_lower_buy_limit_price,
+                                  amount,
+                                  amount_in_quote,
+                                  starting_price,
+                                  highest_price,
+                                  lowest_price,
+                                  closing_price):
+
+        senario = self._determine_senario(starting_price, highest_price, lowest_price, closing_price)
+        return next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price, amount, amount_in_quote
+
+    def _determine_senario(self,
+                           starting_price,
+                           highest_price,
+                           lowest_price,
+                           closing_price, ):
+
+        if closing_price > starting_price:
+            if lowest_price == starting_price:
+                if highest_price == closing_price:
+                    s = 1
+                else:
+                    s = 2
+            else:
+                if highest_price == closing_price:
+                    s = 3
+                else:
+                    s = 4
+
+        else:
+            if highest_price == starting_price:
+                if lowest_price == closing_price:
+                    s = 5
+                else:
+                    s = 6
+            else:
+                if lowest_price == closing_price:
+                    s = 7
+                else:
+                    s = 8
+
+        return s
+
+    def _run_senario(self):
+        pass
+
+    def _run_senario1(self):
+        pass
+
+    def _run_senario2(self):
+        pass
+
+    def _run_senario3(self):
+        pass
+
+    def _update_ascending_setup(self, lowest_price, higest_price):
+        pass
+
+    def _update_descending_setup(self, highest_price, lowest_price):
+        pass
+
+    # ..........................................................................................
+    def _init_optimum_parameters2(self):
+        markets = self._public_client.get_markets()
+        symbols = markets.keys()
+        selected_quote = 'USDT'
+        leveraged_symbols = []
+        for symbol in symbols:
+            splitted_symbol = symbol.split('/')
+            base = splitted_symbol[0]
+            quote = splitted_symbol[1]
+            if quote == selected_quote:
+                if base.endswith('UP') or base.endswith('DOWN'):
+                    leveraged_symbols.append(symbol)
+        tickers = self._public_client.fetch_tickers(symbols=leveraged_symbols)
+
+        selected_symbols = []
+        for symbol in leveraged_symbols:
+            sample_price = tickers[symbol]['bid']
+            integer_part_length = len(str(int(sample_price))) if int(sample_price) else 0
+            decmial_part_length = markets[symbol]['precision']['price']
+            total_length = integer_part_length + decmial_part_length
+            if total_length > 4:
+                selected_symbols.append(symbol)
+
+        # selected_symbols = ['SUSHIUP/USDT']
+        ohlcvs_limit = 1000
+
+        # limit_step_ratios = np.arange(0.01, 0.05, 0.01)
+        limit_step_ratios = [
+            # 0.001,
+            # 0.005,
+            0.01,
+            # 0.02,
+            # 0.05,
+            # 0.1,
+            # 0.2
+        ]
+        # stoploss2limit_ratios = np.arange(0.01, 0.05, 0.01)
+        stoploss2limit_ratios = [
+            # 0.001,
+            # 0.005,
+            # 0.01,
+            # 0.05,
+            0.1,
+            # 0.2,
+            # 0.25,
+        ]
+
+        stoploss_safety_ratios = [
+            # 0,
+            # 0.2,
+            0.25,
+            # 0.3
+        ]
+
+        fee = 0.001
+
+        results = []
+
+        for symbol in selected_symbols:
+            ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=ohlcvs_limit)
 
             price_precision = markets[symbol]['precision']['price']
             amount_precision = markets[symbol]['precision']['amount']
@@ -161,7 +369,6 @@ class TrailingStoplossStrategyDeveolper:
                                 'number_of_upper_buy_limit_transactions': number_of_upper_buy_limit_transactions,
                                 'number_of_lower_buy_limit_transactions': number_of_lower_buy_limit_transactions,
                                 'number_of_stoploss_triggered_transactions': number_of_stoploss_triggered_transactions,
-                                'number_of_bad_candlestics': number_of_bad_candlestics,
                             }
                         )
         sorted_results = sorted(results, key=lambda k: k['profit_rate'], reverse=True)
@@ -169,202 +376,3 @@ class TrailingStoplossStrategyDeveolper:
         self._optimum_symbol = optimum_result['symbol']
         self._optimum_limit_step_ratio = optimum_result['limit_step_ratio']
         self._optimum_stoploss2limit_ratio = optimum_result['stoploss2limit_ratio']
-
-    def _calculate_setup_prices(self, current_price,
-                                price_precision,
-                                limit_step_ratio,
-                                stoploss2limit_ratio,
-                                stoploss_safty_ratio):
-        next_stoploss_price = round(current_price * (1 - limit_step_ratio * stoploss2limit_ratio), price_precision)
-        next_stoploss_trigger_price = round(
-            current_price * (1 - limit_step_ratio * stoploss2limit_ratio * (1 - stoploss_safty_ratio)), price_precision)
-        next_upper_buy_limit_price = current_price
-        next_lower_buy_limit_price = round(current_price * (1 - limit_step_ratio),
-                                           price_precision)
-
-        return next_stoploss_price, next_stoploss_trigger_price, next_upper_buy_limit_price, next_lower_buy_limit_price
-
-    def _determine_senario(self,
-                           starting_price,
-                           highest_price,
-                           lowest_price,
-                           closing_price,
-                           nu,
-                           sl,
-                           nl):
-
-        s = 0
-        if starting_price == nu:
-            if closing_price > starting_price:
-                if lowest_price == starting_price:
-                    if highest_price == closing_price:
-                        s = 1
-                    else:
-                        s = 2
-                else:
-                    if lowest_price > sl:
-                        if highest_price == closing_price:
-                            s = 3
-                        else:
-                            s = 4
-                    else:
-                        if lowest_price > nl:
-                            if highest_price == nu:
-                                s = 6
-                            else:
-                                s = 7
-                        else:
-                            if highest_price == nu:
-                                s = 9
-                            else:
-                                s = 10
-            else:
-                if lowest_price > sl:
-                    if lowest_price == closing_price:
-                        if highest_price == starting_price:
-                            s = 12
-                        else:
-                            s = 13
-                    else:
-                        if highest_price == starting_price:
-                            s = 14
-                        else:
-                            s = 15
-                else:
-                    if closing_price > sl:
-                        if lowest_price > nl:
-                            if highest_price == starting_price:
-                                s = 17
-                            else:
-                                s = 18
-                        else:
-                            if highest_price == starting_price:
-                                s = 20
-                            else:
-                                s = 21
-                    else:
-                        if lowest_price > nl:
-                            if lowest_price == closing_price:
-                                if highest_price == starting_price:
-                                    s = 23
-                                else:
-                                    s = 24
-                            else:
-                                if highest_price == starting_price:
-                                    s = 25
-                                else:
-                                    s = 26
-                        else:
-                            if closing_price > nl:
-                                if highest_price == starting_price:
-                                    s = 28
-                                else:
-                                    s = 29
-                            else:
-                                if lowest_price == closing_price:
-                                    if highest_price == starting_price:
-                                        s = 31
-                                    else:
-                                        s = 32
-                                else:
-                                    if highest_price == starting_price:
-                                        s = 33
-                                    else:
-                                        s = 34
-        else:
-            if starting_price > sl:
-                if closing_price > nu:
-                    if lowest_price > sl:
-                        if lowest_price == starting_price:
-                            if highest_price == closing_price:
-                                s = 36
-                            else:
-                                s = 37
-                        else:
-                            if highest_price == closing_price:
-                                s = 38
-                            else:
-                                s = 39
-                    else:
-                        if lowest_price > nl:
-                            if highest_price == closing_price:
-                                s = 41
-                            else:
-                                s = 42
-                        else:
-                            if highest_price == closing_price:
-                                s = 44
-                            else:
-                                s = 45
-                else:
-                    if closing_price > sl:
-                        if lowest_price > sl:
-                            if highest_price < nu:
-                                if lowest_price == closing_price:
-                                    if highest_price == starting_price:
-                                        s = 47
-                                    else:
-                                        s = 48
-                                else:
-                                    if highest_price == starting_price:
-                                        s = 49
-                                    else:
-                                        s = 50
-
-                            else:
-                                if lowest_price == closing_price:
-                                    s = 52
-                                else:
-                                    s = 53
-                        else:
-                            if lowest_price > nl:
-                                if highest_price < nu:
-                                    if highest_price == starting_price:
-                                        s = 55
-                                    else:
-                                        s = 56
-                                else:
-                                    s = 58
-
-                            else:
-                                if highest_price < nu:
-                                    if highest_price == starting_price:
-                                        s = 60
-                                    else:
-                                        s = 61
-                                else:
-                                    s = 63
-                    else:
-                        if closing_price > nl:
-                            if lowest_price > nl:
-                                if highest_price < nu:
-                                    if lowest_price == closing_price:
-                                        if highest_price == starting_price:
-                                            s = 65
-                                        else:
-                                            s = 66
-                                    else:
-                                        if highest_price == starting_price:
-                                            s = 67
-                                        else:
-                                            s = 68
-
-                                else:
-                                    if lowest_price == closing_price:
-                                        s = 69
-                                    else:
-                                        s = 70
-
-                            else:
-                                if highest_price == starting_price:
-                                    s = 71
-                                else:
-                                    if highest_price < nu:
-                                        s = 72
-                                    else:
-                                        s = 73
-
-                        else:
-                            pass
-            else:
-                pass

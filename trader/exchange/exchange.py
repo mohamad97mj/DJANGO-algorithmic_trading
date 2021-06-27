@@ -30,15 +30,15 @@ class Exchange:
         return self._ccxt_exchange.fetch_order_book(symbol=symbol, limit=limit)
 
     def fetch_tickers(self, symbols):
-        if (self._ccxt_exchange.has['fetchTickers']):
+        if self._ccxt_exchange.has['fetchTickers']:
             return self._ccxt_exchange.fetch_tickers(symbols=symbols)
 
     def fetck_ticker(self, symbol):
-        if (self._ccxt_exchange.has['fetchTickers']):
+        if self._ccxt_exchange.has['fetchTickers']:
             return self._ccxt_exchange.fetch_ticker(symbol=symbol)
 
     def fetch_ohlcv(self, symbol, timeframe, since, limit):
-        if (self._ccxt_exchange.has['fetchOHLCV']):
+        if self._ccxt_exchange.has['fetchOHLCV']:
             return self._ccxt_exchange.fetch_ohlcv(symbol=symbol,
                                                    timeframe=timeframe,
                                                    since=since,
