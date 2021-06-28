@@ -73,8 +73,79 @@ class TrailingStoplossStrategyDeveolper:
             if total_length > 4:
                 selected_symbols.append(symbol)
 
+        limit_step_ratios, stoploss2limit_ratios, stoploss_safety_ratios = self._init_ratios()
+
         # selected_symbols = ['SUSHIUP/USDT']
         ohlcvs_limit = 1000
+
+        results = []
+
+        for symbol in selected_symbols:
+
+            ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=ohlcvs_limit)
+
+            symbol_market_data = SymbolMarketData(price_precision=markets[symbol]['precision']['price'],
+                                                  amount_precision=markets[symbol]['precision']['amount'],
+                                                  fee=markets[symbol]['maker'])
+
+            for r1 in limit_step_ratios:
+                for r2 in stoploss2limit_ratios:
+                    for r3 in stoploss_safety_ratios:
+                        balanace_data = BalanceData(amount=0, amount_in_quote=100, is_cache=True)
+                        shlc_data = ShlcData(ohlcvs[0][1], ohlcvs[0][2], ohlcvs[0][3], ohlcvs[0][4])
+                        ratio_data = RatioData(r1, r2, r3)
+                        self._buy(balanace_data,
+                                  balanace_data.amount_in_quote,
+                                  shlc_data.starting_price,
+                                  symbol_market_data.amount_precision,
+                                  symbol_market_data.fee)
+
+                        setup_data = self._calculate_setup_data(current_price=shlc_data.starting_price,
+                                                                price_precision=symbol_market_data.price_precision,
+                                                                ratio_data=ratio_data)
+
+                        self._run_candlestick_senario(
+                            balanace_data,
+                            symbol_market_data,
+                            ratio_data,
+                            setup_data,
+                            shlc_data)
+
+                        for i in range(1, len(ohlcvs)):
+                            previous_closing_price = shlc_data.closing_price
+                            shlc_data = (previous_closing_price, ohlcvs[i][2], ohlcvs[i][3], ohlcvs[i][4])
+
+                            self._run_candlestick_senario(
+                                balanace_data,
+                                symbol_market_data,
+                                ratio_data,
+                                setup_data,
+                                shlc_data)
+
+                        if balanace_data.is_cache:
+                            balanace_data.amount_in_quote = balanace_data.amount * shlc_data.closing_price
+
+                        results.append(
+                            {
+                                'symbol': symbol,
+                                'limit_step_ratio': r1,
+                                'stoploss2limit_ratio': r2,
+                                'stoploss_safety_ratio': r3,
+                                'profit_rate': ((balanace_data.amount_in_quote - 100) / 100) * 100,
+                                # 'total_number_of_transactions': total_number_of_transactions,
+                                # 'number_of_upper_buy_limit_transactions': number_of_upper_buy_limit_transactions,
+                                # 'number_of_lower_buy_limit_transactions': number_of_lower_buy_limit_transactions,
+                                # 'number_of_stoploss_triggered_transactions': number_of_stoploss_triggered_transactions,
+                            }
+                        )
+
+            sorted_results = sorted(results, key=lambda k: k['profit_rate'], reverse=True)
+            optimum_result = sorted_results[0]
+            self._optimum_symbol = optimum_result['symbol']
+            self._optimum_limit_step_ratio = optimum_result['limit_step_ratio']
+            self._optimum_stoploss2limit_ratio = optimum_result['stoploss2limit_ratio']
+
+    def _init_ratios(self):
 
         # limit_step_ratios = np.arange(0.01, 0.05, 0.01)
         limit_step_ratios = [
@@ -104,76 +175,7 @@ class TrailingStoplossStrategyDeveolper:
             # 0.3
         ]
 
-        results = []
-
-        for symbol in selected_symbols:
-
-            ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=ohlcvs_limit)
-
-            price_precision = markets[symbol]['precision']['price']
-            amount_precision = markets[symbol]['precision']['amount']
-            fee = markets[symbol]['maker']
-
-            symbol_market_data = SymbolMarketData(price_precision, amount_precision, fee)
-
-            for r1 in limit_step_ratios:
-                for r2 in stoploss2limit_ratios:
-                    for r3 in stoploss_safety_ratios:
-                        balanace_data = BalanceData(amount=0, amount_in_quote=100, is_cache=True)
-                        shlc_data = ShlcData(ohlcvs[0][1], ohlcvs[0][2], ohlcvs[0][3], ohlcvs[0][4])
-                        ratio_data = RatioData(r1, r2, r3)
-                        self._buy(balanace_data,
-                                  balanace_data.amount_in_quote,
-                                  shlc_data.starting_price,
-                                  symbol_market_data.amount_precision,
-                                  symbol_market_data.fee)
-
-                        setup_data = self._calculate_setup_data(shlc_data.starting_price,
-                                                                symbol_market_data.price_precision,
-                                                                ratio_data)
-
-                        self._run_candlestick_senario(
-                            balanace_data,
-                            symbol_market_data,
-                            ratio_data,
-                            setup_data,
-                            shlc_data,
-                        )
-
-                        for i in range(1, len(ohlcvs)):
-                            previous_closing_price = shlc_data.closing_price
-                            shlc_data = (previous_closing_price, ohlcvs[i][2], ohlcvs[i][3], ohlcvs[i][4])
-
-                            self._run_candlestick_senario(
-                                balanace_data,
-                                symbol_market_data,
-                                ratio_data,
-                                setup_data,
-                                shlc_data,
-                            )
-
-                        if balanace_data.is_cache:
-                            balanace_data.amount_in_quote = balanace_data.amount * shlc_data.closing_price
-
-                        results.append(
-                            {
-                                'symbol': symbol,
-                                'limit_step_ratio': r1,
-                                'stoploss2limit_ratio': r2,
-                                'stoploss_safety_ratio': r3,
-                                'profit_rate': ((balanace_data.amount_in_quote - 100) / 100) * 100,
-                                # 'total_number_of_transactions': total_number_of_transactions,
-                                # 'number_of_upper_buy_limit_transactions': number_of_upper_buy_limit_transactions,
-                                # 'number_of_lower_buy_limit_transactions': number_of_lower_buy_limit_transactions,
-                                # 'number_of_stoploss_triggered_transactions': number_of_stoploss_triggered_transactions,
-                            }
-                        )
-
-            sorted_results = sorted(results, key=lambda k: k['profit_rate'], reverse=True)
-            optimum_result = sorted_results[0]
-            self._optimum_symbol = optimum_result['symbol']
-            self._optimum_limit_step_ratio = optimum_result['limit_step_ratio']
-            self._optimum_stoploss2limit_ratio = optimum_result['stoploss2limit_ratio']
+        return limit_step_ratios, stoploss2limit_ratios, stoploss_safety_ratios
 
     def _buy(self, balanace_data, buy_amount_in_quote, buy_price, amount_precision, fee):
         pure_buy_amount_in_quote = buy_amount_in_quote * (1 - fee)
