@@ -27,6 +27,14 @@ class SetupData:
     lower_buy_limit_price: float
 
 
+@dataclass
+class BalanceData:
+    amount: float
+    amount_in_quote: float
+    is_cache: bool
+
+
+
 
 class TrailingStoplossStrategyDeveolper:
 
