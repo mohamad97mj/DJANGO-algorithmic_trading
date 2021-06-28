@@ -4,6 +4,14 @@ from trader.clients.public_client import PublicClient
 from trader.main.spot.models import SpotPosition
 
 
+@dataclass
+class RatioData:
+    limit_step_ratio: str
+    stoploss2limit_ratio: str
+    stoploss_safty_ratio: str
+
+
+
 
 
 class TrailingStoplossStrategyDeveolper:
