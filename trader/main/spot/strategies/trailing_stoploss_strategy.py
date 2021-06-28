@@ -106,7 +106,7 @@ class TrailingStoplossStrategyDeveolper:
 
                         for i in range(1, len(ohlcvs)):
                             previous_closing_price = shlc_data.closing_price
-                            shlc_data = (previous_closing_price, ohlcvs[i][2], ohlcvs[i][3], ohlcvs[i][4])
+                            shlc_data = ShlcData(previous_closing_price, ohlcvs[i][2], ohlcvs[i][3], ohlcvs[i][4])
 
                             self._run_candlestick_senario(
                                 balanace_data,
@@ -203,10 +203,7 @@ class TrailingStoplossStrategyDeveolper:
         balanace_data.amount += buy_amount
         balanace_data.amount_in_quote -= (buy_amount_in_quote - remaining_amount_in_quote)
 
-    def _calculate_setup_data(self,
-                              current_price,
-                              price_precision,
-                              ratio_data):
+    def _calculate_setup_data(self, current_price, price_precision, ratio_data):
         stoploss_price = round(current_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio),
                                price_precision)
         stoploss_trigger_price = round(
@@ -217,60 +214,53 @@ class TrailingStoplossStrategyDeveolper:
 
         return SetupData(stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price)
 
-    def _run_candlestick_senario(self,
-                                 balance_data,
-                                 symbol_market_data,
-                                 ratio_data,
-                                 setup_data,
-                                 shlc_data):
+    def _run_candlestick_senario(self, balance_data, symbol_market_data, ratio_data, setup_data, shlc_data):
 
         senario = self._determine_senario(shlc_data)
+        run_senario_method = getattr(self, 'run_senario{}'.format(senario))
+        run_senario_method(balance_data, symbol_market_data, ratio_data, setup_data, shlc_data)
 
-        if senario == 1:
-            if balance_data.cache:
-                if setup_data.upper_buy_limit_price < shlc_data.highest_price:
-                    self._buy(balance_data,
-                              balance_data.amount_in_quote,
-                              setup_data.upper_buy_limit_price,
-                              symbol_market_data.amount_precision,
-                              symbol_market_data.fee)
-                    setup_data = self._calculate_setup_data(
-                        shlc_data.closing_price, symbol_market_data.price_precision, ratio_data)
-            else:
-                setup_data = self._calculate_setup_data(
-                    shlc_data.closing_price, symbol_market_data.price_precision, ratio_data)
-
-        elif senario == 2:
-            pass
-
-    def _determine_senario(self,
-                           shlc_data):
+    def _determine_senario(self, shlc_data):
 
         if shlc_data.closing_price > shlc_data.starting_price:
             if shlc_data.lowest_price == shlc_data.starting_price:
                 if shlc_data.highest_price == shlc_data.closing_price:
-                    s = 1
+                    s = '1'
                 else:
-                    s = 2
+                    s = '2'
             else:
                 if shlc_data.highest_price == shlc_data.closing_price:
-                    s = 3
+                    s = '3'
                 else:
-                    s = 4
+                    s = '4'
 
         else:
             if shlc_data.highest_price == shlc_data.starting_price:
                 if shlc_data.lowest_price == shlc_data.closing_price:
-                    s = 5
+                    s = '5'
                 else:
-                    s = 6
+                    s = '6'
             else:
                 if shlc_data.lowest_price == shlc_data.closing_price:
-                    s = 7
+                    s = '7'
                 else:
-                    s = 8
+                    s = '8'
 
         return s
+
+    def _run_senario1(self, balance_data, symbol_market_data, ratio_data, setup_data, shlc_data):
+        if balance_data.cache:
+            if setup_data.upper_buy_limit_price < shlc_data.highest_price:
+                self._buy(balance_data,
+                          balance_data.amount_in_quote,
+                          setup_data.upper_buy_limit_price,
+                          symbol_market_data.amount_precision,
+                          symbol_market_data.fee)
+                setup_data = self._calculate_setup_data(
+                    shlc_data.closing_price, symbol_market_data.price_precision, ratio_data)
+        else:
+            setup_data = self._calculate_setup_data(
+                shlc_data.closing_price, symbol_market_data.price_precision, ratio_data)
 
     def _update_ascending_setup(self, lowest_price, higest_price):
         pass
