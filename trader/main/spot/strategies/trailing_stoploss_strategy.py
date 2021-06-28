@@ -31,7 +31,7 @@ class SetupData:
 class BalanceData:
     amount: float
     amount_in_quote: float
-    is_cache: bool
+    is_cash: bool
 
 
 @dataclass
@@ -84,7 +84,7 @@ class TrailingStoplossStrategyDeveolper:
             for r1 in limit_step_ratios:
                 for r2 in stoploss2limit_ratios:
                     for r3 in stoploss_safety_ratios:
-                        balance_data = BalanceData(amount=0, amount_in_quote=100, is_cache=True)
+                        balance_data = BalanceData(amount=0, amount_in_quote=100, is_cash=True)
                         shlc_data = ShlcData(ohlcvs[0][1], ohlcvs[0][2], ohlcvs[0][3], ohlcvs[0][4])
                         ratio_data = RatioData(r1, r2, r3)
                         self._buy(balance_data=balance_data,
@@ -113,7 +113,7 @@ class TrailingStoplossStrategyDeveolper:
                                                                        symbol_market_data,
                                                                        ratio_data)
 
-                        if balance_data.is_cache:
+                        if balance_data.is_cash:
                             balance_data.amount_in_quote = balance_data.amount * shlc_data.closing_price
 
                         results.append(
@@ -197,7 +197,7 @@ class TrailingStoplossStrategyDeveolper:
         buy_amount = truncate((pure_buy_amount_in_quote / buy_price), amount_precision)
         # remaining_amount_in_quote = pure_buy_amount_in_quote - buy_amount * buy_price
         remaining_amount_in_quote = 0
-        balance_data.is_cache = False
+        balance_data.is_cash = False
         balance_data.amount += buy_amount
         balance_data.amount_in_quote -= (buy_amount_in_quote - remaining_amount_in_quote)
 
@@ -205,7 +205,7 @@ class TrailingStoplossStrategyDeveolper:
         pure_sell_amount = sell_amount * (1 - fee)
         sell_amount_in_quote = truncate(pure_sell_amount * sell_price, amount_precision)
         remaining_amount = 0
-        balance_data.is_cache = True
+        balance_data.is_cash = True
         balance_data.amount_in_quote += sell_amount_in_quote
         balance_data.amount -= (sell_amount - remaining_amount)
 
@@ -258,7 +258,7 @@ class TrailingStoplossStrategyDeveolper:
         return self._run_ascending_senario(setup_data, balance_data, shlc_data, symbol_market_data, ratio_data)
 
     def _run_senario2(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
-        if balance_data.cache:
+        if balance_data.is_cash:
             pass
         else:
             setup_data = self._calculate_setup_data(
@@ -268,7 +268,7 @@ class TrailingStoplossStrategyDeveolper:
 
     def _run_ascending_senario(self, setup_data, balance_data, highest_price, symbol_market_data, ratio_data):
         if setup_data.upper_buy_limit_price < highest_price:
-            if balance_data.cache:
+            if balance_data.is_cash:
                 self._buy(balance_data=balance_data,
                           buy_amount_in_quote=balance_data.amount_in_quote,
                           buy_price=setup_data.upper_buy_limit_price,
@@ -283,7 +283,7 @@ class TrailingStoplossStrategyDeveolper:
     def _run_descending_senario(self, setup_data, balance_data, lowest_price, symbol_market_data, ratio_data):
 
         if lowest_price < setup_data.stoploss_price:
-            if balance_data.cache:
+            if not balance_data.is_cash:
                 self._sell(balance_data=balance_data,
                            sell_amount=balance_data.amount,
                            sell_price=setup_data.stoploss_price,
