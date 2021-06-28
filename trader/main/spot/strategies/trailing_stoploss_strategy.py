@@ -34,6 +34,11 @@ class BalanceData:
     is_cache: bool
 
 
+@dataclass
+class SymbolMarketData:
+    price_precision: int
+    amount_precision: int
+    fee: float
 
 
 class TrailingStoplossStrategyDeveolper:
