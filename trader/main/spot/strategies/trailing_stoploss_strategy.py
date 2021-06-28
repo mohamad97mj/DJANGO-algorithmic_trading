@@ -192,14 +192,22 @@ class TrailingStoplossStrategyDeveolper:
 
         return limit_step_ratios, stoploss2limit_ratios, stoploss_safety_ratios
 
-    def _buy(self, balanace_data, buy_amount_in_quote, buy_price, amount_precision, fee):
+    def _buy(self, balance_data, buy_amount_in_quote, buy_price, amount_precision, fee):
         pure_buy_amount_in_quote = buy_amount_in_quote * (1 - fee)
         buy_amount = truncate((pure_buy_amount_in_quote / buy_price), amount_precision)
         # remaining_amount_in_quote = pure_buy_amount_in_quote - buy_amount * buy_price
         remaining_amount_in_quote = 0
-        balanace_data.is_cache = True
-        balanace_data.amount += buy_amount
-        balanace_data.amount_in_quote -= (buy_amount_in_quote - remaining_amount_in_quote)
+        balance_data.is_cache = False
+        balance_data.amount += buy_amount
+        balance_data.amount_in_quote -= (buy_amount_in_quote - remaining_amount_in_quote)
+
+    def _sell(self, balance_data, sell_amount, sell_price, amount_precision, fee):
+        pure_sell_amount = sell_amount * (1 - fee)
+        sell_amount_in_quote = truncate(pure_sell_amount * sell_price, amount_precision)
+        remaining_amount = 0
+        balance_data.is_cache = True
+        balance_data.amount_in_quote += sell_amount_in_quote
+        balance_data.amount -= (sell_amount - remaining_amount)
 
     def _calculate_setup_data(self, current_price, price_precision, ratio_data):
         stoploss_price = round(current_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio),
@@ -285,7 +293,9 @@ class TrailingStoplossStrategyDeveolper:
                 setup_data = self._calculate_setup_data(
                     shlc_data.closing_price, symbol_market_data.price_precision, ratio_data)
         else:
-            setup_data = self._calculate_setup_data(
-                shlc_data.closing_price, symbol_market_data.price_precision, ratio_data)
+            if shlc_data.lowest_price < setup_data.stoploss_price:
+                if shlc_data.lowest_price < setup_data.lower_buy_limit_price:
+                    pass
+                else:
 
         return setup_data
