@@ -6,9 +6,9 @@ from trader.main.spot.models import SpotPosition
 
 @dataclass
 class RatioData:
-    limit_step_ratio: str
-    stoploss2limit_ratio: str
-    stoploss_safty_ratio: str
+    limit_step_ratio: float
+    stoploss2limit_ratio: float
+    stoploss_safty_ratio: float
 
 
 @dataclass
@@ -119,18 +119,21 @@ class TrailingStoplossStrategyDeveolper:
             for r1 in limit_step_ratios:
                 for r2 in stoploss2limit_ratios:
                     for r3 in stoploss_safety_ratios:
-                        balnace_data = BalanceData(amount=0, amount_in_quote=100, is_cache=True)
+                        balanace_data = BalanceData(amount=0, amount_in_quote=100, is_cache=True)
                         shlc_data = ShlcData(ohlcvs[0][1], ohlcvs[0][2], ohlcvs[0][3], ohlcvs[0][4])
-                        self._buy(balnace_data,
+                        ratio_data = RatioData(r1, r2, r3)
+                        self._buy(balanace_data,
+                                  balanace_data.amount_in_quote,
                                   shlc_data.starting_price,
                                   symbol_market_data.amount_precision,
                                   symbol_market_data.fee)
 
                         cache = False
-                        stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price = self._calculate_setup_prices(
-                            starting_price, price_precision, r1, r2, r3)
+                        setup_data = self._calculate_setup_data(shlc_data.starting_price,
+                                                                symbol_market_data.price_precision,
+                                                                ratio_data)
 
-                        stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price, amount, amount_in_quote = self._update_candlestick_setup(
+                        stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price, amount, amount_in_quote = self._update_candlestick_setup_data(
                             price_precision,
                             r1,
                             r2,
@@ -205,40 +208,28 @@ class TrailingStoplossStrategyDeveolper:
         balanace_data.amount += buy_amount
         balanace_data.amount_in_quote -= (buy_amount_in_quote - remaining_amount_in_quote)
 
-    def _calculate_setup_prices(self,
-                                current_price,
-                                price_precision,
-                                limit_step_ratio,
-                                stoploss2limit_ratio,
-                                stoploss_safty_ratio):
-        stoploss_price = round(current_price * (1 - limit_step_ratio * stoploss2limit_ratio), price_precision)
+    def _calculate_setup_data(self,
+                              current_price,
+                              price_precision,
+                              ratio_data):
+        stoploss_price = round(current_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio),
+                               price_precision)
         stoploss_trigger_price = round(
-            current_price * (1 - limit_step_ratio * stoploss2limit_ratio * (1 - stoploss_safty_ratio)), price_precision)
+            current_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio * (
+                    1 - ratio_data.stoploss_safty_ratio)), price_precision)
         upper_buy_limit_price = current_price
-        lower_buy_limit_price = round(current_price * (1 - limit_step_ratio), price_precision)
+        lower_buy_limit_price = round(current_price * (1 - ratio_data.limit_step_ratio), price_precision)
 
-        return stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price
+        return SetupData(stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price)
 
-    def _update_candlestick_setup(self,
-                                  price_precision,
-                                  limit_step_ratio,
-                                  stoploss2limit_ratio,
-                                  stoploss_safty_ratio,
-                                  stoploss_price,
-                                  stoploss_trigger_price,
-                                  upper_buy_limit_price,
-                                  lower_buy_limit_price,
-                                  cache,
-                                  amount,
-                                  amount_in_quote,
-                                  amount_precision,
-                                  fee,
-                                  starting_price,
-                                  highest_price,
-                                  lowest_price,
-                                  closing_price):
+    def _update_candlestick_setup_data(self,
+                                       symbol_market_data,
+                                       ratio_data,
+                                       setup_data,
+                                       balance_data,
+                                       shlc_data):
 
-        senario = self._determine_senario(starting_price, highest_price, lowest_price, closing_price)
+        senario = self._determine_senario(shlc_data)
 
         if senario == 1:
             if cache:
@@ -247,12 +238,12 @@ class TrailingStoplossStrategyDeveolper:
                                                         upper_buy_limit_price,
                                                         amount_precision,
                                                         fee)
-                    stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price = self._calculate_setup_prices(
+                    stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price = self._calculate_setup_data(
                         closing_price, price_precision, limit_step_ratio, stoploss2limit_ratio, stoploss_safty_ratio)
                 else:
                     pass
             else:
-                stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price = self._calculate_setup_prices(
+                stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price = self._calculate_setup_data(
                     closing_price, price_precision, limit_step_ratio, stoploss2limit_ratio, stoploss_safty_ratio)
 
         elif senario == 2:
