@@ -261,9 +261,3 @@ class TrailingStoplossStrategyDeveolper:
                 shlc_data.closing_price, symbol_market_data.price_precision, ratio_data)
 
         return setup_data
-
-    def _update_ascending_setup(self, lowest_price, higest_price):
-        pass
-
-    def _update_descending_setup(self, highest_price, lowest_price):
-        pass
