@@ -41,6 +41,19 @@ class SymbolMarketData:
     fee: float
 
 
+@dataclass
+class ResultData:
+    symbol: str
+    limit_step_ratio: float
+    stoploss2limit_ratio: float
+    stoploss_safty_ratio: float
+    profit_rata: float
+    # total_number_of_transactions: int
+    # number_of_upper_buy_limit_transactions: int
+    # number_of_lower_buy_limit_transactions: int
+    # number_of_stoploss_triggered_transactions: int
+
+
 class TrailingStoplossStrategyDeveolper:
 
     def __init__(self, exchange_id):
@@ -52,30 +65,10 @@ class TrailingStoplossStrategyDeveolper:
 
     def _init_optimum_parameters(self):
         markets = self._public_client.get_markets()
-        symbols = markets.keys()
-        selected_quote = 'USDT'
-        leveraged_symbols = []
-        for symbol in symbols:
-            splitted_symbol = symbol.split('/')
-            base = splitted_symbol[0]
-            quote = splitted_symbol[1]
-            if quote == selected_quote:
-                if base.endswith('UP') or base.endswith('DOWN'):
-                    leveraged_symbols.append(symbol)
-        tickers = self._public_client.fetch_tickers(symbols=leveraged_symbols)
-
-        selected_symbols = []
-        for symbol in leveraged_symbols:
-            sample_price = tickers[symbol]['bid']
-            integer_part_length = len(str(int(sample_price))) if int(sample_price) else 0
-            decmial_part_length = markets[symbol]['precision']['price']
-            total_length = integer_part_length + decmial_part_length
-            if total_length > 4:
-                selected_symbols.append(symbol)
-
+        selected_symbols = self.select_symbols(markets)
         limit_step_ratios, stoploss2limit_ratios, stoploss_safety_ratios = self._init_ratios()
 
-        # selected_symbols = ['SUSHIUP/USDT']
+        # selected_symbols = ['BTCUP/USDT']
         ohlcvs_limit = 1000
 
         results = []
@@ -126,24 +119,48 @@ class TrailingStoplossStrategyDeveolper:
                             balanace_data.amount_in_quote = balanace_data.amount * shlc_data.closing_price
 
                         results.append(
-                            {
-                                'symbol': symbol,
-                                'limit_step_ratio': r1,
-                                'stoploss2limit_ratio': r2,
-                                'stoploss_safety_ratio': r3,
-                                'profit_rate': ((balanace_data.amount_in_quote - 100) / 100) * 100,
-                                # 'total_number_of_transactions': total_number_of_transactions,
-                                # 'number_of_upper_buy_limit_transactions': number_of_upper_buy_limit_transactions,
-                                # 'number_of_lower_buy_limit_transactions': number_of_lower_buy_limit_transactions,
-                                # 'number_of_stoploss_triggered_transactions': number_of_stoploss_triggered_transactions,
-                            }
+                            ResultData(
+                                symbol=symbol,
+                                limit_step_ratio=r1,
+                                stoploss2limit_ratio=r2,
+                                stoploss_safty_ratio=r3,
+                                profit_rata=((balanace_data.amount_in_quote - 100) / 100) * 100,
+                                # total_number_of_transactions=total_number_of_transactions,
+                                # number_of_upper_buy_limit_transactions=number_of_upper_buy_limit_transactions,
+                                # number_of_lower_buy_limit_transactions=number_of_lower_buy_limit_transactions,
+                                # number_of_stoploss_triggered_transactions=number_of_stoploss_triggered_transactions,
+                            )
                         )
 
-            sorted_results = sorted(results, key=lambda k: k['profit_rate'], reverse=True)
+            sorted_results = sorted(results, key=lambda result: result.profit_rate, reverse=True)
             optimum_result = sorted_results[0]
-            self._optimum_symbol = optimum_result['symbol']
-            self._optimum_limit_step_ratio = optimum_result['limit_step_ratio']
-            self._optimum_stoploss2limit_ratio = optimum_result['stoploss2limit_ratio']
+            self._optimum_symbol = optimum_result.symbol
+            self._optimum_limit_step_ratio = optimum_result.limit_step_ratio
+            self._optimum_stoploss2limit_ratio = optimum_result.stoploss2limit_ratio
+
+    def select_symbols(self, markets):
+        symbols = markets.keys()
+        selected_quote = 'USDT'
+        leveraged_symbols = []
+        for symbol in symbols:
+            splitted_symbol = symbol.split('/')
+            base = splitted_symbol[0]
+            quote = splitted_symbol[1]
+            if quote == selected_quote:
+                if base.endswith('UP') or base.endswith('DOWN'):
+                    leveraged_symbols.append(symbol)
+        tickers = self._public_client.fetch_tickers(symbols=leveraged_symbols)
+
+        selected_symbols = []
+        for symbol in leveraged_symbols:
+            sample_price = tickers[symbol]['bid']
+            integer_part_length = len(str(int(sample_price))) if int(sample_price) else 0
+            decmial_part_length = markets[symbol]['precision']['price']
+            total_length = integer_part_length + decmial_part_length
+            if total_length > 4:
+                selected_symbols.append(symbol)
+
+        return selected_symbols
 
     def _init_ratios(self):
 
@@ -227,31 +244,28 @@ class TrailingStoplossStrategyDeveolper:
             pass
 
     def _determine_senario(self,
-                           starting_price,
-                           highest_price,
-                           lowest_price,
-                           closing_price):
+                           shlc_data):
 
-        if closing_price > starting_price:
-            if lowest_price == starting_price:
-                if highest_price == closing_price:
+        if shlc_data.closing_price > shlc_data.starting_price:
+            if shlc_data.lowest_price == shlc_data.starting_price:
+                if shlc_data.highest_price == shlc_data.closing_price:
                     s = 1
                 else:
                     s = 2
             else:
-                if highest_price == closing_price:
+                if shlc_data.highest_price == shlc_data.closing_price:
                     s = 3
                 else:
                     s = 4
 
         else:
-            if highest_price == starting_price:
-                if lowest_price == closing_price:
+            if shlc_data.highest_price == shlc_data.starting_price:
+                if shlc_data.lowest_price == shlc_data.closing_price:
                     s = 5
                 else:
                     s = 6
             else:
-                if lowest_price == closing_price:
+                if shlc_data.lowest_price == shlc_data.closing_price:
                     s = 7
                 else:
                     s = 8
