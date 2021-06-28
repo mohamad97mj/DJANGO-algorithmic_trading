@@ -11,6 +11,13 @@ class RatioData:
     stoploss_safty_ratio: str
 
 
+@dataclass
+class ShlcData:
+    starting_price: float
+    higheest_price: float
+    lowest_price: float
+    closing_price: float
+
 
 
 
