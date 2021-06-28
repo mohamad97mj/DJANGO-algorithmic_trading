@@ -247,6 +247,18 @@ class TrailingStoplossStrategyDeveolper:
         return s
 
     def _run_senario1(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+        return self._run_ascending_senario(setup_data, balance_data, shlc_data, symbol_market_data, ratio_data)
+
+    def _run_senario2(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+        if balance_data.cache:
+            pass
+        else:
+            setup_data = self._calculate_setup_data(
+                shlc_data.highest_price, symbol_market_data.price_precision, ratio_data)
+
+        return setup_data
+
+    def _run_ascending_senario(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
         if balance_data.cache:
             if setup_data.upper_buy_limit_price < shlc_data.highest_price:
                 self._buy(balance_data,
@@ -261,3 +273,5 @@ class TrailingStoplossStrategyDeveolper:
                 shlc_data.closing_price, symbol_market_data.price_precision, ratio_data)
 
         return setup_data
+
+
