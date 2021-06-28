@@ -87,13 +87,13 @@ class TrailingStoplossStrategyDeveolper:
                         balance_data = BalanceData(amount=0, amount_in_quote=100, is_cache=True)
                         shlc_data = ShlcData(ohlcvs[0][1], ohlcvs[0][2], ohlcvs[0][3], ohlcvs[0][4])
                         ratio_data = RatioData(r1, r2, r3)
-                        self._buy(balance_data,
-                                  balance_data.amount_in_quote,
-                                  shlc_data.starting_price,
-                                  symbol_market_data.amount_precision,
-                                  symbol_market_data.fee)
+                        self._buy(balance_data=balance_data,
+                                  buy_amount_in_quote=balance_data.amount_in_quote,
+                                  buy_price=shlc_data.starting_price,
+                                  amount_precision=symbol_market_data.amount_precision,
+                                  fee=symbol_market_data.fee)
 
-                        setup_data = self._calculate_setup_data(current_price=shlc_data.starting_price,
+                        setup_data = self._calculate_setup_data(setupe_price=shlc_data.starting_price,
                                                                 price_precision=symbol_market_data.price_precision,
                                                                 ratio_data=ratio_data)
 
@@ -209,14 +209,14 @@ class TrailingStoplossStrategyDeveolper:
         balance_data.amount_in_quote += sell_amount_in_quote
         balance_data.amount -= (sell_amount - remaining_amount)
 
-    def _calculate_setup_data(self, current_price, price_precision, ratio_data):
-        stoploss_price = round(current_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio),
+    def _calculate_setup_data(self, setupe_price, price_precision, ratio_data):
+        stoploss_price = round(setupe_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio),
                                price_precision)
         stoploss_trigger_price = round(
-            current_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio * (
+            setupe_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio * (
                     1 - ratio_data.stoploss_safty_ratio)), price_precision)
-        upper_buy_limit_price = current_price
-        lower_buy_limit_price = round(current_price * (1 - ratio_data.limit_step_ratio), price_precision)
+        upper_buy_limit_price = setupe_price
+        lower_buy_limit_price = round(setupe_price * (1 - ratio_data.limit_step_ratio), price_precision)
 
         return SetupData(stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price)
 
@@ -267,35 +267,44 @@ class TrailingStoplossStrategyDeveolper:
         return setup_data
 
     def _run_ascending_senario(self, setup_data, balance_data, highest_price, symbol_market_data, ratio_data):
-        if balance_data.cache:
-            if setup_data.upper_buy_limit_price < highest_price:
-                self._buy(balance_data,
-                          balance_data.amount_in_quote,
-                          setup_data.upper_buy_limit_price,
-                          symbol_market_data.amount_precision,
-                          symbol_market_data.fee)
-                setup_data = self._calculate_setup_data(
-                    highest_price, symbol_market_data.price_precision, ratio_data)
-        else:
-            setup_data = self._calculate_setup_data(
-                highest_price, symbol_market_data.price_precision, ratio_data)
+        if setup_data.upper_buy_limit_price < highest_price:
+            if balance_data.cache:
+                self._buy(balance_data=balance_data,
+                          buy_amount_in_quote=balance_data.amount_in_quote,
+                          buy_price=setup_data.upper_buy_limit_price,
+                          amount_precision=symbol_market_data.amount_precision,
+                          fee=symbol_market_data.fee)
 
+            setup_data = self._calculate_setup_data(setupe_price=highest_price,
+                                                    price_precision=symbol_market_data.price_precision,
+                                                    ratio_data=ratio_data)
         return setup_data
 
-    def _run_descending_senario(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
-        if balance_data.cache:
-            if setup_data.upper_buy_limit_price < shlc_data.highest_price:
-                self._buy(balance_data,
-                          balance_data.amount_in_quote,
-                          setup_data.upper_buy_limit_price,
-                          symbol_market_data.amount_precision,
-                          symbol_market_data.fee)
-                setup_data = self._calculate_setup_data(
-                    shlc_data.closing_price, symbol_market_data.price_precision, ratio_data)
-        else:
-            if shlc_data.lowest_price < setup_data.stoploss_price:
-                if shlc_data.lowest_price < setup_data.lower_buy_limit_price:
-                    pass
-                else:
+    def _run_descending_senario(self, setup_data, balance_data, lowest_price, symbol_market_data, ratio_data):
+
+        if lowest_price < setup_data.stoploss_price:
+            if balance_data.cache:
+                self._sell(balance_data=balance_data,
+                           sell_amount=balance_data.amount,
+                           sell_price=setup_data.stoploss_price,
+                           amount_precision=symbol_market_data.amount_precision,
+                           fee=symbol_market_data.fee)
+
+            if lowest_price < setup_data.lower_buy_limit_price:
+                self._buy(balance_data=balance_data,
+                          buy_amount_in_quote=balance_data.amount_in_quote,
+                          buy_price=setup_data.lower_buy_limit_price,
+                          amount_precision=symbol_market_data.amount_precision,
+                          fee=symbol_market_data.fee)
+                setup_data = self._calculate_setup_data(setupe_price=setup_data.lower_buy_limit_price,
+                                                        price_precision=symbol_market_data.amount_precision,
+                                                        ratio_data=ratio_data)
+
+                setup_data = self._run_descending_senario(
+                    setup_data=setup_data,
+                    balance_data=balance_data,
+                    lowest_price=lowest_price,
+                    symbol_market_data=symbol_market_data,
+                    ratio_data=ratio_data)
 
         return setup_data
