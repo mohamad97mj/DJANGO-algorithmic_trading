@@ -19,6 +19,13 @@ class ShlcData:
     closing_price: float
 
 
+@dataclass
+class SetupData:
+    stoploss_price: float
+    stoploss_trigger_price: float
+    upper_buy_limit_price: float
+    lower_buy_limit_price: float
+
 
 
 class TrailingStoplossStrategyDeveolper:
