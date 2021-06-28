@@ -128,56 +128,32 @@ class TrailingStoplossStrategyDeveolper:
                                   symbol_market_data.amount_precision,
                                   symbol_market_data.fee)
 
-                        cache = False
                         setup_data = self._calculate_setup_data(shlc_data.starting_price,
                                                                 symbol_market_data.price_precision,
                                                                 ratio_data)
 
-                        stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price, amount, amount_in_quote = self._update_candlestick_setup_data(
-                            price_precision,
-                            r1,
-                            r2,
-                            r3,
-                            stoploss_price,
-                            stoploss_trigger_price,
-                            upper_buy_limit_price,
-                            lower_buy_limit_price,
-                            cache,
-                            amount,
-                            amount_in_quote,
-                            starting_price,
-                            highest_price,
-                            lowest_price,
-                            closing_price
+                        self._run_candlestick_senario(
+                            balanace_data,
+                            symbol_market_data,
+                            ratio_data,
+                            setup_data,
+                            shlc_data,
                         )
 
                         for i in range(1, len(ohlcvs)):
-                            previous_closing_price = closing_price
-                            # opening_price = ohlcvs[i][1]
-                            highest_price = ohlcvs[i][2]
-                            lowest_price = ohlcvs[i][3]
-                            closing_price = ohlcvs[i][4]
+                            previous_closing_price = shlc_data.closing_price
+                            shlc_data = (previous_closing_price, ohlcvs[i][2], ohlcvs[i][3], ohlcvs[i][4])
 
-                            stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price, amount, amount_in_quote = self._update_candlestick_setup(
-                                price_precision,
-                                r1,
-                                r2,
-                                r3,
-                                stoploss_price,
-                                stoploss_trigger_price,
-                                upper_buy_limit_price,
-                                lower_buy_limit_price,
-                                cache,
-                                amount,
-                                amount_in_quote,
-                                previous_closing_price,
-                                highest_price,
-                                lowest_price,
-                                closing_price,
+                            self._run_candlestick_senario(
+                                balanace_data,
+                                symbol_market_data,
+                                ratio_data,
+                                setup_data,
+                                shlc_data,
                             )
 
-                        if amount:
-                            amount_in_quote = amount * closing_price
+                        if balanace_data.is_cache:
+                            balanace_data.amount_in_quote = balanace_data.amount * shlc_data.closing_price
 
                         results.append(
                             {
@@ -185,7 +161,7 @@ class TrailingStoplossStrategyDeveolper:
                                 'limit_step_ratio': r1,
                                 'stoploss2limit_ratio': r2,
                                 'stoploss_safety_ratio': r3,
-                                'profit_rate': ((amount_in_quote - 100) / 100) * 100,
+                                'profit_rate': ((balanace_data.amount_in_quote - 100) / 100) * 100,
                                 # 'total_number_of_transactions': total_number_of_transactions,
                                 # 'number_of_upper_buy_limit_transactions': number_of_upper_buy_limit_transactions,
                                 # 'number_of_lower_buy_limit_transactions': number_of_lower_buy_limit_transactions,
@@ -222,34 +198,31 @@ class TrailingStoplossStrategyDeveolper:
 
         return SetupData(stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price)
 
-    def _update_candlestick_setup_data(self,
-                                       symbol_market_data,
-                                       ratio_data,
-                                       setup_data,
-                                       balance_data,
-                                       shlc_data):
+    def _run_candlestick_senario(self,
+                                 balance_data,
+                                 symbol_market_data,
+                                 ratio_data,
+                                 setup_data,
+                                 shlc_data):
 
         senario = self._determine_senario(shlc_data)
 
         if senario == 1:
-            if cache:
-                if upper_buy_limit_price < highest_price:
-                    amount, amount_in_quote = self._buy(amount_in_quote,
-                                                        upper_buy_limit_price,
-                                                        amount_precision,
-                                                        fee)
-                    stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price = self._calculate_setup_data(
-                        closing_price, price_precision, limit_step_ratio, stoploss2limit_ratio, stoploss_safty_ratio)
-                else:
-                    pass
+            if balance_data.cache:
+                if setup_data.upper_buy_limit_price < shlc_data.highest_price:
+                    self._buy(balance_data,
+                              balance_data.amount_in_quote,
+                              setup_data.upper_buy_limit_price,
+                              symbol_market_data.amount_precision,
+                              symbol_market_data.fee)
+                    setup_data = self._calculate_setup_data(
+                        shlc_data.closing_price, symbol_market_data.price_precision, ratio_data)
             else:
-                stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price = self._calculate_setup_data(
-                    closing_price, price_precision, limit_step_ratio, stoploss2limit_ratio, stoploss_safty_ratio)
+                setup_data = self._calculate_setup_data(
+                    shlc_data.closing_price, symbol_market_data.price_precision, ratio_data)
 
         elif senario == 2:
             pass
-
-        return stoploss_price, stoploss_trigger_price, upper_buy_limit_price, lower_buy_limit_price, amount, amount_in_quote
 
     def _determine_senario(self,
                            starting_price,
