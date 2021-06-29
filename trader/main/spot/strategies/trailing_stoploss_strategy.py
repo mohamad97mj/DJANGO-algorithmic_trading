@@ -71,6 +71,7 @@ class TrailingStoplossStrategyDeveolper:
 
         # selected_symbols = ['BTCUP/USDT']
         ohlcvs_limit = 1000
+        initial_amount_in_quote = 10000
 
         results = []
 
@@ -85,7 +86,7 @@ class TrailingStoplossStrategyDeveolper:
             for r1 in limit_step_ratios:
                 for r2 in stoploss2limit_ratios:
                     # for r3 in stoploss_safety_ratios:
-                    balance_data = BalanceData(amount=0, amount_in_quote=100, is_cash=True)
+                    balance_data = BalanceData(amount=0, amount_in_quote=initial_amount_in_quote, is_cash=True)
                     shlc_data = ShlcData(ohlcvs[0][1], ohlcvs[0][2], ohlcvs[0][3], ohlcvs[0][4])
                     ratio_data = RatioData(r1,
                                            r2,
@@ -126,7 +127,8 @@ class TrailingStoplossStrategyDeveolper:
                             limit_step_ratio=r1,
                             stoploss2limit_ratio=r2,
                             # stoploss_safty_ratio=r3,
-                            profit_rata=((balance_data.amount_in_quote - 100) / 100) * 100,
+                            profit_rata=
+                            ((balance_data.amount_in_quote - initial_amount_in_quote) / initial_amount_in_quote) * 100,
                             # total_number_of_transactions=total_number_of_transactions,
                             # number_of_upper_buy_limit_transactions=number_of_upper_buy_limit_transactions,
                             # number_of_lower_buy_limit_transactions=number_of_lower_buy_limit_transactions,
@@ -312,12 +314,10 @@ class TrailingStoplossStrategyDeveolper:
                                                    lowest_price=shlc_data.closing_price,
                                                    symbol_market_data=symbol_market_data,
                                                    ratio_data=ratio_data)
-        if not balance_data1.is_cash:
-            self._sell(balance_data=balance_data1,
-                       sell_amount=balance_data1.amount,
-                       sell_price=shlc_data.closing_price,
-                       amount_precision=symbol_market_data.amount_precision,
-                       fee=symbol_market_data.fee)
+        if balance_data1.is_cash:
+            amount_in_quote1 = balance_data1.amount_in_quote
+        else:
+            amount_in_quote1 = balance_data1.amount * shlc_data.closing_price
 
         balance_data2 = deepcopy(balance_data)
         setup_data2 = deepcopy(setup_data)
@@ -339,14 +339,12 @@ class TrailingStoplossStrategyDeveolper:
                                                   symbol_market_data=symbol_market_data,
                                                   ratio_data=ratio_data)
 
-        if not balance_data2.is_cash:
-            self._sell(balance_data=balance_data2,
-                       sell_amount=balance_data2.amount,
-                       sell_price=shlc_data.closing_price,
-                       amount_precision=symbol_market_data.amount_precision,
-                       fee=symbol_market_data.fee)
+        if balance_data2.is_cash:
+            amount_in_quote2 = balance_data2.amount_in_quote
+        else:
+            amount_in_quote2 = balance_data2.amount * shlc_data.closing_price
 
-        if balance_data1.amount_in_quote < balance_data2.amount_in_quote:
+        if amount_in_quote1 < amount_in_quote2:
             my_copy(balance_data1, balance_data)
             return setup_data1
         else:
@@ -407,12 +405,10 @@ class TrailingStoplossStrategyDeveolper:
                                                   symbol_market_data=symbol_market_data,
                                                   ratio_data=ratio_data)
 
-        if not balance_data1.is_cash:
-            self._sell(balance_data=balance_data1,
-                       sell_amount=balance_data1.amount,
-                       sell_price=shlc_data.closing_price,
-                       amount_precision=symbol_market_data.amount_precision,
-                       fee=symbol_market_data.fee)
+        if balance_data1.is_cash:
+            amount_in_quote1 = balance_data1.amount_in_quote
+        else:
+            amount_in_quote1 = balance_data1.amount * shlc_data.closing_price
 
         balance_data2 = deepcopy(balance_data)
         setup_data2 = deepcopy(setup_data)
@@ -434,14 +430,12 @@ class TrailingStoplossStrategyDeveolper:
                                                    symbol_market_data=symbol_market_data,
                                                    ratio_data=ratio_data)
 
-        if not balance_data2.is_cash:
-            self._sell(balance_data=balance_data2,
-                       sell_amount=balance_data2.amount,
-                       sell_price=shlc_data.closing_price,
-                       amount_precision=symbol_market_data.amount_precision,
-                       fee=symbol_market_data.fee)
+        if balance_data2.is_cash:
+            amount_in_quote2 = balance_data2.amount_in_quote
+        else:
+            amount_in_quote2 = balance_data2.amount * shlc_data.closing_price
 
-        if balance_data1.amount_in_quote < balance_data2.amount_in_quote:
+        if amount_in_quote1 < amount_in_quote2:
             my_copy(balance_data1, balance_data)
             return setup_data1
         else:
