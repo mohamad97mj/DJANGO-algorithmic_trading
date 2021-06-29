@@ -1,6 +1,7 @@
 import numpy as np
 from trader.clients.public_client import PublicClient
 from trader.main.spot.models import SpotPosition
+from .trailing_stoploss_strategy import TrailingStoplossStrategyDeveolper
 
 
 class SpotStrategyCenter:
