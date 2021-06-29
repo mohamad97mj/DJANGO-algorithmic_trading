@@ -118,8 +118,8 @@ class TrailingStoplossStrategyDeveolper:
                                                                    symbol_market_data,
                                                                    ratio_data)
 
-                    if balance_data.is_cash:
-                        balance_data.amount_in_quote = balance_data.amount * shlc_data.closing_price
+                    if not balance_data.is_cash:
+                        balance_data.amount_in_quote += balance_data.amount * shlc_data.closing_price
 
                     results.append(
                         ResultData(
