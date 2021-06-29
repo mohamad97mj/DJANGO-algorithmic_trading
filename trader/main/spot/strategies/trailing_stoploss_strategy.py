@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from copy import deepcopy
-from trader.global_utils import truncate, my_copy
+from trader.global_utils import truncate, my_copy, log
 from trader.clients.public_client import PublicClient
 from trader.main.spot.models import SpotPosition
 
@@ -44,15 +44,18 @@ class SymbolMarketData:
 
 @dataclass
 class ResultData:
-    symbol: str
-    limit_step_ratio: float
-    stoploss2limit_ratio: float
-    # stoploss_safty_ratio: float
-    profit_rata: float
-    # total_number_of_transactions: int
-    # number_of_upper_buy_limit_transactions: int
-    # number_of_lower_buy_limit_transactions: int
-    # number_of_stoploss_triggered_transactions: int
+    symbol: str = None
+    limit_step_ratio: float = None
+    stoploss2limit_ratio: float = None
+    # stoploss_safty_ratio: float = None
+    profit_rate: float = None
+    total_number_of_transactions: int = None
+    number_of_transactions: dict = field(default_factory=lambda: {
+        'upper_buy_limit': 1,
+        'lower_buy_limit': 0,
+        'stoploss_triggered': 0
+    })
+    number_of_senarios: dict = field(default_factory=lambda: {str(k): 0 for k in range(1, 9)})
 
 
 class TrailingStoplossStrategyDeveolper:
@@ -70,8 +73,8 @@ class TrailingStoplossStrategyDeveolper:
         limit_step_ratios, stoploss2limit_ratios = self._init_ratios()
 
         # selected_symbols = ['BTCUP/USDT']
-        ohlcvs_limit = 1000
-        initial_amount_in_quote = 10000
+        ohlcvs_limit = 240
+        initial_amount_in_quote = 100
 
         results = []
 
@@ -85,6 +88,7 @@ class TrailingStoplossStrategyDeveolper:
 
             for r1 in limit_step_ratios:
                 for r2 in stoploss2limit_ratios:
+                    result_data = ResultData(symbol=symbol, limit_step_ratio=r1, stoploss2limit_ratio=r2)
                     # for r3 in stoploss_safety_ratios:
                     balance_data = BalanceData(amount=0, amount_in_quote=initial_amount_in_quote, is_cash=True)
                     shlc_data = ShlcData(ohlcvs[0][1], ohlcvs[0][2], ohlcvs[0][3], ohlcvs[0][4])
@@ -106,7 +110,8 @@ class TrailingStoplossStrategyDeveolper:
                                                                balance_data,
                                                                shlc_data,
                                                                symbol_market_data,
-                                                               ratio_data)
+                                                               ratio_data,
+                                                               result_data)
 
                     for i in range(1, len(ohlcvs)):
                         previous_closing_price = shlc_data.closing_price
@@ -116,31 +121,20 @@ class TrailingStoplossStrategyDeveolper:
                                                                    balance_data,
                                                                    shlc_data,
                                                                    symbol_market_data,
-                                                                   ratio_data)
+                                                                   ratio_data,
+                                                                   result_data)
 
                     if not balance_data.is_cash:
                         balance_data.amount_in_quote += balance_data.amount * shlc_data.closing_price
+                    result_data.profit_rate = \
+                        ((balance_data.amount_in_quote - initial_amount_in_quote) / initial_amount_in_quote) * 100
+                    results.append(result_data)
 
-                    results.append(
-                        ResultData(
-                            symbol=symbol,
-                            limit_step_ratio=r1,
-                            stoploss2limit_ratio=r2,
-                            # stoploss_safty_ratio=r3,
-                            profit_rata=
-                            ((balance_data.amount_in_quote - initial_amount_in_quote) / initial_amount_in_quote) * 100,
-                            # total_number_of_transactions=total_number_of_transactions,
-                            # number_of_upper_buy_limit_transactions=number_of_upper_buy_limit_transactions,
-                            # number_of_lower_buy_limit_transactions=number_of_lower_buy_limit_transactions,
-                            # number_of_stoploss_triggered_transactions=number_of_stoploss_triggered_transactions,
-                        )
-                    )
-
-            sorted_results = sorted(results, key=lambda result: result.profit_rate, reverse=True)
-            optimum_result = sorted_results[0]
-            self._optimum_symbol = optimum_result.symbol
-            self._optimum_limit_step_ratio = optimum_result.limit_step_ratio
-            self._optimum_stoploss2limit_ratio = optimum_result.stoploss2limit_ratio
+        sorted_results = sorted(results, key=lambda result: result.profit_rate, reverse=True)
+        optimum_result = sorted_results[0]
+        self._optimum_symbol = optimum_result.symbol
+        self._optimum_limit_step_ratio = optimum_result.limit_step_ratio
+        self._optimum_stoploss2limit_ratio = optimum_result.stoploss2limit_ratio
 
     def select_symbols(self, markets):
         symbols = markets.keys()
@@ -172,8 +166,8 @@ class TrailingStoplossStrategyDeveolper:
         limit_step_ratios = [
             # 0.001,
             # 0.005,
-            0.01,
-            # 0.02,
+            # 0.01,
+            0.02,
             # 0.05,
             # 0.1,
             # 0.2
@@ -184,9 +178,9 @@ class TrailingStoplossStrategyDeveolper:
             # 0.005,
             # 0.01,
             # 0.05,
-            0.1,
+            # 0.1,
             # 0.2,
-            # 0.25,
+            0.25,
         ]
 
         stoploss_safety_ratios = [
@@ -200,17 +194,20 @@ class TrailingStoplossStrategyDeveolper:
             # stoploss_safety_ratios
 
     def _buy(self, balance_data, buy_amount_in_quote, buy_price, amount_precision, fee):
-        truncated_buy_amount_before_fee = truncate(buy_amount_in_quote / buy_price, amount_precision)
+        deviation = 0.0001
+        truncated_buy_amount_before_fee = truncate(buy_amount_in_quote / (buy_price * (1 + deviation)),
+                                                   amount_precision)
         pure_buy_amount = truncated_buy_amount_before_fee * (1 - fee)
-        truncated_buy_amount_in_quote = truncated_buy_amount_before_fee * buy_price
+        real_buy_amount_in_quote = truncated_buy_amount_before_fee * buy_price
         balance_data.is_cash = False
         balance_data.amount += pure_buy_amount
-        balance_data.amount_in_quote -= truncated_buy_amount_in_quote
+        balance_data.amount_in_quote -= real_buy_amount_in_quote
 
     def _sell(self, balance_data, sell_amount, sell_price, amount_precision, fee):
+        deviation = 0.0001
         truncated_sell_amount_before_fee = truncate(sell_amount, amount_precision)
         pure_sell_amount = truncated_sell_amount_before_fee * (1 - fee)
-        pure_sell_amount_in_quote = pure_sell_amount * sell_price
+        pure_sell_amount_in_quote = pure_sell_amount * (sell_price * (1 - deviation))
         balance_data.is_cash = True
         balance_data.amount_in_quote += pure_sell_amount_in_quote
         balance_data.amount -= truncated_sell_amount_before_fee
@@ -229,11 +226,13 @@ class TrailingStoplossStrategyDeveolper:
                          upper_buy_limit_price,
                          lower_buy_limit_price)
 
-    def _run_candlestick_senario(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+    def _run_candlestick_senario(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data,
+                                 result_data):
 
         senario = self._determine_senario(shlc_data)
+        result_data.number_of_senarios[senario] += 1
         run_senario_method = getattr(self, '_run_senario{}'.format(senario))
-        return run_senario_method(setup_data, balance_data, shlc_data, symbol_market_data, ratio_data)
+        return run_senario_method(setup_data, balance_data, shlc_data, symbol_market_data, ratio_data, result_data)
 
     def _determine_senario(self, shlc_data):
 
@@ -263,141 +262,167 @@ class TrailingStoplossStrategyDeveolper:
 
         return s
 
-    def _run_senario1(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+    def _run_senario1(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data, result_data):
         return self._run_ascending_senario(setup_data=setup_data,
                                            balance_data=balance_data,
                                            highest_price=shlc_data.highest_price,
                                            symbol_market_data=symbol_market_data,
-                                           ratio_data=ratio_data)
+                                           ratio_data=ratio_data,
+                                           result_data=result_data)
 
-    def _run_senario2(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+    def _run_senario2(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data, result_data):
         setup_data = self._run_ascending_senario(setup_data=setup_data,
                                                  balance_data=balance_data,
                                                  highest_price=shlc_data.highest_price,
                                                  symbol_market_data=symbol_market_data,
-                                                 ratio_data=ratio_data)
+                                                 ratio_data=ratio_data,
+                                                 result_data=result_data)
+
         return self._run_descending_senario(setup_data=setup_data,
                                             balance_data=balance_data,
                                             lowest_price=shlc_data.closing_price,
                                             symbol_market_data=symbol_market_data,
-                                            ratio_data=ratio_data)
+                                            ratio_data=ratio_data,
+                                            result_data=result_data)
 
-    def _run_senario3(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+    def _run_senario3(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data, result_data):
         setup_data = self._run_descending_senario(setup_data=setup_data,
                                                   balance_data=balance_data,
                                                   lowest_price=shlc_data.lowest_price,
                                                   symbol_market_data=symbol_market_data,
-                                                  ratio_data=ratio_data)
+                                                  ratio_data=ratio_data,
+                                                  result_data=result_data)
+
         return self._run_ascending_senario(setup_data=setup_data,
                                            balance_data=balance_data,
                                            highest_price=shlc_data.highest_price,
                                            symbol_market_data=symbol_market_data,
-                                           ratio_data=ratio_data)
+                                           ratio_data=ratio_data,
+                                           result_data=result_data)
 
-    def _run_senario4(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+    def _run_senario4(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data, result_data):
         balance_data1 = deepcopy(balance_data)
         setup_data1 = deepcopy(setup_data)
+        result_data1 = deepcopy(result_data)
         setup_data1 = self._run_descending_senario(setup_data=setup_data1,
                                                    balance_data=balance_data1,
                                                    lowest_price=shlc_data.lowest_price,
                                                    symbol_market_data=symbol_market_data,
-                                                   ratio_data=ratio_data)
+                                                   ratio_data=ratio_data,
+                                                   result_data=result_data1)
+
         setup_data1 = self._run_ascending_senario(setup_data=setup_data1,
                                                   balance_data=balance_data1,
                                                   highest_price=shlc_data.highest_price,
                                                   symbol_market_data=symbol_market_data,
-                                                  ratio_data=ratio_data)
+                                                  ratio_data=ratio_data,
+                                                  result_data=result_data1)
 
         setup_data1 = self._run_descending_senario(setup_data=setup_data1,
                                                    balance_data=balance_data1,
                                                    lowest_price=shlc_data.closing_price,
                                                    symbol_market_data=symbol_market_data,
-                                                   ratio_data=ratio_data)
+                                                   ratio_data=ratio_data,
+                                                   result_data=result_data1)
 
         amount_in_quote1 = balance_data1.amount_in_quote + balance_data1.amount * shlc_data.closing_price
 
         balance_data2 = deepcopy(balance_data)
         setup_data2 = deepcopy(setup_data)
+        result_data2 = deepcopy(result_data)
         setup_data2 = self._run_ascending_senario(setup_data=setup_data2,
                                                   balance_data=balance_data2,
                                                   highest_price=shlc_data.highest_price,
                                                   symbol_market_data=symbol_market_data,
-                                                  ratio_data=ratio_data)
+                                                  ratio_data=ratio_data,
+                                                  result_data=result_data2)
 
         setup_data2 = self._run_descending_senario(setup_data=setup_data2,
                                                    balance_data=balance_data2,
                                                    lowest_price=shlc_data.lowest_price,
                                                    symbol_market_data=symbol_market_data,
-                                                   ratio_data=ratio_data)
+                                                   ratio_data=ratio_data,
+                                                   result_data=result_data2)
 
         setup_data2 = self._run_ascending_senario(setup_data=setup_data2,
                                                   balance_data=balance_data2,
                                                   highest_price=shlc_data.closing_price,
                                                   symbol_market_data=symbol_market_data,
-                                                  ratio_data=ratio_data)
+                                                  ratio_data=ratio_data,
+                                                  result_data=result_data2)
 
         amount_in_quote2 = balance_data2.amount_in_quote + balance_data2.amount * shlc_data.closing_price
 
         if amount_in_quote1 < amount_in_quote2:
             my_copy(balance_data1, balance_data)
+            my_copy(result_data1, result_data)
             return setup_data1
         else:
             my_copy(balance_data2, balance_data)
+            my_copy(result_data2, result_data)
             return setup_data2
 
-    def _run_senario5(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+    def _run_senario5(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data, result_data):
         return self._run_descending_senario(setup_data=setup_data,
                                             balance_data=balance_data,
                                             lowest_price=shlc_data.lowest_price,
                                             symbol_market_data=symbol_market_data,
-                                            ratio_data=ratio_data)
+                                            ratio_data=ratio_data,
+                                            result_data=result_data)
 
-    def _run_senario6(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+    def _run_senario6(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data, result_data):
         setup_data = self._run_descending_senario(setup_data=setup_data,
                                                   balance_data=balance_data,
                                                   lowest_price=shlc_data.lowest_price,
                                                   symbol_market_data=symbol_market_data,
-                                                  ratio_data=ratio_data)
+                                                  ratio_data=ratio_data,
+                                                  result_data=result_data)
 
         return self._run_ascending_senario(setup_data=setup_data,
                                            balance_data=balance_data,
                                            highest_price=shlc_data.closing_price,
                                            symbol_market_data=symbol_market_data,
-                                           ratio_data=ratio_data)
+                                           ratio_data=ratio_data,
+                                           result_data=result_data)
 
-    def _run_senario7(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+    def _run_senario7(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data, result_data):
         setup_data = self._run_ascending_senario(setup_data=setup_data,
                                                  balance_data=balance_data,
                                                  highest_price=shlc_data.highest_price,
                                                  symbol_market_data=symbol_market_data,
-                                                 ratio_data=ratio_data)
+                                                 ratio_data=ratio_data,
+                                                 result_data=result_data)
 
         return self._run_descending_senario(setup_data=setup_data,
                                             balance_data=balance_data,
                                             lowest_price=shlc_data.lowest_price,
                                             symbol_market_data=symbol_market_data,
-                                            ratio_data=ratio_data)
+                                            ratio_data=ratio_data,
+                                            result_data=result_data)
 
-    def _run_senario8(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+    def _run_senario8(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data, result_data):
         balance_data1 = deepcopy(balance_data)
         setup_data1 = deepcopy(setup_data)
         setup_data1 = self._run_ascending_senario(setup_data=setup_data1,
                                                   balance_data=balance_data1,
                                                   highest_price=shlc_data.highest_price,
                                                   symbol_market_data=symbol_market_data,
-                                                  ratio_data=ratio_data)
+                                                  ratio_data=ratio_data,
+                                                  result_data=result_data)
 
         setup_data1 = self._run_descending_senario(setup_data=setup_data1,
                                                    balance_data=balance_data1,
                                                    lowest_price=shlc_data.lowest_price,
                                                    symbol_market_data=symbol_market_data,
-                                                   ratio_data=ratio_data)
+                                                   ratio_data=ratio_data,
+                                                   result_data=result_data)
 
         setup_data1 = self._run_ascending_senario(setup_data=setup_data1,
                                                   balance_data=balance_data1,
                                                   highest_price=shlc_data.closing_price,
                                                   symbol_market_data=symbol_market_data,
-                                                  ratio_data=ratio_data)
+                                                  ratio_data=ratio_data,
+                                                  result_data=result_data)
 
         amount_in_quote1 = balance_data1.amount_in_quote + balance_data1.amount * shlc_data.closing_price
 
@@ -407,19 +432,22 @@ class TrailingStoplossStrategyDeveolper:
                                                    balance_data=balance_data2,
                                                    lowest_price=shlc_data.lowest_price,
                                                    symbol_market_data=symbol_market_data,
-                                                   ratio_data=ratio_data)
+                                                   ratio_data=ratio_data,
+                                                   result_data=result_data)
 
         setup_data2 = self._run_ascending_senario(setup_data=setup_data2,
                                                   balance_data=balance_data2,
                                                   highest_price=shlc_data.highest_price,
                                                   symbol_market_data=symbol_market_data,
-                                                  ratio_data=ratio_data)
+                                                  ratio_data=ratio_data,
+                                                  result_data=result_data)
 
         setup_data2 = self._run_descending_senario(setup_data=setup_data2,
                                                    balance_data=balance_data2,
                                                    lowest_price=shlc_data.closing_price,
                                                    symbol_market_data=symbol_market_data,
-                                                   ratio_data=ratio_data)
+                                                   ratio_data=ratio_data,
+                                                   result_data=result_data)
 
         amount_in_quote2 = balance_data2.amount_in_quote + balance_data2.amount * shlc_data.closing_price
 
@@ -430,7 +458,8 @@ class TrailingStoplossStrategyDeveolper:
             my_copy(balance_data2, balance_data)
             return setup_data2
 
-    def _run_ascending_senario(self, setup_data, balance_data, highest_price, symbol_market_data, ratio_data):
+    def _run_ascending_senario(self, setup_data, balance_data, highest_price, symbol_market_data, ratio_data,
+                               result_data):
         if setup_data.upper_buy_limit_price < highest_price:
             if balance_data.is_cash:
                 self._buy(balance_data=balance_data,
@@ -438,13 +467,15 @@ class TrailingStoplossStrategyDeveolper:
                           buy_price=setup_data.upper_buy_limit_price,
                           amount_precision=symbol_market_data.amount_precision,
                           fee=symbol_market_data.fee)
+                result_data.number_of_transactions['upper_buy_limit'] += 1
 
             setup_data = self._calculate_setup_data(setupe_price=highest_price,
                                                     price_precision=symbol_market_data.price_precision,
                                                     ratio_data=ratio_data)
         return setup_data
 
-    def _run_descending_senario(self, setup_data, balance_data, lowest_price, symbol_market_data, ratio_data):
+    def _run_descending_senario(self, setup_data, balance_data, lowest_price, symbol_market_data, ratio_data,
+                                result_data):
 
         if lowest_price < setup_data.stoploss_price:
             if not balance_data.is_cash:
@@ -453,6 +484,7 @@ class TrailingStoplossStrategyDeveolper:
                            sell_price=setup_data.stoploss_price,
                            amount_precision=symbol_market_data.amount_precision,
                            fee=symbol_market_data.fee)
+                result_data.number_of_transactions['stoploss_triggered'] += 1
 
             if lowest_price < setup_data.lower_buy_limit_price:
                 self._buy(balance_data=balance_data,
@@ -460,8 +492,10 @@ class TrailingStoplossStrategyDeveolper:
                           buy_price=setup_data.lower_buy_limit_price,
                           amount_precision=symbol_market_data.amount_precision,
                           fee=symbol_market_data.fee)
+                result_data.number_of_transactions['lower_buy_limit'] += 1
+
                 setup_data = self._calculate_setup_data(setupe_price=setup_data.lower_buy_limit_price,
-                                                        price_precision=symbol_market_data.amount_precision,
+                                                        price_precision=symbol_market_data.price_precision,
                                                         ratio_data=ratio_data)
 
                 setup_data = self._run_descending_senario(
@@ -469,6 +503,8 @@ class TrailingStoplossStrategyDeveolper:
                     balance_data=balance_data,
                     lowest_price=lowest_price,
                     symbol_market_data=symbol_market_data,
-                    ratio_data=ratio_data)
+                    ratio_data=ratio_data,
+                    result_data=result_data
+                )
 
         return setup_data
