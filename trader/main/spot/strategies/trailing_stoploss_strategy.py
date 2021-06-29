@@ -313,10 +313,8 @@ class TrailingStoplossStrategyDeveolper:
                                                    lowest_price=shlc_data.closing_price,
                                                    symbol_market_data=symbol_market_data,
                                                    ratio_data=ratio_data)
-        if balance_data1.is_cash:
-            amount_in_quote1 = balance_data1.amount_in_quote
-        else:
-            amount_in_quote1 = balance_data1.amount * shlc_data.closing_price
+
+        amount_in_quote1 = balance_data1.amount_in_quote + balance_data1.amount * shlc_data.closing_price
 
         balance_data2 = deepcopy(balance_data)
         setup_data2 = deepcopy(setup_data)
@@ -338,10 +336,7 @@ class TrailingStoplossStrategyDeveolper:
                                                   symbol_market_data=symbol_market_data,
                                                   ratio_data=ratio_data)
 
-        if balance_data2.is_cash:
-            amount_in_quote2 = balance_data2.amount_in_quote
-        else:
-            amount_in_quote2 = balance_data2.amount * shlc_data.closing_price
+        amount_in_quote2 = balance_data2.amount_in_quote + balance_data2.amount * shlc_data.closing_price
 
         if amount_in_quote1 < amount_in_quote2:
             my_copy(balance_data1, balance_data)
@@ -404,10 +399,7 @@ class TrailingStoplossStrategyDeveolper:
                                                   symbol_market_data=symbol_market_data,
                                                   ratio_data=ratio_data)
 
-        if balance_data1.is_cash:
-            amount_in_quote1 = balance_data1.amount_in_quote
-        else:
-            amount_in_quote1 = balance_data1.amount * shlc_data.closing_price
+        amount_in_quote1 = balance_data1.amount_in_quote + balance_data1.amount * shlc_data.closing_price
 
         balance_data2 = deepcopy(balance_data)
         setup_data2 = deepcopy(setup_data)
@@ -429,10 +421,7 @@ class TrailingStoplossStrategyDeveolper:
                                                    symbol_market_data=symbol_market_data,
                                                    ratio_data=ratio_data)
 
-        if balance_data2.is_cash:
-            amount_in_quote2 = balance_data2.amount_in_quote
-        else:
-            amount_in_quote2 = balance_data2.amount * shlc_data.closing_price
+        amount_in_quote2 = balance_data2.amount_in_quote + balance_data2.amount * shlc_data.closing_price
 
         if amount_in_quote1 < amount_in_quote2:
             my_copy(balance_data1, balance_data)
