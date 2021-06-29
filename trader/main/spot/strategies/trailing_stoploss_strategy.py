@@ -200,13 +200,12 @@ class TrailingStoplossStrategyDeveolper:
             # stoploss_safety_ratios
 
     def _buy(self, balance_data, buy_amount_in_quote, buy_price, amount_precision, fee):
-        pure_buy_amount_in_quote = buy_amount_in_quote * (1 - fee)
-        buy_amount = truncate((pure_buy_amount_in_quote / buy_price), amount_precision)
-        # remaining_amount_in_quote = pure_buy_amount_in_quote - buy_amount * buy_price
-        remaining_amount_in_quote = 0
+        buy_amount_before_fee = (buy_amount_in_quote / buy_price, amount_precision)
+        buy_amount = buy_amount_before_fee * (1 - fee)
+        pure_buy_amount_in_quote = buy_amount_before_fee * buy_price
         balance_data.is_cash = False
         balance_data.amount += buy_amount
-        balance_data.amount_in_quote -= (buy_amount_in_quote - remaining_amount_in_quote)
+        balance_data.amount_in_quote -= pure_buy_amount_in_quote
 
     def _sell(self, balance_data, sell_amount, sell_price, amount_precision, fee):
         pure_sell_amount = sell_amount * (1 - fee)
