@@ -224,7 +224,7 @@ class TrailingStoplossStrategyDeveolper:
     def _run_candlestick_senario(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
 
         senario = self._determine_senario(shlc_data)
-        run_senario_method = getattr(self, 'run_senario{}'.format(senario))
+        run_senario_method = getattr(self, '_run_senario{}'.format(senario))
         return run_senario_method(setup_data, balance_data, shlc_data, symbol_market_data, ratio_data)
 
     def _determine_senario(self, shlc_data):
