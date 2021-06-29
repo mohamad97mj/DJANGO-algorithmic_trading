@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from trader.global_utils import truncate
+from copy import deepcopy
+from trader.global_utils import truncate, my_copy
 from trader.clients.public_client import PublicClient
 from trader.main.spot.models import SpotPosition
 
@@ -14,7 +15,7 @@ class RatioData:
 @dataclass
 class ShlcData:
     starting_price: float
-    higheest_price: float
+    highest_price: float
     lowest_price: float
     closing_price: float
 
@@ -255,16 +256,12 @@ class TrailingStoplossStrategyDeveolper:
         return s
 
     def _run_senario1(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
-        return self._run_ascending_senario(setup_data, balance_data, shlc_data, symbol_market_data, ratio_data)
+        return self._run_ascending_senario(setup_data=setup_data,
+                                           balance_data=balance_data,
+                                           highest_price=shlc_data.highest_price,
+                                           symbol_market_data=symbol_market_data,
+                                           ratio_data=ratio_data)
 
-    def _run_senario2(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
-        if balance_data.is_cash:
-            pass
-        else:
-            setup_data = self._calculate_setup_data(
-                shlc_data.highest_price, symbol_market_data.price_precision, ratio_data)
-
-        return setup_data
 
     def _run_ascending_senario(self, setup_data, balance_data, highest_price, symbol_market_data, ratio_data):
         if setup_data.upper_buy_limit_price < highest_price:
