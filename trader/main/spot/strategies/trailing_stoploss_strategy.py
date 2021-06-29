@@ -379,7 +379,67 @@ class TrailingStoplossStrategyDeveolper:
                                             symbol_market_data=symbol_market_data,
                                             ratio_data=ratio_data)
 
+    def _run_senario8(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+        balance_data1 = deepcopy(balance_data)
+        setup_data1 = deepcopy(setup_data)
+        setup_data1 = self._run_ascending_senario(setup_data=setup_data1,
+                                                  balance_data=balance_data1,
+                                                  highest_price=shlc_data.highest_price,
+                                                  symbol_market_data=symbol_market_data,
+                                                  ratio_data=ratio_data)
 
+        setup_data1 = self._run_descending_senario(setup_data=setup_data1,
+                                                   balance_data=balance_data1,
+                                                   lowest_price=shlc_data.lowest_price,
+                                                   symbol_market_data=symbol_market_data,
+                                                   ratio_data=ratio_data)
+
+        setup_data1 = self._run_ascending_senario(setup_data=setup_data1,
+                                                  balance_data=balance_data1,
+                                                  highest_price=shlc_data.closing_price,
+                                                  symbol_market_data=symbol_market_data,
+                                                  ratio_data=ratio_data)
+
+        if not balance_data1.is_cash:
+            self._sell(balance_data=balance_data1,
+                       sell_amount=balance_data1.amount,
+                       sell_price=shlc_data.closing_price,
+                       amount_precision=symbol_market_data.amount_precision,
+                       fee=symbol_market_data.fee)
+
+        balance_data2 = deepcopy(balance_data)
+        setup_data2 = deepcopy(setup_data)
+        setup_data2 = self._run_descending_senario(setup_data=setup_data2,
+                                                   balance_data=balance_data2,
+                                                   lowest_price=shlc_data.lowest_price,
+                                                   symbol_market_data=symbol_market_data,
+                                                   ratio_data=ratio_data)
+
+        setup_data2 = self._run_ascending_senario(setup_data=setup_data2,
+                                                  balance_data=balance_data2,
+                                                  highest_price=shlc_data.highest_price,
+                                                  symbol_market_data=symbol_market_data,
+                                                  ratio_data=ratio_data)
+
+        setup_data2 = self._run_descending_senario(setup_data=setup_data2,
+                                                   balance_data=balance_data2,
+                                                   lowest_price=shlc_data.closing_price,
+                                                   symbol_market_data=symbol_market_data,
+                                                   ratio_data=ratio_data)
+
+        if not balance_data2.is_cash:
+            self._sell(balance_data=balance_data2,
+                       sell_amount=balance_data2.amount,
+                       sell_price=shlc_data.closing_price,
+                       amount_precision=symbol_market_data.amount_precision,
+                       fee=symbol_market_data.fee)
+
+        if balance_data1.amount_in_quote < balance_data2.amount_in_quote:
+            my_copy(balance_data1, balance_data)
+            return setup_data1
+        else:
+            my_copy(balance_data2, balance_data)
+            return setup_data2
 
     def _run_ascending_senario(self, setup_data, balance_data, highest_price, symbol_market_data, ratio_data):
         if setup_data.upper_buy_limit_price < highest_price:
