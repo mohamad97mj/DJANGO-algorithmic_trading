@@ -346,6 +346,13 @@ class TrailingStoplossStrategyDeveolper:
             my_copy(balance_data2, balance_data)
             return setup_data2
 
+    def _run_senario5(self, setup_data, balance_data, shlc_data, symbol_market_data, ratio_data):
+        return self._run_descending_senario(setup_data=setup_data,
+                                            balance_data=balance_data,
+                                            lowest_price=shlc_data.lowest_price,
+                                            symbol_market_data=symbol_market_data,
+                                            ratio_data=ratio_data)
+
 
 
     def _run_ascending_senario(self, setup_data, balance_data, highest_price, symbol_market_data, ratio_data):
