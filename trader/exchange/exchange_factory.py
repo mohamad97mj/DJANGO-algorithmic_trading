@@ -1,5 +1,5 @@
 import ccxt
-# from binance.client import Client as PythonBinanceExchange
+from binance.client import Client as PythonBinanceExchange
 from trader.auth import credentials
 from .exchange import Exchange
 from typing import List
@@ -31,12 +31,12 @@ class ExchangeFactory:
         # ccxt_exchange.options['createMarketBuyOrderRequiresPrice'] = False
 
         pb_exchange = None
-        # if exchange_id == 'binance':
-        #     pb_exchange = PythonBinanceExchange(
-        #         api_key=api_key,
-        #         api_secret=secret_key,
-        #         testnet=credential_id == 'test',
-        #     )
+        if exchange_id == 'binance':
+            pb_exchange = PythonBinanceExchange(
+                api_key=api_key,
+                api_secret=secret_key,
+                testnet=credential_id == 'test',
+            )
 
         exchange = Exchange(ccxt_exchange=ccxt_exchange, pb_exchange=pb_exchange)
         self._exchanges.append(exchange)

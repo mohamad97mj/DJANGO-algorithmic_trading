@@ -27,7 +27,6 @@ class SpotBot(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(SpotBot, self).__init__(*args, **kwargs)
-        self.bot_id = 'SpotBot@{0:%Y-%m-%d|%H:%M:%S}'.format(datetime.now())
         self._init_requirements()
 
     def _init_requirements(self):
