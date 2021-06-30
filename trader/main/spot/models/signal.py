@@ -1,6 +1,7 @@
 from datetime import datetime
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from .utils import TimeFieldTZ
 
 
 class SpotSignal(models.Model):
@@ -9,5 +10,4 @@ class SpotSignal(models.Model):
     steps = ArrayField(models.FloatField())
     targets = ArrayField(models.FloatField())
     stoploss = models.FloatField()
-    created_at = models.DateTimeField(auto_now_add=True, blank=True)
-
+    created_at = TimeFieldTZ(default=datetime.now, blank=True)
