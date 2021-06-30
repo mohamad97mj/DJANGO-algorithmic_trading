@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'algorithmic_trading.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'trade',
+        'NAME': 'trader',
         'USER': 'postgres',
         'PASSWORD': 'mJ604998',
         'HOST': 'localhost',
