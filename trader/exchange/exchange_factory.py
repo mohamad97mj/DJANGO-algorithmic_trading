@@ -23,7 +23,7 @@ class ExchangeFactory:
 
         ccxt_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
             'enableRateLimit': enable_rate_limit,
-            'verbose': verbose,
+            # 'verbose': verbose,
             'apiKey': api_key,
             'secret': secret_key,
         })
