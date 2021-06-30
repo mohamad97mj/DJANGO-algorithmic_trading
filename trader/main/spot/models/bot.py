@@ -27,6 +27,7 @@ class SpotBot(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(SpotBot, self).__init__(*args, **kwargs)
+        self._strategy_state_data = None
         self._init_requirements()
 
     def _init_requirements(self):
@@ -37,7 +38,7 @@ class SpotBot(models.Model):
         self._init_requirements()
 
     def _set_strategy_operations(self):
-        self._strategy_center.set_strategy_operations(self.strategy, self.position)
+        self._strategy_center.set_strategy_operations(self.strategy, self.position, self._strategy_state_data)
 
     def _execute_strategy_operations(self):
         pass

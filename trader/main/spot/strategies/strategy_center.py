@@ -13,6 +13,5 @@ class SpotStrategyCenter:
         }
         self._public_client = PublicClient(exchange_id)
 
-    def set_strategy_operations(self, strategy: str, position: SpotPosition):
-        return self._strategy_mapper[strategy](position=position)
-
+    def set_strategy_operations(self, strategy: str, position: SpotPosition, strategy_state_data):
+        return self._strategy_mapper[strategy](position=position, strategy_state_data=strategy_state_data)
