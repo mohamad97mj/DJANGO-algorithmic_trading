@@ -1,6 +1,5 @@
 from django.db import models
-from datetime import datetime
-from .utils import TimeFieldTZ
+from django.utils import timezone
 
 
 class SpotPositionManager(models.Manager):
@@ -13,4 +12,4 @@ class SpotPosition(models.Model):
     # position_id = models.CharField(max_length=100, unique=True)
     signal = models.ForeignKey('SpotSignal', related_name='positions', on_delete=models.RESTRICT, null=True)
     volume = models.FloatField()
-    created_at = TimeFieldTZ(default=datetime.now, blank=True)
+    created_at = models.CharField(max_length=100, default=timezone.now, blank=True)

@@ -1,6 +1,5 @@
 from django.db import models
-from datetime import datetime
-from .utils import TimeFieldTZ
+from django.utils import timezone
 
 
 class Operation(models.Model):
@@ -9,5 +8,5 @@ class Operation(models.Model):
     action = models.CharField(max_length=50)
     position = models.ForeignKey('SpotPosition', related_name='operations', on_delete=models.RESTRICT)
     status = models.CharField(max_length=50, blank=True)
-    created_at = TimeFieldTZ(default=datetime.now, blank=True)
-    executed_at = TimeFieldTZ(blank=True)
+    created_at = models.CharField(max_length=100, default=timezone.now, blank=True)
+    executed_at = models.CharField(max_length=100, blank=True)

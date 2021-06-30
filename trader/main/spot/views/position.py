@@ -22,8 +22,6 @@ class PositionView(APIView):
         """
         Opens a new position.
         """
-        print(timezone.now())
-        print(datetime.now())
 
         data = request.data
         exchange_id = data['exchange_id']

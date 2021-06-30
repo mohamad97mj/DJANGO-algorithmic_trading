@@ -1,6 +1,5 @@
 from django.db import models
-from datetime import datetime as dt
-from .utils import TimeFieldTZ
+from django.utils import timezone
 
 
 class SpotOrder(models.Model):
@@ -19,4 +18,4 @@ class SpotOrder(models.Model):
     remaining = models.FloatField(null=True, blank=True)
     cost = models.FloatField(null=True, blank=True)
     fee = models.JSONField(null=True, blank=True)
-    created_at = TimeFieldTZ(default=datetime.now, blank=True)
+    created_at = models.CharField(max_length=100, default=timezone.now, blank=True)
