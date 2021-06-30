@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from django.conf import settings
 from ..services import SpotPositionService
 from ..serializers import SpotPositionSerializer, SpotBotSerializer
+from django.utils import timezone
+from datetime import datetime
 
 
 class PositionView(APIView):
@@ -20,6 +22,9 @@ class PositionView(APIView):
         """
         Opens a new position.
         """
+        print(timezone.now())
+        print(datetime.now())
+
         data = request.data
         exchange_id = data['exchange_id']
         credential_id = data['credential_id']

@@ -10,4 +10,6 @@ class SpotSignalSerializer(serializers.Serializer):
     stoploss = serializers.FloatField()
 
     def create(self, validated_data):
-        return SpotSignal(**validated_data)
+        spot_signal = SpotSignal(**validated_data)
+        spot_signal.save()
+        return spot_signal

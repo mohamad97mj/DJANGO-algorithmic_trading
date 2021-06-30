@@ -6,6 +6,8 @@ class TraderConfig(AppConfig):
     name = 'trader'
 
     def ready(self):
+        from datetime import datetime
+        print(datetime.now())
         import asyncio
         from .trade import trade
         asyncio.run(trade())
