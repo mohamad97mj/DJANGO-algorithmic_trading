@@ -1,12 +1,12 @@
 from trader.clients.public_client import PublicClient
 from trader.main.spot.models import SpotPosition
-from .trailing_stoploss_strategy import TrailingStoplossStrategyDeveolper
+from .trailing_stoploss_strategy import TrailingStoplossStrategyDeveloper
 
 
 class SpotStrategyCenter:
 
     def __init__(self, exchange_id):
-        self._trailing_stoploss_strategy_developer = TrailingStoplossStrategyDeveolper(exchange_id)
+        self._trailing_stoploss_strategy_developer = TrailingStoplossStrategyDeveloper(exchange_id)
 
         self._strategy_mapper = {
             'trailing_stoploss': self._trailing_stoploss_strategy_developer.set_operations,

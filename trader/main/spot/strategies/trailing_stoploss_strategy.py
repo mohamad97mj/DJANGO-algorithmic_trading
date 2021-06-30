@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from copy import deepcopy
-from trader.global_utils import truncate, my_copy, log
+from trader.global_utils import truncate, my_copy, log, intersection
 from trader.clients.public_client import PublicClient
 from trader.main.spot.models import SpotPosition
 
@@ -58,7 +58,7 @@ class ResultData:
     number_of_senarios: dict = field(default_factory=lambda: {str(k): 0 for k in range(1, 9)})
 
 
-class TrailingStoplossStrategyDeveolper:
+class TrailingStoplossStrategyDeveloper:
 
     def __init__(self, exchange_id):
         self._public_client = PublicClient(exchange_id)
@@ -73,49 +73,42 @@ class TrailingStoplossStrategyDeveolper:
         limit_step_ratios, stoploss2limit_ratios = self._init_ratios()
 
         # selected_symbols = ['BTCUP/USDT']
-        ohlcvs_limit = 240
+        ohlcvs_limits = [60, 240, 1000]
         initial_amount_in_quote = 100
 
-        results = []
+        sorted_results = {}
+        for limit in ohlcvs_limits:
+            results = {}
+            positive_results = {}
+            for symbol in selected_symbols:
 
-        for symbol in selected_symbols:
+                ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=limit)
 
-            ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=ohlcvs_limit)
+                symbol_market_data = SymbolMarketData(price_precision=markets[symbol]['precision']['price'],
+                                                      amount_precision=markets[symbol]['precision']['amount'],
+                                                      fee=markets[symbol]['maker'])
 
-            symbol_market_data = SymbolMarketData(price_precision=markets[symbol]['precision']['price'],
-                                                  amount_precision=markets[symbol]['precision']['amount'],
-                                                  fee=markets[symbol]['maker'])
+                for r1 in limit_step_ratios:
+                    for r2 in stoploss2limit_ratios:
+                        result_data = ResultData(symbol=symbol,
+                                                 limit_step_ratio=r1,
+                                                 stoploss2limit_ratio=r2)
+                        # for r3 in stoploss_safety_ratios:
+                        balance_data = BalanceData(amount=0, amount_in_quote=initial_amount_in_quote, is_cash=True)
+                        shlc_data = ShlcData(ohlcvs[0][1], ohlcvs[0][2], ohlcvs[0][3], ohlcvs[0][4])
+                        ratio_data = RatioData(r1,
+                                               r2,
+                                               # r3
+                                               )
+                        self._buy(balance_data=balance_data,
+                                  buy_amount_in_quote=balance_data.amount_in_quote,
+                                  buy_price=shlc_data.starting_price,
+                                  amount_precision=symbol_market_data.amount_precision,
+                                  fee=symbol_market_data.fee)
 
-            for r1 in limit_step_ratios:
-                for r2 in stoploss2limit_ratios:
-                    result_data = ResultData(symbol=symbol, limit_step_ratio=r1, stoploss2limit_ratio=r2)
-                    # for r3 in stoploss_safety_ratios:
-                    balance_data = BalanceData(amount=0, amount_in_quote=initial_amount_in_quote, is_cash=True)
-                    shlc_data = ShlcData(ohlcvs[0][1], ohlcvs[0][2], ohlcvs[0][3], ohlcvs[0][4])
-                    ratio_data = RatioData(r1,
-                                           r2,
-                                           # r3
-                                           )
-                    self._buy(balance_data=balance_data,
-                              buy_amount_in_quote=balance_data.amount_in_quote,
-                              buy_price=shlc_data.starting_price,
-                              amount_precision=symbol_market_data.amount_precision,
-                              fee=symbol_market_data.fee)
-
-                    setup_data = self._calculate_setup_data(setupe_price=shlc_data.starting_price,
-                                                            price_precision=symbol_market_data.price_precision,
-                                                            ratio_data=ratio_data)
-
-                    setup_data = self._run_candlestick_senario(setup_data,
-                                                               balance_data,
-                                                               shlc_data,
-                                                               symbol_market_data,
-                                                               ratio_data,
-                                                               result_data)
-
-                    for i in range(1, len(ohlcvs)):
-                        previous_closing_price = shlc_data.closing_price
-                        shlc_data = ShlcData(previous_closing_price, ohlcvs[i][2], ohlcvs[i][3], ohlcvs[i][4])
+                        setup_data = self._calculate_setup_data(setupe_price=shlc_data.starting_price,
+                                                                price_precision=symbol_market_data.price_precision,
+                                                                ratio_data=ratio_data)
 
                         setup_data = self._run_candlestick_senario(setup_data,
                                                                    balance_data,
@@ -124,14 +117,29 @@ class TrailingStoplossStrategyDeveolper:
                                                                    ratio_data,
                                                                    result_data)
 
-                    if not balance_data.is_cash:
-                        balance_data.amount_in_quote += balance_data.amount * shlc_data.closing_price
-                    result_data.profit_rate = \
-                        ((balance_data.amount_in_quote - initial_amount_in_quote) / initial_amount_in_quote) * 100
-                    results.append(result_data)
+                        for i in range(1, len(ohlcvs)):
+                            previous_closing_price = shlc_data.closing_price
+                            shlc_data = ShlcData(previous_closing_price, ohlcvs[i][2], ohlcvs[i][3], ohlcvs[i][4])
 
-        sorted_results = sorted(results, key=lambda result: result.profit_rate, reverse=True)
-        optimum_result = sorted_results[0]
+                            setup_data = self._run_candlestick_senario(setup_data,
+                                                                       balance_data,
+                                                                       shlc_data,
+                                                                       symbol_market_data,
+                                                                       ratio_data,
+                                                                       result_data)
+
+                        if not balance_data.is_cash:
+                            balance_data.amount_in_quote += balance_data.amount * shlc_data.closing_price
+                        result_data.profit_rate = \
+                            ((balance_data.amount_in_quote - initial_amount_in_quote) / initial_amount_in_quote) * 100
+                        results[symbol] = result_data
+
+            positive_results[str(limit)] = {k: v for k, v in results.items() if v.profit_rate > 0}
+            positive_results_symbols = {
+                k: list(v.keys()) for k, v in positive_results.items()
+            }
+            intersection_symbols = intersection()
+        optimum_result = sorted_results['60'][0]
         self._optimum_symbol = optimum_result.symbol
         self._optimum_limit_step_ratio = optimum_result.limit_step_ratio
         self._optimum_stoploss2limit_ratio = optimum_result.stoploss2limit_ratio
@@ -153,8 +161,8 @@ class TrailingStoplossStrategyDeveolper:
         for symbol in leveraged_symbols:
             sample_price = tickers[symbol]['bid']
             integer_part_length = len(str(int(sample_price))) if int(sample_price) else 0
-            decmial_part_length = markets[symbol]['precision']['price']
-            total_length = integer_part_length + decmial_part_length
+            decimal_part_length = markets[symbol]['precision']['price']
+            total_length = integer_part_length + decimal_part_length
             if total_length > 4:
                 selected_symbols.append(symbol)
 
