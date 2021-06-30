@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 from trader.clients import PrivateClient
 from trader.main.spot.strategies.strategy_center import SpotStrategyCenter
@@ -24,14 +25,15 @@ class SpotBot(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(SpotBot, self).__init__(*args, **kwargs)
+        self.bot_id = 'SpotBot@{0:%Y-%m-%d|%H:%M:%S}'.format(datetime.now())
         self._init_requirements()
 
     def _init_requirements(self):
         self._private_client = PrivateClient(exchange_id=self.exchange_id, credential_id=self.credential_id)
         self._strategy_center = SpotStrategyCenter(exchange_id=self.exchange_id)
 
-    def reload_bot(self):
-        pass
+    def reload(self):
+        self._init_requirements()
 
     def _set_strategy_operations(self):
         self._strategy_center.set_strategy_operations(self.strategy, self.position)
