@@ -1,9 +1,8 @@
-from datetime import datetime
+from django.utils import timezone
 from django.db import models
 from trader.clients import PrivateClient
 from trader.main.spot.strategies.strategy_center import SpotStrategyCenter
 from .utils.exceptions import BotDoesNotExistsException
-from .utils import TimeFieldTZ
 
 
 class SpotBotManager(models.Manager):
@@ -23,7 +22,7 @@ class SpotBot(models.Model):
     credential_id = models.CharField(max_length=100)
     strategy = models.CharField(max_length=100)
     position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.RESTRICT)
-    created_at = TimeFieldTZ(default=datetime.now, blank=True)
+    created_at = models.CharField(max_length=100, default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __init__(self, *args, **kwargs):
