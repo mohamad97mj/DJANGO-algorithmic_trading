@@ -15,9 +15,8 @@ class SpotBotHandler:
         return new_bot
 
     def reload_bots(self):
-        loaded_bots = SpotBot.objects.all()
-        self.bots = list(loaded_bots)
-        for bot in loaded_bots:
+        self.bots = list(SpotBot.objects.all())
+        for bot in self.bots:
             bot.reload()
 
     def run_bots(self):
