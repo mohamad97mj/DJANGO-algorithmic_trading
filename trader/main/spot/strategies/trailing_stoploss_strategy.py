@@ -10,7 +10,7 @@ from trader.main.spot.models import SpotPosition, SpotOrder, Operation
 class RatioData:
     limit_step_ratio: float
     stoploss2limit_ratio: float
-    # stoploss_safty_ratio: float
+    # stoploss_safety_ratio: float
 
 
 @dataclass
@@ -73,8 +73,8 @@ class StrategyStateData:
 
 class TrailingStoplossStrategyDeveloper:
 
-    def __init__(self, exchange_id):
-        self._public_client = PublicClient(exchange_id)
+    def __init__(self, public_client):
+        self._public_client = public_client
         self._test_init_optimum_parameters()
 
     def set_operations(self, position: SpotPosition, strategy_state_data: StrategyStateData):
@@ -146,25 +146,25 @@ class TrailingStoplossStrategyDeveloper:
         pass
 
     def _test_init_optimum_parameters(self):
+        print("in test init optimum")
         markets = self._public_client.get_markets()
         selected_symbols = self.select_symbols(markets)
         limit_step_ratios, stoploss2limit_ratios = self._init_ratios()
 
         # selected_symbols = ['BTCUP/USDT']
         ohlcvs_limits = [60, 240, 1000]
+        max_limit = max(ohlcvs_limits)
         initial_amount_in_quote = 100
 
-        sorted_results = {}
-        positive_results = {}
-        for limit in ohlcvs_limits:
-            results = {}
-            for symbol in selected_symbols:
-
-                ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=limit)
-
+        positive_results = {k: {} for k in ohlcvs_limits}
+        for symbol in selected_symbols:
+            ohlcvs = self._public_client.fetch_ohlcv(symbol=symbol, limit=max_limit)
+            for limit in ohlcvs_limits:
+                results_data = []
                 symbol_market_data = SymbolMarketData(price_precision=markets[symbol]['precision']['price'],
                                                       amount_precision=markets[symbol]['precision']['amount'],
                                                       fee=markets[symbol]['maker'])
+                offset = max_limit - limit
 
                 for r1 in limit_step_ratios:
                     for r2 in stoploss2limit_ratios:
@@ -173,7 +173,11 @@ class TrailingStoplossStrategyDeveloper:
                                                  stoploss2limit_ratio=r2)
                         # for r3 in stoploss_safety_ratios:
                         balance_data = BalanceData(amount=0, amount_in_quote=initial_amount_in_quote, is_cash=True)
-                        shlc_data = ShlcData(ohlcvs[0][1], ohlcvs[0][2], ohlcvs[0][3], ohlcvs[0][4])
+                        shlc_data = ShlcData(ohlcvs[offset][1],
+                                             ohlcvs[offset][2],
+                                             ohlcvs[offset][3],
+                                             ohlcvs[offset][4])
+
                         ratio_data = RatioData(r1,
                                                r2,
                                                # r3
@@ -195,9 +199,12 @@ class TrailingStoplossStrategyDeveloper:
                                                                     ratio_data,
                                                                     result_data)
 
-                        for i in range(1, len(ohlcvs)):
+                        for i in range(1, limit):
                             previous_closing_price = shlc_data.closing_price
-                            shlc_data = ShlcData(previous_closing_price, ohlcvs[i][2], ohlcvs[i][3], ohlcvs[i][4])
+                            shlc_data = ShlcData(previous_closing_price,
+                                                 ohlcvs[offset + i][2],
+                                                 ohlcvs[offset + i][3],
+                                                 ohlcvs[offset + i][4])
 
                             setup_data = self._run_candlestick_scenario(setup_data,
                                                                         balance_data,
@@ -210,9 +217,10 @@ class TrailingStoplossStrategyDeveloper:
                             balance_data.amount_in_quote += balance_data.amount * shlc_data.closing_price
                         result_data.profit_rate = \
                             ((balance_data.amount_in_quote - initial_amount_in_quote) / initial_amount_in_quote) * 100
-                        results[symbol] = result_data
-
-            positive_results[str(limit)] = {k: v for k, v in results.items() if v.profit_rate > 0}
+                        results_data.append(result_data)
+                positive_results_data = [rd for rd in results_data if rd.profit_rate > 0]
+                if positive_results_data:
+                    positive_results[limit][symbol] = positive_results_data[0]
         positive_results_symbols = {
             k: list(v.keys()) for k, v in positive_results.items()
         }
@@ -220,9 +228,10 @@ class TrailingStoplossStrategyDeveloper:
         symbol_avg_profit = {
         }
         for s in intersection_symbols:
-            limits = [str(l) for l in ohlcvs_limits]
+            print(s)
             avg_profit = 0
-            for l in limits:
+            for l in ohlcvs_limits:
+                print(s)
                 avg_profit += positive_results[l][s].profit_rate
             avg_profit /= len(ohlcvs_limits)
             avg_profit = int(avg_profit)
