@@ -40,6 +40,9 @@ class SpotBot(models.Model):
     def reload(self):
         pass
 
+    def get_price_required_symbols(self):
+        return self._strategy_center.get_strategy_price_required_symbols()
+
     def _get_strategy_operations(self):
         return self._strategy_center.get_strategy_operations(self.position, self._strategy_state_data)
 
