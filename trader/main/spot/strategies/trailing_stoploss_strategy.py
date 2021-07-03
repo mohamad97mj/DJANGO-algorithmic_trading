@@ -62,7 +62,6 @@ class ResultData:
 @dataclass
 class StateData:
     symbol: str = None
-    price: float = None
     setup_data: SetupData = None
     balance_data: BalanceData = None
 
@@ -75,64 +74,57 @@ class TrailingStoplossStrategyDeveloper:
 
     def __init__(self, public_client):
         self._public_client = public_client
-        self._test_init_optimum_parameters()
+        self._simulate_init_optimum_parameters()
 
     def get_price_required_symbols(self):
         return list(self._optimum_symbol_balance_shares.keys())
 
-    def get_operations(self, position: SpotPosition, strategy_state_data: StrategyStateData):
+    def get_operations(self, position: SpotPosition, strategy_state_data: StrategyStateData, symbol_prices: dict):
 
         operations = []
         markets = self._public_client.get_markets()
         for state_data in strategy_state_data.states_data:
-            if state_data.price > state_data.setup_data.upper_buy_limit_price:
+            price = symbol_prices[state_data.symbol]
+            if price > state_data.setup_data.upper_buy_limit_price:
                 if state_data.balance_data.is_cash:
-                    buy_order = SpotOrder(symbol=state_data.symbol,
-                                          type='market',
-                                          side='buy',
-                                          price=state_data.price,
-                                          amount_in_quote=state_data.balance_data.amount_in_quote, )
-                    buy_order.save()
-                    sell_operation = Operation(
-                        order=buy_order,
-                        action='create',
-                        position=position,
-                        status='in_progress')
-                    operations.append(sell_operation)
-                    sell_operation.save()
-                    position.save()
+                    operations.append(self._create_buy_market_operation(
+                        symbol=state_data.symbol,
+                        price=price,
+                        amount_in_quote=state_data.balance_data.amount_in_quote,
+                        position=position
+                    ))
 
                 state_data.setup_data = self._calculate_setup_data(
-                    setupe_price=state_data.price,
+                    setupe_price=price,
                     price_precision=markets[state_data.symbol]['precision']['price'],
                     ratio_data=self._optimum_ratio_data)
 
-            elif state_data.price < state_data.setup_data.lower_buy_limit_price:
+            elif price < state_data.setup_data.lower_buy_limit_price:
                 buy_order = SpotOrder(symbol=state_data.symbol,
                                       type='market',
                                       side='buy',
-                                      price=state_data.price,
+                                      price=price,
                                       amount_in_quote=state_data.balance_data.amount_in_quote, )
                 buy_order.save()
-                sell_operation = Operation(
+                buy_operation = Operation(
                     order=buy_order,
                     action='create',
                     position=position,
                     status='in_progress')
-                operations.append(sell_operation)
-                sell_operation.save()
+                operations.append(buy_operation)
+                buy_operation.save()
                 position.save()
 
                 state_data.setup_data = self._calculate_setup_data(
-                    setupe_price=state_data.price,
+                    setupe_price=price,
                     price_precision=markets[state_data.symbol]['precision']['price'],
                     ratio_data=self._optimum_ratio_data)
 
-            elif state_data.price < state_data.setup_data.stoploss_price:
+            elif price < state_data.setup_data.stoploss_price:
                 sell_order = SpotOrder(symbol=state_data.symbol,
                                        type='market',
                                        side='sell',
-                                       price=state_data.price,
+                                       price=price,
                                        amount_in_quote=state_data.balance_data.amount_in_quote, )
                 sell_order.save()
                 sell_operation = Operation(
@@ -146,10 +138,26 @@ class TrailingStoplossStrategyDeveloper:
 
         return operations
 
-    def _real_init_optimum_parameters(self):
+    def _create_buy_market_operation(self, symbol, price, amount_in_quote, position):
+        buy_market_order = SpotOrder(symbol=state_data.symbol,
+                                     type='market',
+                                     side='buy',
+                                     price=price,
+                                     amount_in_quote=state_data.balance_data.amount_in_quote, )
+        buy_market_order.save()
+        buy_market_operation = Operation(
+            order=buy_market_order,
+            action='create',
+            position=position,
+            status='in_progress')
+        buy_market_operation.save()
+        position.save()
+        return buy_market_operation
+
+    def _dynamic_init_optimum_parameters(self):
         pass
 
-    def _test_init_optimum_parameters(self):
+    def _simulate_init_optimum_parameters(self):
         print("in test init optimum")
         markets = self._public_client.get_markets()
         selected_symbols = self.select_symbols(markets)
@@ -186,11 +194,11 @@ class TrailingStoplossStrategyDeveloper:
                                                r2,
                                                # r3
                                                )
-                        self._buy(balance_data=balance_data,
-                                  buy_amount_in_quote=balance_data.amount_in_quote,
-                                  buy_price=shlc_data.starting_price,
-                                  amount_precision=symbol_market_data.amount_precision,
-                                  fee=symbol_market_data.fee)
+                        self._buy_simulate(balance_data=balance_data,
+                                           buy_amount_in_quote=balance_data.amount_in_quote,
+                                           buy_price=shlc_data.starting_price,
+                                           amount_precision=symbol_market_data.amount_precision,
+                                           fee=symbol_market_data.fee)
 
                         setup_data = self._calculate_setup_data(setupe_price=shlc_data.starting_price,
                                                                 price_precision=symbol_market_data.price_precision,
@@ -308,7 +316,7 @@ class TrailingStoplossStrategyDeveloper:
         return limit_step_ratios, stoploss2limit_ratios, \
             # stoploss_safety_ratios
 
-    def _buy(self, balance_data, buy_amount_in_quote, buy_price, amount_precision, fee):
+    def _buy_simulate(self, balance_data, buy_amount_in_quote, buy_price, amount_precision, fee):
         deviation = 0.0001
         truncated_buy_amount_before_fee = truncate(buy_amount_in_quote / (buy_price * (1 + deviation)),
                                                    amount_precision)
@@ -318,7 +326,7 @@ class TrailingStoplossStrategyDeveloper:
         balance_data.amount += pure_buy_amount
         balance_data.amount_in_quote -= real_buy_amount_in_quote
 
-    def _sell(self, balance_data, sell_amount, sell_price, amount_precision, fee):
+    def _sell_simulate(self, balance_data, sell_amount, sell_price, amount_precision, fee):
         deviation = 0.0001
         truncated_sell_amount_before_fee = truncate(sell_amount, amount_precision)
         pure_sell_amount = truncated_sell_amount_before_fee * (1 - fee)
@@ -577,11 +585,11 @@ class TrailingStoplossStrategyDeveloper:
                                 result_data):
         if setup_data.upper_buy_limit_price < highest_price:
             if balance_data.is_cash:
-                self._buy(balance_data=balance_data,
-                          buy_amount_in_quote=balance_data.amount_in_quote,
-                          buy_price=setup_data.upper_buy_limit_price,
-                          amount_precision=symbol_market_data.amount_precision,
-                          fee=symbol_market_data.fee)
+                self._buy_simulate(balance_data=balance_data,
+                                   buy_amount_in_quote=balance_data.amount_in_quote,
+                                   buy_price=setup_data.upper_buy_limit_price,
+                                   amount_precision=symbol_market_data.amount_precision,
+                                   fee=symbol_market_data.fee)
                 result_data.number_of_transactions['upper_buy_limit'] += 1
 
             setup_data = self._calculate_setup_data(setupe_price=highest_price,
@@ -594,19 +602,19 @@ class TrailingStoplossStrategyDeveloper:
 
         if lowest_price < setup_data.stoploss_price:
             if not balance_data.is_cash:
-                self._sell(balance_data=balance_data,
-                           sell_amount=balance_data.amount,
-                           sell_price=setup_data.stoploss_price,
-                           amount_precision=symbol_market_data.amount_precision,
-                           fee=symbol_market_data.fee)
+                self._sell_simulate(balance_data=balance_data,
+                                    sell_amount=balance_data.amount,
+                                    sell_price=setup_data.stoploss_price,
+                                    amount_precision=symbol_market_data.amount_precision,
+                                    fee=symbol_market_data.fee)
                 result_data.number_of_transactions['stoploss_triggered'] += 1
 
             if lowest_price < setup_data.lower_buy_limit_price:
-                self._buy(balance_data=balance_data,
-                          buy_amount_in_quote=balance_data.amount_in_quote,
-                          buy_price=setup_data.lower_buy_limit_price,
-                          amount_precision=symbol_market_data.amount_precision,
-                          fee=symbol_market_data.fee)
+                self._buy_simulate(balance_data=balance_data,
+                                   buy_amount_in_quote=balance_data.amount_in_quote,
+                                   buy_price=setup_data.lower_buy_limit_price,
+                                   amount_precision=symbol_market_data.amount_precision,
+                                   fee=symbol_market_data.fee)
                 result_data.number_of_transactions['lower_buy_limit'] += 1
 
                 setup_data = self._calculate_setup_data(setupe_price=setup_data.lower_buy_limit_price,

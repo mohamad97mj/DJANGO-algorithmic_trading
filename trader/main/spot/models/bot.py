@@ -43,8 +43,10 @@ class SpotBot(models.Model):
     def get_price_required_symbols(self):
         return self._strategy_center.get_strategy_price_required_symbols()
 
-    def _get_strategy_operations(self):
-        return self._strategy_center.get_strategy_operations(self.position, self._strategy_state_data)
+    def _get_strategy_operations(self, symbol_prices):
+        return self._strategy_center.get_strategy_operations(position=self.position,
+                                                             strategy_state_data=self._strategy_state_data,
+                                                             symbol_prices=symbol_prices)
 
     def _execute_strategy_operations(self, operations: List[Operation]):
         for operation in operations:
@@ -60,6 +62,5 @@ class SpotBot(models.Model):
                             amount=operation.order.amount)
 
     def run(self, symbol_prices: dict):
-        print('in first bot')
-        # operations = self._get_strategy_operations()
-        # self._execute_strategy_operations(operations)
+        operations = self._get_strategy_operations(symbol_prices=symbol_prices)
+        self._execute_strategy_operations(operations)

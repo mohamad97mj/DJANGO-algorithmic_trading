@@ -18,5 +18,7 @@ class SpotStrategyCenter:
     def get_strategy_price_required_symbols(self):
         return self._strategy.get_price_required_symbols()
 
-    def get_strategy_operations(self, position: SpotPosition, strategy_state_data):
-        return self._strategy.get_operations(position=position, strategy_state_data=strategy_state_data)
+    def get_strategy_operations(self, position: SpotPosition, strategy_state_data, symbol_prices):
+        return self._strategy.get_operations(position=position,
+                                             strategy_state_data=strategy_state_data,
+                                             symbol_prices=symbol_prices)
