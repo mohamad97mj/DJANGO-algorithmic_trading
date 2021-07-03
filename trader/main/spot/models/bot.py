@@ -59,7 +59,7 @@ class SpotBot(models.Model):
                             symbol=operation.order.symbol,
                             amount=operation.order.amount)
 
-    def run(self):
+    def run(self, symbol_prices: dict):
         print('in first bot')
         # operations = self._get_strategy_operations()
         # self._execute_strategy_operations(operations)
