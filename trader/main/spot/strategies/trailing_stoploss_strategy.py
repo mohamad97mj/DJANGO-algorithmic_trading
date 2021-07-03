@@ -77,9 +77,13 @@ class TrailingStoplossStrategyDeveloper:
         self._public_client = public_client
         self._test_init_optimum_parameters()
 
-    def set_operations(self, position: SpotPosition, strategy_state_data: StrategyStateData):
-        markets = self._public_client.get_markets()
+    def get_price_required_symbols(self):
+        return list(self._optimum_symbol_balance_shares.keys())
+
+    def get_operations(self, position: SpotPosition, strategy_state_data: StrategyStateData):
+
         operations = []
+        markets = self._public_client.get_markets()
         for state_data in strategy_state_data.states_data:
             if state_data.price > state_data.setup_data.upper_buy_limit_price:
                 if state_data.balance_data.is_cash:

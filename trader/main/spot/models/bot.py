@@ -35,12 +35,13 @@ class SpotBot(models.Model):
     def _init_requirements(self):
         self._private_client = PrivateClient(exchange_id=self.exchange_id, credential_id=self.credential_id)
         self._strategy_center = SpotStrategyCenter(exchange_id=self.exchange_id)
+        self._strategy_center.set_strategy(self.strategy)
 
     def reload(self):
         pass
 
-    def _set_strategy_operations(self):
-        return self._strategy_center.set_strategy_operations(self.strategy, self.position, self._strategy_state_data)
+    def _get_strategy_operations(self):
+        return self._strategy_center.get_strategy_operations(self.position, self._strategy_state_data)
 
     def _execute_strategy_operations(self, operations: List[Operation]):
         for operation in operations:
@@ -57,5 +58,5 @@ class SpotBot(models.Model):
 
     def run(self):
         print('in first bot')
-        # operations = self._set_strategy_operations()
+        # operations = self._get_strategy_operations()
         # self._execute_strategy_operations(operations)
