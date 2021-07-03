@@ -85,65 +85,56 @@ class TrailingStoplossStrategyDeveloper:
         markets = self._public_client.get_markets()
         for state_data in strategy_state_data.states_data:
             price = symbol_prices[state_data.symbol]
+            price_precision = markets[state_data.symbol]['precision']['price']
             if price > state_data.setup_data.upper_buy_limit_price:
                 if state_data.balance_data.is_cash:
-                    operations.append(self._create_buy_market_operation(
+                    buy_upper_limit_operation = self._create_operation(
                         symbol=state_data.symbol,
+                        type='market',
+                        side='buy',
                         price=price,
                         amount_in_quote=state_data.balance_data.amount_in_quote,
-                        position=position
-                    ))
+                        position=position)
+                    operations.append(buy_upper_limit_operation)
 
                 state_data.setup_data = self._calculate_setup_data(
                     setupe_price=price,
-                    price_precision=markets[state_data.symbol]['precision']['price'],
+                    price_precision=price_precision,
                     ratio_data=self._optimum_ratio_data)
 
             elif price < state_data.setup_data.lower_buy_limit_price:
-                buy_order = SpotOrder(symbol=state_data.symbol,
-                                      type='market',
-                                      side='buy',
-                                      price=price,
-                                      amount_in_quote=state_data.balance_data.amount_in_quote, )
-                buy_order.save()
-                buy_operation = Operation(
-                    order=buy_order,
-                    action='create',
-                    position=position,
-                    status='in_progress')
-                operations.append(buy_operation)
-                buy_operation.save()
-                position.save()
+                buy_lower_limit_operation = self._create_operation(
+                    symbol=state_data.symbol,
+                    type='market',
+                    side='buy',
+                    price=price,
+                    amount_in_quote=state_data.balance_data.amount_in_quote,
+                    position=position)
+                operations.append(buy_lower_limit_operation)
 
                 state_data.setup_data = self._calculate_setup_data(
                     setupe_price=price,
-                    price_precision=markets[state_data.symbol]['precision']['price'],
+                    price_precision=price_precision,
                     ratio_data=self._optimum_ratio_data)
 
             elif price < state_data.setup_data.stoploss_price:
-                sell_order = SpotOrder(symbol=state_data.symbol,
-                                       type='market',
-                                       side='sell',
-                                       price=price,
-                                       amount_in_quote=state_data.balance_data.amount_in_quote, )
-                sell_order.save()
-                sell_operation = Operation(
-                    order=sell_order,
-                    action='create',
-                    position=position,
-                    status='in_progress')
-                operations.append(sell_operation)
-                sell_operation.save()
-                position.save()
+                stoploss_operation = self._create_operation(
+                    symbol=state_data.symbol,
+                    type='market',
+                    side='buy',
+                    price=price,
+                    amount_in_quote=state_data.balance_data.amount_in_quote,
+                    position=position)
+                operations.append(stoploss_operation)
 
         return operations
 
-    def _create_buy_market_operation(self, symbol, price, amount_in_quote, position):
-        buy_market_order = SpotOrder(symbol=state_data.symbol,
-                                     type='market',
-                                     side='buy',
+    def _create_operation(self, symbol, type, side, price, amount_in_quote, position):
+        buy_market_order = SpotOrder(symbol=symbol,
+                                     type=type,
+                                     side=side,
                                      price=price,
-                                     amount_in_quote=state_data.balance_data.amount_in_quote, )
+                                     amount_in_quote=amount_in_quote, )
         buy_market_order.save()
         buy_market_operation = Operation(
             order=buy_market_order,
