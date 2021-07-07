@@ -4,20 +4,22 @@ from binance import ThreadedWebsocketManager
 
 api_key = os.environ.get('MAIN_API_KEY')
 api_secret = os.environ.get('MAIN_SECRET_KEY')
+print(api_key)
+print(api_secret)
 
 
 def main():
     symbol = 'BTCUSDT'
 
-    twm = ThreadedWebsocketManager(api_key=api_key, api_secret=api_secret)
+    twm = ThreadedWebsocketManager()
     # start is required to initialise its internal loop
     twm.start()
 
     def handle_socket_message(msg):
-        # print(f"message type: {msg['e']}")
         print(msg)
 
-    twm.start_symbol_ticker_socket(callback=handle_socket_message, symbol='BTCUSDT')
+    twm.start_symbol_ticker_socket(callback=handle_socket_message, symbol='SUSHIUPUSDT')
+    twm.start_symbol_ticker_socket(callback=handle_socket_message, symbol='ETHUSDT')
 
     # twm.start_kline_socket(callback=handle_socket_message, symbol=symbol)
     # multiple sockets can be started
@@ -30,5 +32,6 @@ def main():
     print("helooooooooooooooooooooooooooo")
     # twm.join()
     print('goodbyeeeeeeeeeeeeeeeeeeeeeeeee')
+
 
 main()
