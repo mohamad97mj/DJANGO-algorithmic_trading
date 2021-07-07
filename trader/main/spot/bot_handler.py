@@ -2,6 +2,7 @@ import time
 from typing import List
 from trader.main.spot.models import SpotPosition, SpotBot
 from binance import ThreadedWebsocketManager
+from trader.clients import PublicClient, PrivateClient
 
 
 class SpotBotHandler:
@@ -9,9 +10,11 @@ class SpotBotHandler:
     def __init__(self):
         self._bots: List[SpotBot] = []
         self._symbol_prices: dict = {}
+        self._public_clients = {}
 
     def create_bot(self, exchange_id: str, credential_id: str, strategy: str, position: SpotPosition):
         new_bot = SpotBot(exchange_id=exchange_id, credential_id=credential_id, strategy=strategy, position=position)
+        self.init_bot_requirements(bot=new_bot)
         self._bots.append(new_bot)
         new_bot.save()
         return new_bot
@@ -19,7 +22,17 @@ class SpotBotHandler:
     def reload_bots(self):
         self._bots = list(SpotBot.objects.all())
         for bot in self._bots:
+            self.init_bot_requirements(bot)
             bot.reload()
+
+    def init_bot_requirements(self, bot):
+        private_client = PrivateClient(exchange_id=bot.exchange_id, credential_id=bot.credential_id)
+        if bot.exchange_id in self._public_clients:
+            public_client = self._public_clients[bot.exchange_id]
+        else:
+            public_client = PublicClient(exchange_id=bot.exchange_id)
+            self._public_clients[bot.exchange_id] = public_client
+        bot.init_requirements(private_client=private_client, public_client=public_client)
 
     def _is_prices_available(self, symbols: List):
         is_available = True

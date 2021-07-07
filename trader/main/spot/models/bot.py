@@ -1,7 +1,7 @@
 from typing import List
 from django.utils import timezone
 from django.db import models
-from trader.clients import PrivateClient
+from trader.clients import PrivateClient, PublicClient
 from trader.main.spot.strategies.strategy_center import SpotStrategyCenter
 from .utils.exceptions import BotDoesNotExistsException
 from .operation import Operation
@@ -29,12 +29,13 @@ class SpotBot(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(SpotBot, self).__init__(*args, **kwargs)
+        self._private_client = None
+        self._strategy_center = None
         self._strategy_state_data = None
-        self._init_requirements()
 
-    def _init_requirements(self):
-        self._private_client = PrivateClient(exchange_id=self.exchange_id, credential_id=self.credential_id)
-        self._strategy_center = SpotStrategyCenter(exchange_id=self.exchange_id)
+    def init_requirements(self, private_client: PrivateClient, public_client: PublicClient):
+        self._private_client = private_client
+        self._strategy_center = SpotStrategyCenter(public_client=public_client)
         self._strategy_center.set_strategy(self.strategy)
 
     def reload(self):
