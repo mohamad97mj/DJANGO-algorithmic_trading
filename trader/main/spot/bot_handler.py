@@ -1,8 +1,10 @@
 import time
+from functools import partial
 from typing import List
 from trader.main.spot.models import SpotPosition, SpotBot
 from binance import ThreadedWebsocketManager
 from trader.clients import PublicClient, PrivateClient
+from trader.global_utils import with2without_slash
 
 
 class SpotBotHandler:
@@ -39,7 +41,7 @@ class SpotBotHandler:
         while True:
             for bot in self._bots:
                 price_required_symbols = bot.get_price_required_symbols()
-
+                self._start_price_ticker(bot.exchange_id, price_required_symbols)
                 while not self._is_prices_available(bot.exchange_id, price_required_symbols):
                     time.sleep(1)
                 bot.run(self._symbol_prices)
@@ -55,14 +57,21 @@ class SpotBotHandler:
 
         return is_available
 
-    def _start_price_ticker(self, symbols: List):
+    def _start_price_ticker(self, exchange_id, symbols: List):
+
+        def handle_socket_message(msg, _symbol, _exchange_id):
+            print(_symbol)
+            print(_exchange_id)
+            print(msg)
 
         twm = ThreadedWebsocketManager()
         twm.start()
         for symbol in symbols:
             if symbol not in self._symbol_prices:
-                twm.start_symbol_ticker_socket(callback=self._handle_price_ticker_socket_message, symbol=symbol)
-
-    def _handle_price_ticker_socket_message(self, msg):
-        # print(f"message type: {msg['e']}")
-        print(msg)
+                self._symbol_prices[symbol] = {}
+            if exchange_id not in self._symbol_prices[symbol]:
+                twm.start_symbol_ticker_socket(
+                    callback=partial(handle_socket_message,
+                                     _symbol=symbol,
+                                     _exchange_id=exchange_id),
+                    symbol=with2without_slash(symbol)),

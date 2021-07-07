@@ -98,7 +98,7 @@ class TrailingStoplossStrategyDeveloper:
                     operations.append(buy_upper_limit_operation)
 
                 state_data.setup_data = self._calculate_setup_data(
-                    setupe_price=price,
+                    setup_price=price,
                     price_precision=price_precision,
                     ratio_data=self._optimum_ratio_data)
 
@@ -113,7 +113,7 @@ class TrailingStoplossStrategyDeveloper:
                 operations.append(buy_lower_limit_operation)
 
                 state_data.setup_data = self._calculate_setup_data(
-                    setupe_price=price,
+                    setup_price=price,
                     price_precision=price_precision,
                     ratio_data=self._optimum_ratio_data)
 
@@ -149,7 +149,6 @@ class TrailingStoplossStrategyDeveloper:
         pass
 
     def _simulate_init_optimum_parameters(self):
-        print("in test init optimum")
         markets = self._public_client.get_markets()
         selected_symbols = self.select_symbols(markets)
         limit_step_ratios, stoploss2limit_ratios = self._init_ratios()
@@ -191,7 +190,7 @@ class TrailingStoplossStrategyDeveloper:
                                            amount_precision=symbol_market_data.amount_precision,
                                            fee=symbol_market_data.fee)
 
-                        setup_data = self._calculate_setup_data(setupe_price=shlc_data.starting_price,
+                        setup_data = self._calculate_setup_data(setup_price=shlc_data.starting_price,
                                                                 price_precision=symbol_market_data.price_precision,
                                                                 ratio_data=ratio_data)
 
@@ -231,10 +230,8 @@ class TrailingStoplossStrategyDeveloper:
         symbol_avg_profit = {
         }
         for s in intersection_symbols:
-            print(s)
             avg_profit = 0
             for l in ohlcvs_limits:
-                print(s)
                 avg_profit += positive_results[l][s].profit_rate
             avg_profit /= len(ohlcvs_limits)
             avg_profit = int(avg_profit)
@@ -248,7 +245,7 @@ class TrailingStoplossStrategyDeveloper:
         }
 
         self._optimum_ratio_data = RatioData(limit_step_ratios[0], stoploss2limit_ratios[0])
-        self._optimum_symbol_balance_shares = symbol_balance_shares
+        self._optimum_symbol_balance_shares = symbol_balance_shares or {'ETHDOWN/USDT': 1.0}
 
     def select_symbols(self, markets):
         symbols = markets.keys()
@@ -276,7 +273,7 @@ class TrailingStoplossStrategyDeveloper:
 
     def _init_ratios(self):
 
-        # limit_step_ratios = np.arange(0.01, 0.05, 0.01)
+        # limit_step_ratios = np.arrange(0.01, 0.05, 0.01)
         limit_step_ratios = [
             # 0.001,
             # 0.005,
@@ -286,7 +283,7 @@ class TrailingStoplossStrategyDeveloper:
             # 0.1,
             # 0.2
         ]
-        # stoploss2limit_ratios = np.arange(0.01, 0.05, 0.01)
+        # stoploss2limit_ratios = np.arrange(0.01, 0.05, 0.01)
         stoploss2limit_ratios = [
             # 0.001,
             # 0.005,
@@ -326,14 +323,14 @@ class TrailingStoplossStrategyDeveloper:
         balance_data.amount_in_quote += pure_sell_amount_in_quote
         balance_data.amount -= truncated_sell_amount_before_fee
 
-    def _calculate_setup_data(self, setupe_price, price_precision, ratio_data):
-        stoploss_price = round(setupe_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio),
+    def _calculate_setup_data(self, setup_price, price_precision, ratio_data):
+        stoploss_price = round(setup_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio),
                                price_precision)
         # stoploss_trigger_price = round(
-        #     setupe_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio * (
+        #     setup_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio * (
         #             1 - ratio_data.stoploss_safety_ratio)), price_precision)
-        upper_buy_limit_price = setupe_price
-        lower_buy_limit_price = round(setupe_price * (1 - ratio_data.limit_step_ratio), price_precision)
+        upper_buy_limit_price = setup_price
+        lower_buy_limit_price = round(setup_price * (1 - ratio_data.limit_step_ratio), price_precision)
 
         return SetupData(stoploss_price,
                          # stoploss_trigger_price,
@@ -583,7 +580,7 @@ class TrailingStoplossStrategyDeveloper:
                                    fee=symbol_market_data.fee)
                 result_data.number_of_transactions['upper_buy_limit'] += 1
 
-            setup_data = self._calculate_setup_data(setupe_price=highest_price,
+            setup_data = self._calculate_setup_data(setup_price=highest_price,
                                                     price_precision=symbol_market_data.price_precision,
                                                     ratio_data=ratio_data)
         return setup_data
@@ -608,7 +605,7 @@ class TrailingStoplossStrategyDeveloper:
                                    fee=symbol_market_data.fee)
                 result_data.number_of_transactions['lower_buy_limit'] += 1
 
-                setup_data = self._calculate_setup_data(setupe_price=setup_data.lower_buy_limit_price,
+                setup_data = self._calculate_setup_data(setup_price=setup_data.lower_buy_limit_price,
                                                         price_precision=symbol_market_data.price_precision,
                                                         ratio_data=ratio_data)
 
