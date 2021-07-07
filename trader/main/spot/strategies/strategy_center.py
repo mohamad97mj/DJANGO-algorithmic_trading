@@ -5,8 +5,8 @@ from .trailing_stoploss_strategy import TrailingStoplossStrategyDeveloper
 
 class SpotStrategyCenter:
 
-    def __init__(self, exchange_id):
-        self._public_client = PublicClient(exchange_id)
+    def __init__(self, public_client: PublicClient):
+        self._public_client = public_client
         self._strategy = None
         self._strategy_mapper = {
             'trailing_stoploss': TrailingStoplossStrategyDeveloper
