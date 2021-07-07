@@ -34,17 +34,26 @@ class SpotBotHandler:
             self._public_clients[bot.exchange_id] = public_client
         bot.init_requirements(private_client=private_client, public_client=public_client)
 
-    def _is_prices_available(self, symbols: List):
+    def run_bots(self):
+        # cancel previous orders
+        while True:
+            for bot in self._bots:
+                price_required_symbols = bot.get_price_required_symbols()
+
+                while not self._is_prices_available(bot.exchange_id, price_required_symbols):
+                    time.sleep(1)
+                bot.run(self._symbol_prices)
+            time.sleep(1)
+
+    def _is_prices_available(self, exchange_id, symbols: List):
         is_available = True
         for symbol in symbols:
-            if not (symbol in self._symbol_prices and self._symbol_prices[symbol]):
+            if not (symbol in self._symbol_prices and
+                    exchange_id in self._symbol_prices[symbol] and
+                    self._symbol_prices[symbol][exchange_id]):
                 is_available = False
 
         return is_available
-
-    def _handle_price_ticker_socket_message(self, msg):
-        # print(f"message type: {msg['e']}")
-        print(msg)
 
     def _start_price_ticker(self, symbols: List):
 
@@ -54,13 +63,6 @@ class SpotBotHandler:
             if symbol not in self._symbol_prices:
                 twm.start_symbol_ticker_socket(callback=self._handle_price_ticker_socket_message, symbol=symbol)
 
-    def run_bots(self):
-        # cancel previous orders
-        while True:
-            for bot in self._bots:
-                price_required_symbols = bot.get_price_required_symbols()
-
-                while not self._is_prices_available(price_required_symbols):
-                    time.sleep(1)
-                bot.run(self._symbol_prices)
-            time.sleep(1)
+    def _handle_price_ticker_socket_message(self, msg):
+        # print(f"message type: {msg['e']}")
+        print(msg)
