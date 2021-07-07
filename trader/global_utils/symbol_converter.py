@@ -7,4 +7,5 @@ def with2without_slash(symbol):
 
 def without2with_slash(symbol, market):
     with_slash_symbols = list(market.keys)
-    pass
+    without2with_slash_mapper = {s.replace('/', ''): s for s in with_slash_symbols}
+    return without2with_slash_mapper[symbol]
