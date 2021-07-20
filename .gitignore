@@ -143,4 +143,5 @@ cython_debug/
 
 test.py
 test2.py
+test*.py
 env.sh
