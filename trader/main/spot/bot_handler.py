@@ -4,7 +4,7 @@ from typing import List
 from trader.main.spot.models import SpotPosition, SpotBot
 from binance import ThreadedWebsocketManager
 from trader.clients import PublicClient, PrivateClient
-from trader.global_utils import with2without_slash
+from trader.utils import with2without_slash
 
 
 class SpotBotHandler:
@@ -44,34 +44,34 @@ class SpotBotHandler:
                 self._start_price_ticker(bot.exchange_id, price_required_symbols)
                 while not self._is_prices_available(bot.exchange_id, price_required_symbols):
                     time.sleep(1)
-                bot.run(self._symbol_prices)
+                bot.run(self._symbol_prices[bot.exchange_id])
             time.sleep(1)
 
     def _is_prices_available(self, exchange_id, symbols: List):
         is_available = True
         for symbol in symbols:
-            if not (symbol in self._symbol_prices and
-                    exchange_id in self._symbol_prices[symbol] and
-                    self._symbol_prices[symbol][exchange_id]):
+            if not (exchange_id in self._symbol_prices and
+                    symbol in self._symbol_prices[exchange_id] and
+                    self._symbol_prices[exchange_id][symbol]):
                 is_available = False
 
         return is_available
 
     def _start_price_ticker(self, exchange_id, symbols: List):
 
-        def handle_socket_message(msg, _symbol, _exchange_id):
-            print(_symbol)
-            print(_exchange_id)
-            print(msg)
+        def handle_socket_message(msg, _symbol):
+            if msg['e'] != 'error':
+                self._symbol_prices[exchange_id][_symbol] = float(msg['c'])
+            print(self._symbol_prices)
 
         twm = ThreadedWebsocketManager()
         twm.start()
         for symbol in symbols:
-            if symbol not in self._symbol_prices:
-                self._symbol_prices[symbol] = {}
-            if exchange_id not in self._symbol_prices[symbol]:
+            if exchange_id not in self._symbol_prices:
+                self._symbol_prices[exchange_id] = {}
+            if symbol not in self._symbol_prices[exchange_id]:
                 twm.start_symbol_ticker_socket(
                     callback=partial(handle_socket_message,
                                      _symbol=symbol,
-                                     _exchange_id=exchange_id),
+                                     ),
                     symbol=with2without_slash(symbol)),
