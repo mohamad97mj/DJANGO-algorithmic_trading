@@ -1,8 +1,7 @@
 from typing import List
 from dataclasses import dataclass, field
 from copy import deepcopy
-from trader.global_utils import truncate, my_copy, intersection
-from trader.clients.public_client import PublicClient
+from trader.utils import truncate, my_copy, intersection
 from trader.main.spot.models import SpotPosition, SpotOrder, Operation
 
 
@@ -66,6 +65,7 @@ class StateData:
     balance_data: BalanceData = None
 
 
+@dataclass
 class StrategyStateData:
     states_data: List[StateData]
 
@@ -77,16 +77,25 @@ class TrailingStoplossStrategyDeveloper:
         self._simulate_init_optimum_parameters()
 
     def get_price_required_symbols(self):
-        return list(self._optimum_symbol_balance_shares.keys())
+        return list(self._optimum_symbol_balance_shares)
 
     def get_operations(self, position: SpotPosition, strategy_state_data: StrategyStateData, symbol_prices: dict):
+        if not strategy_state_data:
+            strategy_state_data = StrategyStateData(
+                states_data=[StateData(symbol=symbol,
+                                       balance_data=BalanceData(
+                                           amount=0,
+                                           amount_in_quote=self._optimum_symbol_balance_shares[
+                                                               symbol] * position.volume,
+                                           is_cash=True)
+                                       ) for symbol in list(symbol_prices)])
 
         operations = []
         markets = self._public_client.get_markets()
         for state_data in strategy_state_data.states_data:
             price = symbol_prices[state_data.symbol]
             price_precision = markets[state_data.symbol]['precision']['price']
-            if price > state_data.setup_data.upper_buy_limit_price:
+            if (not state_data.setup_data) or price > state_data.setup_data.upper_buy_limit_price:
                 if state_data.balance_data.is_cash:
                     buy_upper_limit_operation = self._create_operation(
                         symbol=state_data.symbol,
@@ -224,18 +233,18 @@ class TrailingStoplossStrategyDeveloper:
                 if positive_results_data:
                     positive_results[limit][symbol] = positive_results_data[0]
         positive_results_symbols = {
-            k: list(v.keys()) for k, v in positive_results.items()
+            k: list(v) for k, v in positive_results.items()
         }
         intersection_symbols = intersection(*list(positive_results_symbols.values()))
         symbol_avg_profit = {
         }
-        for s in intersection_symbols:
+        for symbol in intersection_symbols:
             avg_profit = 0
-            for l in ohlcvs_limits:
-                avg_profit += positive_results[l][s].profit_rate
+            for limit in ohlcvs_limits:
+                avg_profit += positive_results[limit][symbol].profit_rate
             avg_profit /= len(ohlcvs_limits)
             avg_profit = int(avg_profit)
-            symbol_avg_profit[s] = avg_profit
+            symbol_avg_profit[symbol] = avg_profit
 
         total_avg_profit = 0
         for ap in symbol_avg_profit.values():
@@ -244,8 +253,22 @@ class TrailingStoplossStrategyDeveloper:
             s: ap / total_avg_profit for s, ap in symbol_avg_profit.items()
         }
 
+        spare_symbol_profit = {}
+        for symbol in positive_results_symbols[1000]:
+            profit = positive_results[1000][symbol].profit_rate
+            profit = int(profit) or 1
+            spare_symbol_profit[symbol] = profit
+
+        total_profit = 0
+        for ap in spare_symbol_profit.values():
+            total_profit += ap
+        spare_balance_shares = {
+            s: ap / total_profit for s, ap in spare_symbol_profit.items()
+        }
+
         self._optimum_ratio_data = RatioData(limit_step_ratios[0], stoploss2limit_ratios[0])
-        self._optimum_symbol_balance_shares = symbol_balance_shares or {'ETHDOWN/USDT': 1.0}
+        self._optimum_symbol_balance_shares = symbol_balance_shares if len(
+            symbol_balance_shares) > 1 else spare_balance_shares
 
     def select_symbols(self, markets):
         symbols = markets.keys()
