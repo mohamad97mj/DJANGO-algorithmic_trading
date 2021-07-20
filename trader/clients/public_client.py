@@ -1,4 +1,4 @@
-from trader.global_utils import apply2all_methods, log
+from trader.utils import apply2all_methods, log
 from trader.exchange import ef
 
 
@@ -9,6 +9,9 @@ class PublicClient:
 
         # def get_exchanges(self):
         #     return ccxt.exchanges
+
+    def fetch_time(self):
+        return self._exchange.fetch_time()
 
     def load_markets(self, reload=False):
         return self._exchange.load_markets(reload=reload)
@@ -32,7 +35,7 @@ class PublicClient:
         return self._exchange.fetch_tickers(symbols=symbols)
 
     def fetch_ticker(self, symbol='BTC/USDT'):
-        return self._exchange.fetck_ticker(symbol=symbol)
+        return self._exchange.fetch_ticker(symbol=symbol)
 
     def fetch_ohlcv(self, symbol='BTC/USDT', timeframe='1m', since=None, limit=None):
         if not limit:

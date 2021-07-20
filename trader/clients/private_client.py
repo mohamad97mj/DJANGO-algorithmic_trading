@@ -1,9 +1,10 @@
-from trader.global_utils import apply2all_methods, log
+from trader.utils import apply2all_methods, log
 from trader.exchange import ef
 
 
 @apply2all_methods(log)
 class PrivateClient:
+
     def __init__(self, exchange_id, credential_id):
         self._exchange = ef.create_exchange(exchange_id=exchange_id,
                                             credential_id=credential_id)
@@ -30,7 +31,7 @@ class PrivateClient:
         return self._exchange.create_market_buy_order(symbol=symbol, amount=amount)
 
     def create_market_buy_order_in_quote(self, symbol, amount_in_qoute):
-        return self._exchange.create_marke_buy_order_in_quote(symbol=symbol, amount=amount_in_qoute, price=1)
+        return self._exchange.create_market_buy_order_in_quote(symbol=symbol, amount=amount_in_qoute, price=1)
 
     def create_market_sell_order(self, symbol, amount):
         return self._exchange.create_market_sell_order(symbol=symbol, amount=amount)
