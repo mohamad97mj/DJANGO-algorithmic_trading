@@ -23,7 +23,7 @@ class LevelFilter(logging.Filter):
         return record.levelname.lower() == self.level
 
 
-def my_get_logger(logger_name='videoserver.video_api'):
+def my_get_logger(logger_name='trader'):
     logger_name = logger_name
     logger = logging.getLogger(logger_name)
     if settings.DEBUG:

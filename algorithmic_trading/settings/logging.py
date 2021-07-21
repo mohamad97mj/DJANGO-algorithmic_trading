@@ -1,7 +1,7 @@
 import os
 from .main import STATIC_ROOT, DEBUG
 import logging.config
-from pathlib import Path
+
 
 LOGGING_CONFIG = None
 
