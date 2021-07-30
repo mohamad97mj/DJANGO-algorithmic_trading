@@ -1,7 +1,10 @@
 import ccxt
-from ccxt.base.errors import ExchangeError
+from ccxt.base.errors import NetworkError
+from global_utils import retry_on_timeout
+from trader.utils import apply2all_methods
 
 
+@apply2all_methods(retry_on_timeout(timeout_errors=NetworkError))
 class Exchange:
     default_params = {
         'recvWindow': 10000
@@ -10,6 +13,9 @@ class Exchange:
     def __init__(self, ccxt_exchange: ccxt.Exchange, pb_exchange):  # pb stands for python binance
         self._ccxt_exchange = ccxt_exchange
         self._pb_exchange = pb_exchange
+
+    def fetch_status(self):
+        return self._ccxt_exchange.fetch_status()
 
     def fetch_time(self):
         return self._ccxt_exchange.fetch_time()
