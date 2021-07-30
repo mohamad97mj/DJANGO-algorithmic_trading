@@ -2,7 +2,6 @@ from trader.utils import apply2all_methods, log
 from trader.exchange import ef
 
 
-@apply2all_methods(log)
 class PrivateClient:
 
     def __init__(self, exchange_id, credential_id):
