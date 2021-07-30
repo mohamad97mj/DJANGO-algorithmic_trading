@@ -134,6 +134,8 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
+static
+
 # Cython debug symbols
 cython_debug/
 
@@ -143,4 +145,5 @@ cython_debug/
 
 test.py
 test2.py
+test*.py
 env.sh

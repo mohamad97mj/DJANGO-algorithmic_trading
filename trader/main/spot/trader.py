@@ -14,7 +14,7 @@ class SpotTrader:
                                             position=position)
 
     def start(self):
-        print("in start")
+        self._bot_handler.reload_bots()
         self._bot_handler.run_bots()
 
 

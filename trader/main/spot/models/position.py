@@ -1,5 +1,5 @@
 from django.db import models
-from datetime import datetime
+from django.utils import timezone
 
 
 class SpotPositionManager(models.Manager):
@@ -7,13 +7,10 @@ class SpotPositionManager(models.Manager):
 
 
 class SpotPosition(models.Model):
-    objcets = SpotPositionManager()
+    objects = SpotPositionManager()
 
-    position_id = models.CharField(max_length=100, unique=True)
-    signal = models.ForeignKey('SpotSignal', related_name='positions', on_delete=models.RESTRICT)
-    volume = models.FloatField()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        now = datetime.now()
-        self.position_id = '{}|{}'.format('position', now)
+    # position_id = models.CharField(max_length=100, unique=True)
+    signal = models.ForeignKey('SpotSignal', related_name='positions', on_delete=models.RESTRICT, null=True)
+    volume = models.FloatField()  # initial volume
+    # current volume = ?
+    created_at = models.CharField(max_length=100, default=timezone.now, blank=True)

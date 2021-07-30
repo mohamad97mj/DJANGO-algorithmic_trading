@@ -1,3 +1,4 @@
+import sys
 from django.apps import AppConfig
 
 
@@ -6,7 +7,9 @@ class TraderConfig(AppConfig):
     name = 'trader'
 
     def ready(self):
-        import asyncio
-        from .trade import trade
-        asyncio.run(trade())
-        print("after")
+        if 'runserver' in sys.argv:
+            from global_utils import my_get_logger
+            logger = my_get_logger()
+            logger.info("trader app started!")
+            from .trade import trade
+            trade()
