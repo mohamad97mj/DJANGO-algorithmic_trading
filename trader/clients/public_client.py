@@ -1,14 +1,15 @@
-from trader.utils import apply2all_methods, log
 from trader.exchange import ef
 
 
-@apply2all_methods(log)
 class PublicClient:
     def __init__(self, exchange_id):
         self._exchange = ef.create_exchange(exchange_id=exchange_id)
 
         # def get_exchanges(self):
         #     return ccxt.exchanges
+
+    def fetch_status(self):
+        return self._exchange.fetch_status()
 
     def fetch_time(self):
         return self._exchange.fetch_time()
