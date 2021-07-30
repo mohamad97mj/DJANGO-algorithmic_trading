@@ -43,11 +43,30 @@ class SpotBot(models.Model):
         self._strategy_center.set_strategy(self.strategy)
         self._strategy_state_data = self._strategy_center.init_strategy_state_data(position=self.position)
 
-    def reset_strategy(self):
+    def ready(self):
+        self.sell_all_assets()
+
+    def reset(self):
+        self.sell_all_assets()
         self._strategy_center.reset_strategy()
 
-    def reload(self):
-        pass
+    def sell_all_assets(self):
+        logger = my_get_logger()
+        markets = self._public_client.get_markets()
+        total_balances = self._private_client.fetch_total_balance()
+        for currency, balance in total_balances.items():
+            symbol = '{}/USDT'.format(currency)
+            if symbol in markets:
+                if currency != 'USDT' and balance > markets[symbol]['limits']['amount']['min']:
+                    ticker = self._public_client.fetch_ticker(symbol)
+                    price = ticker['last']
+                    if balance * price > markets[symbol]['limits']['cost']['min']:
+                        exchange_order = self._private_client.create_market_sell_order(symbol, balance)
+                        logger.info(
+                            'stoploss_triggered_operation: (symbol: {}, price, amount: {})'.format(
+                                symbol,
+                                exchange_order['price'],
+                                balance))
 
     def get_price_required_symbols(self):
         return self._strategy_center.get_strategy_price_required_symbols()
@@ -57,7 +76,7 @@ class SpotBot(models.Model):
                                                              strategy_state_data=self._strategy_state_data,
                                                              symbol_prices=symbol_prices)
 
-    def _execute_strategy_operations(self, operations: List[Operation], test=False, symbol_prices=None):
+    def _execute_strategy_operations(self, operations: List[Operation], test=True, symbol_prices=None):
         for operation in operations:
             if operation.action == 'create':
                 if operation.order.type == 'market':
@@ -115,4 +134,4 @@ class SpotBot(models.Model):
 
     def run(self, symbol_prices: dict):
         operations = self._get_strategy_operations(symbol_prices=symbol_prices)
-        self._execute_strategy_operations(operations, test=True, symbol_prices=symbol_prices)
+        self._execute_strategy_operations(operations, test=False, symbol_prices=symbol_prices)
