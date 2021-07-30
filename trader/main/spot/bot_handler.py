@@ -1,18 +1,30 @@
 import time
-from functools import partial
+from pprint import pprint
 from typing import List
+from global_utils import retry_on_timeout, async_retry_on_timeout, my_get_logger
 from trader.main.spot.models import SpotPosition, SpotBot
-from binance import ThreadedWebsocketManager
 from trader.clients import PublicClient, PrivateClient
-from trader.utils import with2without_slash
+from trader.utils import with2without_slash, CacheUtils
+import asyncio
+from binance import AsyncClient, BinanceSocketManager
+from threading import Thread
+from aiohttp.client_exceptions import ClientConnectorError
+from dataclasses import dataclass
+from concurrent.futures._base import TimeoutError
+
+
+@dataclass()
+class PriceTicker:
+    thread: Thread
+    client: AsyncClient = None
 
 
 class SpotBotHandler:
 
     def __init__(self):
         self._bots: List[SpotBot] = []
-        self._symbol_prices: dict = {}
         self._public_clients = {}
+        self._price_tickers = {}
 
     def create_bot(self, exchange_id: str, credential_id: str, strategy: str, position: SpotPosition):
         new_bot = SpotBot(exchange_id=exchange_id, credential_id=credential_id, strategy=strategy, position=position)
@@ -37,41 +49,79 @@ class SpotBotHandler:
         bot.init_requirements(private_client=private_client, public_client=public_client)
 
     def run_bots(self):
-        # cancel previous orders
+        # start = int(time.time())
         while True:
             for bot in self._bots:
+
+                # finish = int(time.time())
+                # if finish - start > 10:
+                #     bot.reset_strategy()
+                #
+                # print(finish - start)
+
                 price_required_symbols = bot.get_price_required_symbols()
-                self._start_price_ticker(bot.exchange_id, price_required_symbols)
-                while not self._is_prices_available(bot.exchange_id, price_required_symbols):
-                    time.sleep(1)
-                bot.run(self._symbol_prices[bot.exchange_id])
-            time.sleep(1)
+                symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
+                while not symbol_prices:
+                    self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
+                    time.sleep(7)
+                    symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
 
-    def _is_prices_available(self, exchange_id, symbols: List):
-        is_available = True
+                logger = my_get_logger()
+                logger.info('symbol_prices: {}'.format(symbol_prices))
+                bot.run(symbol_prices)
+
+            time.sleep(2)
+
+    def _get_prices_if_available(self, exchange_id, symbols: List):
+        symbol_prices = self._read_prices(exchange_id, symbols)
         for symbol in symbols:
-            if not (exchange_id in self._symbol_prices and
-                    symbol in self._symbol_prices[exchange_id] and
-                    self._symbol_prices[exchange_id][symbol]):
-                is_available = False
+            if not (symbol in symbol_prices and symbol_prices[symbol]):
+                return
 
-        return is_available
+        return symbol_prices
 
-    def _start_price_ticker(self, exchange_id, symbols: List):
+    def _start_symbols_price_ticker(self, exchange_id, symbols: List):
 
-        def handle_socket_message(msg, _symbol):
-            if msg['e'] != 'error':
-                self._symbol_prices[exchange_id][_symbol] = float(msg['c'])
-            print(self._symbol_prices)
+        symbol_prices = self._read_prices(exchange_id, symbols)
 
-        twm = ThreadedWebsocketManager()
-        twm.start()
         for symbol in symbols:
-            if exchange_id not in self._symbol_prices:
-                self._symbol_prices[exchange_id] = {}
-            if symbol not in self._symbol_prices[exchange_id]:
-                twm.start_symbol_ticker_socket(
-                    callback=partial(handle_socket_message,
-                                     _symbol=symbol,
-                                     ),
-                    symbol=with2without_slash(symbol)),
+            if not (symbol in symbol_prices and symbol_prices[symbol]):
+                if symbol not in self._price_tickers or self._price_tickers[symbol].client:
+                    if symbol in self._price_tickers:
+                        asyncio.run(self._price_tickers[symbol].client.close_connection())
+
+                    self._init_price_ticker(exchange_id, symbol)
+
+    def _init_price_ticker(self, exchange_id, symbol):
+        t = Thread(target=asyncio.run, args=(self._start_symbol_price_ticker(exchange_id, symbol),))
+        self._price_tickers[symbol] = PriceTicker(t)
+        t.start()
+
+    async def _start_symbol_price_ticker(self, exchange_id, symbol):
+        client = await async_retry_on_timeout(
+            self._public_clients[exchange_id],
+            timeout_errors=(ClientConnectorError, TimeoutError))(self._get_async_client)()
+        self._price_tickers[symbol].client = client
+
+        bm = BinanceSocketManager(client)
+        ts = bm.symbol_ticker_socket(with2without_slash(symbol))
+
+        cache_name = '{}_price'.format(exchange_id)
+
+        async with ts as tscm:
+            while True:
+                try:
+                    res = await tscm.recv()
+                    if res['e'] != 'error':
+                        CacheUtils.write_to_cache(symbol, float(res['c']), cache_name)
+                except Exception as e:
+                    print(e)
+
+    async def _get_async_client(self):
+        return await AsyncClient.create()
+
+    def _read_prices(self, exchange_id, symbols):
+        cache_name = '{}_price'.format(exchange_id)
+        return {
+            symbol: CacheUtils.read_from_cache(symbol, cache_name) for symbol in symbols
+        }
