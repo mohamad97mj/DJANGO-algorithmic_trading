@@ -26,7 +26,7 @@ class SpotBot(models.Model):
     credential_id = models.CharField(max_length=100)
     strategy = models.CharField(max_length=100)
     position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.CASCADE)
-    created_at = models.CharField(max_length=100, default=timezone.now, blank=True)
+    created_at = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __init__(self, *args, **kwargs):
