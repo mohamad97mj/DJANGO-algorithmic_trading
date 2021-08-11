@@ -25,7 +25,7 @@ class SpotBot(models.Model):
     exchange_id = models.CharField(max_length=100)
     credential_id = models.CharField(max_length=100)
     strategy = models.CharField(max_length=100)
-    position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.RESTRICT)
+    position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.CASCADE)
     created_at = models.CharField(max_length=100, default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
 
@@ -33,22 +33,23 @@ class SpotBot(models.Model):
         super(SpotBot, self).__init__(*args, **kwargs)
         self._private_client = None
         self._public_client = None
-        self._strategy_center = None
+        self._strategy_developer = None
         self._strategy_state_data = None
 
     def init_requirements(self, private_client: PrivateClient, public_client: PublicClient):
         self._private_client = private_client
         self._public_client = public_client
-        self._strategy_center = SpotStrategyCenter(public_client=public_client)
-        self._strategy_center.set_strategy(self.strategy)
-        self._strategy_state_data = self._strategy_center.init_strategy_state_data(position=self.position)
+        self._strategy_developer = SpotStrategyCenter.get_strategy_developer(self.strategy, public_client)
+        self._strategy_state_data = self._strategy_developer.init_strategy_state_data(position=self.position)
 
     def ready(self):
-        self.sell_all_assets()
+        if not self.strategy == 'manual':
+            self.sell_all_assets()
 
     def reset(self):
-        self.sell_all_assets()
-        self._strategy_center.reset_strategy()
+        if not self.strategy == 'manual':
+            self.sell_all_assets()
+            self._strategy_state_data = self._strategy_developer.reset(self.position)
 
     def sell_all_assets(self):
         logger = my_get_logger()
@@ -63,20 +64,21 @@ class SpotBot(models.Model):
                     if balance * price > markets[symbol]['limits']['cost']['min']:
                         exchange_order = self._private_client.create_market_sell_order(symbol, balance)
                         logger.info(
-                            'stoploss_triggered_operation: (symbol: {}, price, amount: {})'.format(
+                            'sold in reset: (symbol: {}, price: {}, amount: {})'.format(
                                 symbol,
                                 exchange_order['price'],
                                 balance))
 
     def get_price_required_symbols(self):
-        return self._strategy_center.get_strategy_price_required_symbols()
+        return self._strategy_developer.get_strategy_symbols(self.position)
 
     def _get_strategy_operations(self, symbol_prices):
-        return self._strategy_center.get_strategy_operations(position=self.position,
-                                                             strategy_state_data=self._strategy_state_data,
-                                                             symbol_prices=symbol_prices)
+        return self._strategy_developer.get_operations(position=self.position,
+                                                       strategy_state_data=self._strategy_state_data,
+                                                       symbol_prices=symbol_prices)
 
-    def _execute_strategy_operations(self, operations: List[Operation], test=True, symbol_prices=None):
+    def _execute_operations(self, operations: List[Operation], test=False
+                            , symbol_prices=None):
         for operation in operations:
             if operation.action == 'create':
                 if operation.order.type == 'market':
@@ -130,8 +132,15 @@ class SpotBot(models.Model):
 
             logger = my_get_logger()
             logger.info('exchange_order: {}'.format(exchange_order))
-            self._strategy_center.update_strategy_state_data(exchange_order, self._strategy_state_data)
+            self._strategy_developer.update_strategy_state_data(exchange_order, self._strategy_state_data)
 
     def run(self, symbol_prices: dict):
         operations = self._get_strategy_operations(symbol_prices=symbol_prices)
-        self._execute_strategy_operations(operations, test=False, symbol_prices=symbol_prices)
+        self._execute_operations(operations, test=True, symbol_prices=symbol_prices)
+
+    def run_strategy_command(self, command, *args, **kwargs):
+        strategy_method = getattr(self._strategy_developer, command)
+        print(strategy_method(*args, **kwargs))
+
+    def close_position(self):
+        pass
