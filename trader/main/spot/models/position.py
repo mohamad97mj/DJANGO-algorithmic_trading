@@ -13,4 +13,4 @@ class SpotPosition(models.Model):
     signal = models.ForeignKey('SpotSignal', related_name='positions', on_delete=models.CASCADE, null=True)
     volume = models.FloatField()  # initial volume
     # current volume = ?
-    created_at = models.CharField(max_length=100, default=timezone.now, blank=True)
+    created_at = models.DateTimeField(default=timezone.now, blank=True)

@@ -19,4 +19,4 @@ class SpotOrder(models.Model):
     remaining = models.FloatField(null=True, blank=True)
     cost = models.FloatField(null=True, blank=True)
     fee = models.JSONField(null=True, blank=True)
-    created_at = models.CharField(max_length=100, default=timezone.now, blank=True)
+    created_at = models.DateTimeField(default=timezone.now, blank=True)
