@@ -26,3 +26,16 @@ class TargetData(JsonSerializable):
     released_amount_in_quote: float = None
 
 
+@dataclass
+class StrategyStateData(JsonSerializable):
+    symbol: str
+    steps_data: List[StepData]
+    targets_data: List[TargetData]
+    stoploss: float
+    amount_in_quote: float
+    amount: float = 0
+    free_share: float = 1
+    all_steps_achieved: bool = False
+    all_targets_achieved: bool = False
+    total_unrealized_pnl: float = 0
+
