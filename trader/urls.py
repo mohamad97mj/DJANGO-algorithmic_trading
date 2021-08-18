@@ -13,13 +13,14 @@ urlpatterns = [
          views.SpotBotDetailView.as_view(),
          name='spot_bot_detail'),
 
-    path('spot-bots/<slug:bot_id>/position/steps/',
-         views.PositionStepView.as_view(),
-         name='spot_bots_position_step'),
+    path('spot-bots/<slug:bot_id>/position/',
+         views.SpotPositionView.as_view(),
+         name='spot_bots_position'),
 
-    path('spot-bots/<slug:bot_id>/position/targets/',
-         views.PositionStepView.as_view(),
-         name='spot_bots_position_target'),
+
+    # path('spot-bots/<slug:bot_id>/position/targets/',
+    #      views.PositionStepView.as_view(),
+    #      name='spot_bots_position_target'),
 
     path('memory-cache-content/<slug:cache_name>/<slug:location>/',
          views.MemoryCacheContentView.as_view(),
@@ -27,3 +28,4 @@ urlpatterns = [
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'html'])
+
