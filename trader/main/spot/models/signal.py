@@ -8,3 +8,5 @@ class SpotSignal(models.Model):
     symbol = models.CharField(max_length=50)
     stoploss = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
+    step_share_set_mode = models.CharField(default="manual", max_length=50)
+    target_share_set_mode = models.CharField(default="manual", max_length=50)
