@@ -3,10 +3,9 @@ from typing import List
 from django.utils import timezone
 from django.db import models
 from trader.clients import PrivateClient, PublicClient
-from trader.main.spot.strategies.strategy_center import SpotStrategyCenter
 from trader.utils import truncate
 from .utils.exceptions import BotDoesNotExistsException
-from .operation import Operation
+from .operation import SpotOperation
 
 
 class SpotBotManager(models.Manager):
@@ -31,25 +30,17 @@ class SpotBot(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(SpotBot, self).__init__(*args, **kwargs)
+        self.validate_init_data()
         self._private_client = None
         self._public_client = None
-        self._strategy_developer = None
-        self._strategy_state_data = None
+        self.strategy_state_data = None
+
+
 
     def init_requirements(self, private_client: PrivateClient, public_client: PublicClient):
         self._private_client = private_client
         self._public_client = public_client
-        self._strategy_developer = SpotStrategyCenter.get_strategy_developer(self.strategy, public_client)
-        self._strategy_state_data = self._strategy_developer.init_strategy_state_data(position=self.position)
 
-    def ready(self):
-        if not self.strategy == 'manual':
-            self.sell_all_assets()
-
-    def reset(self):
-        if not self.strategy == 'manual':
-            self.sell_all_assets()
-            self._strategy_state_data = self._strategy_developer.reset(self.position)
 
     def sell_all_assets(self):
         logger = my_get_logger()
@@ -69,16 +60,8 @@ class SpotBot(models.Model):
                                 exchange_order['price'],
                                 balance))
 
-    def get_price_required_symbols(self):
-        return self._strategy_developer.get_strategy_symbols(self.position)
-
-    def _get_strategy_operations(self, symbol_prices):
-        return self._strategy_developer.get_operations(position=self.position,
-                                                       strategy_state_data=self._strategy_state_data,
-                                                       symbol_prices=symbol_prices)
-
-    def _execute_operations(self, operations: List[Operation], test=False
-                            , symbol_prices=None):
+    def execute_operations(self, operations: List[SpotOperation], test=False, symbol_prices=None):
+        exchange_orders = []
         for operation in operations:
             if operation.action == 'create':
                 if operation.order.type == 'market':
@@ -132,15 +115,9 @@ class SpotBot(models.Model):
 
             logger = my_get_logger()
             logger.info('exchange_order: {}'.format(exchange_order))
-            self._strategy_developer.update_strategy_state_data(exchange_order, self._strategy_state_data)
+            exchange_orders.append(exchange_order)
 
-    def run(self, symbol_prices: dict):
-        operations = self._get_strategy_operations(symbol_prices=symbol_prices)
-        self._execute_operations(operations, test=True, symbol_prices=symbol_prices)
-
-    def run_strategy_command(self, command, *args, **kwargs):
-        strategy_method = getattr(self._strategy_developer, command)
-        print(strategy_method(*args, **kwargs))
+        return exchange_orders
 
     def close_position(self):
         pass
