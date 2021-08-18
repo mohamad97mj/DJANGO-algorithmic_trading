@@ -191,3 +191,5 @@ class SpotBotHandler:
         method2run = getattr(strategy_developer, command)
         return method2run(bot.position, bot.strategy_state_data, *args, **kwargs)
 
+    def get_strategy_state_data(self, bot_id):
+        return self._bots[bot_id].strategy_state_data
