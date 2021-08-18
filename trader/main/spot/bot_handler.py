@@ -193,3 +193,6 @@ class SpotBotHandler:
 
     def get_strategy_state_data(self, bot_id):
         return self._bots[bot_id].strategy_state_data
+
+    def get_bot(self, bot_id):
+        return self._bots[bot_id]
