@@ -21,5 +21,5 @@ class SpotBotService():
                                  position_data=bot_data['position'])
 
     @staticmethod
-    def edit_position_steps(bot_id, new_steps, step_share_set_mode):
-        return trader.edit_none_triggered_steps(bot_id, new_steps, step_share_set_mode)
+    def edit_position(bot_id, new_position_data):
+        return trader.edit_position(bot_id, new_position_data, )
