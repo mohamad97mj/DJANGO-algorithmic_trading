@@ -1,8 +1,9 @@
 from dataclasses import dataclass, field
 from copy import deepcopy
 from trader.utils import truncate, my_copy, intersection
-from trader.main.spot.models import SpotPosition, SpotOrder, Operation
+from trader.main.spot.models import SpotPosition, SpotOrder, SpotOperation
 from global_utils import my_get_logger
+from .utils import create_buy_in_quote_operation, create_sell_operation
 
 
 @dataclass
@@ -69,6 +70,7 @@ class StrategyStateData:
     states_data: dict
 
 
+# TODO change this class to static
 class TrailingStoplossStrategyDeveloper:
 
     def __init__(self, public_client):
@@ -77,7 +79,7 @@ class TrailingStoplossStrategyDeveloper:
 
     def reset(self, position: SpotPosition):
         self._simulate_init_optimum_parameters()
-        self.init_strategy_state_data(position)
+        return self.init_strategy_state_data(position)
 
     def init_strategy_state_data(self, position: SpotPosition):
         logger = my_get_logger()
@@ -85,7 +87,7 @@ class TrailingStoplossStrategyDeveloper:
         strategy_state_data = StrategyStateData(
             states_data={symbol: StateData(
                 balance_data=BalanceData(amount=0,
-                                         amount_in_quote=self._optimum_symbol_balance_shares[symbol] * position.volume,
+                                         amount_in_quote=self._optimum_symbol_balance_shares[symbol] * position.size,
                                          is_cash=True),
                 setup_data=SetupData()
 
@@ -93,7 +95,7 @@ class TrailingStoplossStrategyDeveloper:
 
         return strategy_state_data
 
-    def get_strategy_symbols(self):
+    def get_strategy_symbols(self, position=None):
         return list(self._optimum_symbol_balance_shares)
 
     def get_operations(self, position: SpotPosition, strategy_state_data: StrategyStateData, symbol_prices: dict):
@@ -101,7 +103,6 @@ class TrailingStoplossStrategyDeveloper:
         logger = my_get_logger()
         markets = self._public_client.get_markets()
         for symbol, state_data in strategy_state_data.states_data.items():
-            logger = my_get_logger()
             logger.info(
                 'state_data: (symbol: {}, setup_data: (upper_buy_limit_price: {} lower_buy_limit_price: {} stoploss_price: {}), balance_data: (amount: {}, amount_in_quote: {}, is_cash: {}))'.format(
                     symbol,
@@ -117,7 +118,7 @@ class TrailingStoplossStrategyDeveloper:
             price_precision = markets[symbol]['precision']['price']
             if (not state_data.setup_data.upper_buy_limit_price) or price > state_data.setup_data.upper_buy_limit_price:
                 if state_data.balance_data.is_cash:
-                    buy_upper_limit_operation = self._create_buy_in_quote_operation(
+                    buy_upper_limit_operation = create_buy_in_quote_operation(
                         symbol=symbol,
                         type='market',
                         price=price,
@@ -137,7 +138,7 @@ class TrailingStoplossStrategyDeveloper:
 
             elif price < state_data.setup_data.lower_buy_limit_price:
                 if state_data.balance_data.is_cash:
-                    buy_lower_limit_operation = self._create_buy_in_quote_operation(
+                    buy_lower_limit_operation = create_buy_in_quote_operation(
                         symbol=symbol,
                         type='market',
                         price=price,
@@ -156,7 +157,7 @@ class TrailingStoplossStrategyDeveloper:
 
             elif price < state_data.setup_data.stoploss_price:
                 if not state_data.balance_data.is_cash:
-                    stoploss_operation = self._create_sell_operation(
+                    stoploss_operation = create_sell_operation(
                         symbol=symbol,
                         type='market',
                         price=price,
@@ -170,38 +171,6 @@ class TrailingStoplossStrategyDeveloper:
 
         return operations
 
-    def _create_buy_in_quote_operation(self, symbol, type, price, amount_in_quote, position):
-        buy_market_order = SpotOrder(symbol=symbol,
-                                     type=type,
-                                     side='buy',
-                                     price=price,
-                                     amount_in_quote=amount_in_quote)
-        buy_market_order.save()
-        buy_market_operation = Operation(
-            order=buy_market_order,
-            action='create',
-            position=position,
-            status='in_progress')
-        buy_market_operation.save()
-        position.save()
-        return buy_market_operation
-
-    def _create_sell_operation(self, symbol, type, price, amount, position):
-        sell_market_order = SpotOrder(symbol=symbol,
-                                      type=type,
-                                      side='sell',
-                                      price=price,
-                                      amount=amount)
-        sell_market_order.save()
-        sell_market_operation = Operation(
-            order=sell_market_order,
-            action='create',
-            position=position,
-            status='in_progress')
-        sell_market_operation.save()
-        position.save()
-        return sell_market_operation
-
     def update_strategy_state_data(self, exchange_order, strategy_state_data):
         state_data = strategy_state_data.states_data[exchange_order['symbol']]
         if exchange_order['side'] == 'buy':
@@ -211,16 +180,13 @@ class TrailingStoplossStrategyDeveloper:
             state_data.balance_data.amount -= exchange_order['amount']
             state_data.balance_data.amount_in_quote += exchange_order['cost'] - exchange_order['fee']['cost']
 
-    def _dynamic_init_optimum_parameters(self):
-        pass
-
     def _simulate_init_optimum_parameters(self):
         markets = self._public_client.get_markets()
         selected_symbols = self.select_symbols(markets)
         limit_step_ratios, stoploss2limit_ratios = self._init_ratios()
 
         # selected_symbols = ['BTCUP/USDT']
-        ohlcvs_limits = [60, 240, 1000]
+        ohlcvs_limits = [60, 120, 240, 480, 1000]
         max_limit = max(ohlcvs_limits)
         initial_amount_in_quote = 100
 
@@ -293,14 +259,17 @@ class TrailingStoplossStrategyDeveloper:
         positive_results_symbols = {
             k: list(v) for k, v in positive_results.items()
         }
-        intersection_symbols = intersection(*list(positive_results_symbols.values()))
+        intersection_symbols = intersection(positive_results_symbols[480], positive_results_symbols[60],
+                                            positive_results_symbols[120], positive_results_symbols[240])
         symbol_avg_profit = {
         }
+
+        main_ohlcvs_limits = [60, 120, 240, 480]
         for symbol in intersection_symbols:
             avg_profit = 0
-            for limit in ohlcvs_limits:
+            for limit in main_ohlcvs_limits:
                 avg_profit += positive_results[limit][symbol].profit_rate
-            avg_profit /= len(ohlcvs_limits)
+            avg_profit /= len(main_ohlcvs_limits)
             avg_profit = int(avg_profit) or 1
             symbol_avg_profit[symbol] = avg_profit
 
@@ -312,8 +281,8 @@ class TrailingStoplossStrategyDeveloper:
         }
 
         spare_symbol_profit = {}
-        for symbol in positive_results_symbols[1000]:
-            profit = positive_results[1000][symbol].profit_rate
+        for symbol in positive_results_symbols[120]:
+            profit = positive_results[120][symbol].profit_rate
             profit = int(profit) or 1
             spare_symbol_profit[symbol] = profit
 
@@ -325,8 +294,7 @@ class TrailingStoplossStrategyDeveloper:
         }
 
         self._optimum_ratio_data = RatioData(limit_step_ratios[0], stoploss2limit_ratios[0])
-        self._optimum_symbol_balance_shares = symbol_balance_shares if len(
-            symbol_balance_shares) > 1 else spare_balance_shares
+        self._optimum_symbol_balance_shares = symbol_balance_shares
 
     def select_symbols(self, markets):
         symbols = markets.keys()
