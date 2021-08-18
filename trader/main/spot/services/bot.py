@@ -6,6 +6,11 @@ from django.db.models import Q
 class SpotBotService():
 
     @staticmethod
+    def get_bot(bot_id: int):
+        return trader.get_bot(bot_id)
+
+
+    @staticmethod
     def create_bot(bot_data: dict):
         return trader.create_bot(exchange_id=bot_data['exchange_id'],
                                  credential_id=bot_data['credential_id'],
