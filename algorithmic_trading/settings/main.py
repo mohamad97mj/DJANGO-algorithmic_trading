@@ -52,6 +52,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'global_utils.custom_api_exception_handler',
+}
+
 ROOT_URLCONF = 'algorithmic_trading.urls'
 
 TEMPLATES = [
