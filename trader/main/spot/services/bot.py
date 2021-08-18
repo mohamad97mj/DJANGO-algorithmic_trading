@@ -9,6 +9,9 @@ class SpotBotService():
     def get_bot(bot_id: int):
         return trader.get_bot(bot_id)
 
+    @staticmethod
+    def get_active_bots(credential_id):
+        return SpotBot.objects.filter(Q(credential_id=credential_id) & Q(is_active=True))
 
     @staticmethod
     def create_bot(bot_data: dict):
