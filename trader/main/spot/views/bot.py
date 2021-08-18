@@ -12,6 +12,11 @@ class SpotBotsView(APIView):
     # permission_classes = [mypermissions.MyCustomIsAuthenticated]
     # @REQUEST_TIME.time()
 
+    @catch_all_exceptions(reraise=True)
+    def get(self, request, format=None):
+        credential_id = request.query_params.get('credential_id', 'test')
+        bot_instances = SpotBotService.get_active_bots(credential_id=credential_id)
+        return Response(data=SpotBotSerializer(bot_instances, many=True).data)
 
     @catch_all_exceptions(reraise=True)
     def post(self, request, format=None):
