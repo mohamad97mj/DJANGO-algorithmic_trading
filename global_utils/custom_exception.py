@@ -1,10 +1,11 @@
 class CustomException(Exception):
-    code = 1
+    code = 500
     message_code = 'custom_exception'
     translated_message = 'خطای سفارشی'
+    detail = ''
 
-    def __init__(self, message=message_code):
-        self.message = message
+    def __init__(self, detail=detail):
+        self.detail = detail
 
     def __str__(self):
-        return self.message
+        return self.detail
