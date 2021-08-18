@@ -1,24 +1,14 @@
 from ..models import SpotPosition, SpotBot
 from ..trader import trader
+from django.db.models import Q
 
 
-class SpotPositionService():
-
-    @staticmethod
-    def get_bot(position_id: int):
-        return SpotBot.objects.get(position_id=position_id)
+class SpotBotService():
 
     @staticmethod
-    def open_position(exchange_id: str, credential_id: str, strategy: str, position: SpotPosition):
-        return trader.open_position(exchange_id=exchange_id,
-                                    credential_id=credential_id,
-                                    strategy=strategy,
-                                    position=position)
+    def create_bot(bot_data: dict):
+        return trader.create_bot(exchange_id=bot_data['exchange_id'],
+                                 credential_id=bot_data['credential_id'],
+                                 strategy=bot_data['strategy'],
+                                 position_data=bot_data['position'])
 
-    @staticmethod
-    def add_position_step(position_id, buy_price, share):
-        return trader.add_position(position_id, buy_price, share)
-
-    @staticmethod
-    def edit_position(position_id, command, *args, **kwargs):
-        return trader.edit_position(position_id, command, *args, **kwargs)
