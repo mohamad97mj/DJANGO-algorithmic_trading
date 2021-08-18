@@ -137,3 +137,7 @@ class ManualStrategyDeveloper:
         )
         return strategy_state_data
 
+    @staticmethod
+    def get_strategy_symbols(position: SpotPosition):
+        return [position.signal.symbol, ]
+
