@@ -225,3 +225,30 @@ class ManualStrategyDeveloper:
         elif exchange_order['side'] == 'sell':
             strategy_state_data.amount -= exchange_order['amount']
 
+    @staticmethod
+    def validate_position_data(position_data: dict):
+
+        signal_data = position_data.get('signal')
+        steps_data = signal_data['steps']
+        step_share_set_mode = signal_data['step_share_set_mode']
+        targets_data = signal_data['targets']
+        target_share_set_mode = signal_data['target_share_set_mode']
+
+        if step_share_set_mode == 'manual':
+            total_share = 0
+            for step_data in steps_data:
+                total_share += round_down(step_data['share'])
+                if not step_data['share']:
+                    raise CustomException('Step share is required in manual mode')
+            if total_share != 1:
+                raise CustomException('Total shares must be equal to 1')
+
+        if target_share_set_mode == 'manual':
+            total_share = 0
+            for target_data in targets_data:
+                if not target_data['share']:
+                    raise CustomException('Target share is required in manual mode')
+                total_share += round_down(target_data.share)
+            if total_share != 1:
+                raise CustomException('Total shares must be equal to 1')
+
