@@ -141,3 +141,77 @@ class ManualStrategyDeveloper:
     def get_strategy_symbols(position: SpotPosition):
         return [position.signal.symbol, ]
 
+    @staticmethod
+    def get_operations(position: SpotPosition, strategy_state_data: StrategyStateData, symbol_prices: dict):
+        logger = my_get_logger()
+        operations = []
+        price = symbol_prices[strategy_state_data.symbol]
+
+        if price < strategy_state_data.stoploss:
+            stoploss_operation = create_sell_operation(
+                symbol=strategy_state_data.symbol,
+                type='market',
+                price=price,
+                amount=strategy_state_data.amount,
+                position=position)
+
+            logger.info(
+                'stoploss_triggered_operation: (symbol: {}, price: {}, amount: {})'.format(
+                    strategy_state_data.symbol,
+                    price,
+                    strategy_state_data.amount))
+
+            operations.append(stoploss_operation)
+
+        else:
+            n = 0
+            for step_data in strategy_state_data.steps_data:
+                if not step_data.is_triggered and (price < step_data.buy_price or step_data.buy_price == -1):
+                    if n == 0:
+                        strategy_state_data.all_steps_achieved = True
+                    strategy_state_data.free_share -= step_data.share
+                    buy_step_operation = create_buy_in_quote_operation(
+                        symbol=strategy_state_data.symbol,
+                        type='market',
+                        price=price,
+                        amount_in_quote=step_data.amount_in_quote,
+                        position=position)
+
+                    logger.info(
+                        'buy_step_operation: (symbol: {}, price: {}, amount_in_quote: {})'.format(
+                            strategy_state_data.symbol,
+                            price,
+                            step_data.amount_in_quote))
+
+                    step_data.is_triggered = True
+                    operations.append(buy_step_operation)
+                n += 1
+
+            for i in range(len(strategy_state_data.targets_data)):
+                target_data = strategy_state_data.targets_data[i]
+                if not target_data.is_triggered and price > target_data.tp_price:
+                    if i == len(strategy_state_data.targets_data) - 1:
+                        strategy_state_data.all_targets_achieved = True
+                    tp_operation = create_sell_operation(
+                        symbol=strategy_state_data.symbol,
+                        type='market',
+                        price=price,
+                        amount=target_data.amount,
+                        position=position)
+
+                    logger.info(
+                        'tp_operation: (symbol: {}, price: {}, amount: {})'.format(
+                            strategy_state_data.symbol,
+                            price,
+                            target_data.amount))
+
+                    operations.append(tp_operation)
+                    target_data.is_triggered = True
+                    if i == 0:
+                        strategy_state_data.stoploss = \
+                            strategy_state_data.steps_data[len(strategy_state_data.steps_data) - 1].buy_price
+                    else:
+                        strategy_state_data.stoploss = strategy_state_data.targets_data[i - 1].tp_price
+
+        return operations
+
