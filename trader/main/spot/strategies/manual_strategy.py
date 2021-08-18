@@ -131,7 +131,7 @@ class ManualStrategyDeveloper:
             stoploss=signal.stoploss,
             amount_in_quote=amount_in_quote,
             amount=amount,
-            free_share=free_share,
+            free_share=round_down(free_share),
             all_steps_achieved=all_steps_achieved,
             all_targets_achieved=all_targets_achieved,
         )
@@ -240,7 +240,7 @@ class ManualStrategyDeveloper:
                 total_share += round_down(step_data['share'])
                 if not step_data['share']:
                     raise CustomException('Step share is required in manual mode')
-            if total_share != 1:
+            if round_down(total_share) != 1:
                 raise CustomException('Total shares must be equal to 1')
 
         if target_share_set_mode == 'manual':
@@ -249,14 +249,42 @@ class ManualStrategyDeveloper:
                 if not target_data['share']:
                     raise CustomException('Target share is required in manual mode')
                 total_share += round_down(target_data.share)
-            if total_share != 1:
+            if round_down(total_share) != 1:
                 raise CustomException('Total shares must be equal to 1')
 
     @staticmethod
-    def edit_none_triggered_steps(position: SpotPosition,
-                                  strategy_state_data: StrategyStateData,
-                                  new_steps_data: List[dict],
-                                  step_share_set_mode='auto'):
+    def edit_steps(position, strategy_state_data, new_steps_data, step_share_set_mode='auto'):
+        edit_is_required = ManualStrategyDeveloper._has_steps_changed(position,
+                                                                      new_steps_data,
+                                                                      step_share_set_mode)
+        if edit_is_required:
+            return ManualStrategyDeveloper._edit_none_triggered_steps(position,
+                                                                      strategy_state_data,
+                                                                      new_steps_data,
+                                                                      step_share_set_mode), True
+        return position, False
+
+    @staticmethod
+    def _has_steps_changed(position, new_steps_data, step_share_set_mode):
+        signal = position.signal
+        current_step_share_set_mode = signal.step_share_set_mode
+        current_steps = signal.steps.filter(is_triggered
+                                            =False)
+        sorted_current_steps = sorted(current_steps, key=lambda step: step.buy_price)
+        sorted_current_steps_data = [
+            {
+                'buy_price': s.buy_price,
+                'share': s.share,
+            } for s in sorted_current_steps
+        ]
+        sorted_new_steps_data = sorted(new_steps_data, key=lambda step: step['buy_price'])
+        return sorted_current_steps_data != sorted_new_steps_data or current_step_share_set_mode != step_share_set_mode
+
+    @staticmethod
+    def _edit_none_triggered_steps(position: SpotPosition,
+                                   strategy_state_data: StrategyStateData,
+                                   new_steps_data: List[dict],
+                                   step_share_set_mode):
         signal = position.signal
         if strategy_state_data.all_steps_achieved:
             raise CustomException('Editing steps is not possible because all steps are triggered!')
@@ -267,7 +295,7 @@ class ManualStrategyDeveloper:
                     if not step_data['share']:
                         raise CustomException('Step share is required in manual mode')
                     total_share += round_down(step_data['share'])
-                if total_share != strategy_state_data.free_share:
+                if round_down(total_share) != round_down(strategy_state_data.free_share):
                     raise CustomException('Total shares must be equal to free share, free share is : {}'.format(
                         strategy_state_data.free_share))
                 if signal.step_share_set_mode == 'auto':
