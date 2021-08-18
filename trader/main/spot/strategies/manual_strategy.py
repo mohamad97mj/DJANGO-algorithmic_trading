@@ -15,3 +15,14 @@ class StepData(JsonSerializable):
     is_triggered: bool = False
     purchased_amount: float = None
 
+
+@dataclass
+class TargetData(JsonSerializable):
+    tp_price: float
+    share: float
+    amount: float = 0
+    is_triggered: bool = False
+    unrealized_amount_in_quote: float = None
+    released_amount_in_quote: float = None
+
+
