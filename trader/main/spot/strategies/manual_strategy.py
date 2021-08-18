@@ -252,3 +252,64 @@ class ManualStrategyDeveloper:
             if total_share != 1:
                 raise CustomException('Total shares must be equal to 1')
 
+    @staticmethod
+    def edit_none_triggered_steps(position: SpotPosition,
+                                  strategy_state_data: StrategyStateData,
+                                  new_steps_data: List[dict],
+                                  step_share_set_mode='auto'):
+        signal = position.signal
+        if strategy_state_data.all_steps_achieved:
+            raise CustomException('Editing steps is not possible because all steps are triggered!')
+        else:
+            if step_share_set_mode == 'manual':
+                total_share = 0
+                for step_data in new_steps_data:
+                    if not step_data['share']:
+                        raise CustomException('Step share is required in manual mode')
+                    total_share += round_down(step_data['share'])
+                if total_share != strategy_state_data.free_share:
+                    raise CustomException('Total shares must be equal to free share, free share is : {}'.format(
+                        strategy_state_data.free_share))
+                if signal.step_share_set_mode == 'auto':
+                    signal.step_share_set_mode = 'semi_auto'
+
+            elif step_share_set_mode == 'auto':
+                auto_step_share = round_down(strategy_state_data.free_share / len(new_steps_data))
+                for i in range(len(new_steps_data) - 1):
+                    new_steps_data[i]['share'] = auto_step_share
+                new_steps_data[len(new_steps_data) - 1]['share'] = round(
+                    1 - (len(new_steps_data) - 1) * auto_step_share, 2)
+                if signal.step_share_set_mode == 'manual':
+                    signal.step_share_set_mode = 'semi_auto'
+
+            signal.steps.filter(is_triggered=False).delete()
+
+            new_steps = []
+            for step_data in new_steps_data:
+                step = SpotStep(
+                    signal=signal,
+                    buy_price=step_data['buy_price'],
+                    share=step_data['share'],
+                    is_triggered=False,
+                    amount_in_quote=position.size * step_data['share']
+                )
+                step.save()
+                new_steps.append(step)
+
+            signal.steps.set(new_steps)
+            signal.save()
+            position.save()
+
+        return position
+
+    @staticmethod
+    def edit_step():
+        return 'edit_step'
+
+    @staticmethod
+    def add_target():
+        return 'add_target'
+
+    @staticmethod
+    def edit_target():
+        return 'edit_target'
