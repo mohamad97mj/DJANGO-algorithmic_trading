@@ -184,3 +184,10 @@ class SpotBotHandler:
         return {
             symbol: CacheUtils.read_from_cache(symbol, cache_name) for symbol in symbols
         }
+
+    def run_strategy_developer_command(self, bot_id, command, *args, **kwargs):
+        bot = self._bots[bot_id]
+        strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
+        method2run = getattr(strategy_developer, command)
+        return method2run(bot.position, bot.strategy_state_data, *args, **kwargs)
+
