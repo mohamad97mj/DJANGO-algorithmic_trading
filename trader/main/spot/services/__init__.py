@@ -1,1 +1,1 @@
-from .position import SpotPositionService
+from .bot import SpotBotService
