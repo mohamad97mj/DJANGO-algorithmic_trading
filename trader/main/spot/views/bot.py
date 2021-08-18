@@ -36,8 +36,8 @@ class SpotBotsView(APIView):
 
 
 class SpotBotDetailView(APIView):
+    @catch_all_exceptions(reraise=True)
     def get(self, request, bot_id, format=None):
         bot_instance = SpotBotService.get_bot(bot_id=bot_id)
         return Response(data=SpotBotSerializer(instance=bot_instance).data)
-
 
