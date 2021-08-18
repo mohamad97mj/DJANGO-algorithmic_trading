@@ -89,3 +89,51 @@ class ManualStrategyDeveloper:
                                                 amount_in_quote=position.size)
         return strategy_state_data
 
+    @staticmethod
+    def reload_strategy_state_data(position):
+        signal = position.signal
+        all_steps_achieved = True
+        all_targets_achieved = True
+        steps = signal.steps.all()
+        sorted_steps = sorted(steps, key=lambda s: s.buy_price)
+        steps_data = []
+        free_share = 0
+        amount_in_quote = 0
+        for step in sorted_steps:
+            if not step.is_triggered:
+                free_share += step.share
+                amount_in_quote += step.amount_in_quote
+                all_steps_achieved = False
+            steps_data.append(
+                StepData(buy_price=step.buy_price,
+                         share=step.share,
+                         amount_in_quote=step.amount_in_quote,
+                         is_triggered=step.is_triggered))
+
+        targets = signal.targets.all()
+        sorted_targets = sorted(targets, key=lambda t: t.tp_price)
+        targets_data = []
+        amount = 0
+        for target in sorted_targets:
+            if not target.is_triggered:
+                all_targets_achieved = False
+                amount += target.amount
+            targets_data.append(
+                TargetData(tp_price=target.tp_price,
+                           share=target.share,
+                           amount=target.amount,
+                           is_triggered=target.is_triggered))
+
+        strategy_state_data = StrategyStateData(
+            symbol=signal.symbol,
+            steps_data=steps_data,
+            targets_data=targets_data,
+            stoploss=signal.stoploss,
+            amount_in_quote=amount_in_quote,
+            amount=amount,
+            free_share=free_share,
+            all_steps_achieved=all_steps_achieved,
+            all_targets_achieved=all_targets_achieved,
+        )
+        return strategy_state_data
+
