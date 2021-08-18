@@ -40,6 +40,3 @@ class PrivateClient:
 
     def create_limit_sell_order(self, symbol, amount, price):
         return self._exchange.create_limit_sell_order(symbol=symbol, amount=amount, price=price)
-
-        #  def create_market_buy_order_in_quote(self, symbol, amount):
-        #     return  self._exchange.create_market_buy_order()
