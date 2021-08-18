@@ -185,9 +185,7 @@ class SpotBotHandler:
             symbol: CacheUtils.read_from_cache(symbol, cache_name) for symbol in symbols
         }
 
-    def run_strategy_developer_command(self, bot_id, command, *args, **kwargs):
-        bot = self._bots[bot_id]
-        strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
+    def _run_strategy_developer_command(self, bot, strategy_developer, command, *args, **kwargs):
         method2run = getattr(strategy_developer, command)
         return method2run(bot.position, bot.strategy_state_data, *args, **kwargs)
 
@@ -196,3 +194,18 @@ class SpotBotHandler:
 
     def get_bot(self, bot_id):
         return self._bots[bot_id]
+
+    def edit_position(self, bot_id, new_position_data):
+        bot = self._bots[bot_id]
+        strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
+        edited_data = []
+        new_position, steps_was_edited = self._run_strategy_developer_command(
+            bot,
+            strategy_developer,
+            'edit_steps',
+            new_position_data['signal']['steps'],
+            new_position_data['signal'].get('step_share_set_mode', 'auto'),
+        )
+        if steps_was_edited:
+            edited_data.append('steps')
+        return new_position, edited_data

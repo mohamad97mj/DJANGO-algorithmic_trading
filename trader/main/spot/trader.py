@@ -13,12 +13,10 @@ class SpotTrader:
                                             strategy=strategy,
                                             position_data=position_data)
 
-    def edit_none_triggered_steps(self, bot_id, *args, **kwargs):
-        return self._bot_handler.run_strategy_developer_command(
+    def edit_position(self, bot_id, new_position_data):
+        return self._bot_handler.edit_position(
             bot_id,
-            'edit_none_triggered_steps',
-            *args,
-            **kwargs)
+            new_position_data)
 
     def get_bot(self, bot_id):
         return self._bot_handler.get_bot(bot_id=bot_id)
