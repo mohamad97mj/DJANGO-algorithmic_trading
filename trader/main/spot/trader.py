@@ -20,6 +20,8 @@ class SpotTrader:
             *args,
             **kwargs)
 
+    def get_bot(self, bot_id):
+        return self._bot_handler.get_bot(bot_id=bot_id)
 
     def start(self):
         self._bot_handler.reload_bots()
