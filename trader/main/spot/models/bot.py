@@ -30,17 +30,16 @@ class SpotBot(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(SpotBot, self).__init__(*args, **kwargs)
-        self.validate_init_data()
         self._private_client = None
         self._public_client = None
         self.strategy_state_data = None
-
-
 
     def init_requirements(self, private_client: PrivateClient, public_client: PublicClient):
         self._private_client = private_client
         self._public_client = public_client
 
+    def set_strategy_state_data(self, strategy_state_data):
+        self.strategy_state_data = strategy_state_data
 
     def sell_all_assets(self):
         logger = my_get_logger()
