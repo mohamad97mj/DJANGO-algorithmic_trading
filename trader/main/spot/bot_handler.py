@@ -1,7 +1,6 @@
 import time
-from pprint import pprint
 from typing import List
-from global_utils import retry_on_timeout, async_retry_on_timeout, my_get_logger
+from global_utils import async_retry_on_timeout, my_get_logger
 from trader.main.spot.models import SpotPosition, SpotBot
 from trader.clients import PublicClient, PrivateClient
 from trader.utils import with2without_slash, CacheUtils
@@ -11,9 +10,12 @@ from threading import Thread
 from aiohttp.client_exceptions import ClientConnectorError
 from dataclasses import dataclass
 from concurrent.futures._base import TimeoutError
+from .strategies.strategy_center import SpotStrategyCenter
+from .models import SpotSignal, SpotStep, SpotTarget
+from trader.utils import round_down
 
 
-@dataclass()
+@dataclass
 class PriceTicker:
     thread: Thread
     client: AsyncClient = None
@@ -22,22 +24,71 @@ class PriceTicker:
 class SpotBotHandler:
 
     def __init__(self):
-        self._bots: List[SpotBot] = []
+        self._bots = {}
         self._public_clients = {}
         self._price_tickers = {}
 
-    def create_bot(self, exchange_id: str, credential_id: str, strategy: str, position: SpotPosition):
-        new_bot = SpotBot(exchange_id=exchange_id, credential_id=credential_id, strategy=strategy, position=position)
+    def create_bot(self, exchange_id: str, credential_id: str, strategy: str, position_data: dict):
+
+        strategy_developer = SpotStrategyCenter.get_strategy_developer(strategy=strategy)
+        strategy_developer.validate_position_data(position_data=position_data)
+
+        signal = None
+        signal_data = position_data.get('signal')
+        if signal_data:
+            signal = SpotSignal(**{key: signal_data.get(key) for key in
+                                   ['symbol',
+                                    'stoploss',
+                                    'step_share_set_mode',
+                                    'target_share_set_mode']})
+            signal.save()
+
+            steps = []
+            sorted_steps_data = sorted(signal_data['steps'], key=lambda s: s['buy_price'])
+            for step_data in sorted_steps_data:
+                step = SpotStep(signal=signal,
+                                buy_price=step_data.get('buy_price'),
+                                share=round_down(step_data.get('share')))
+                step.save()
+                steps.append(step)
+
+            signal.steps.set(steps)
+
+            targets = []
+            sorted_targets_data = sorted(signal_data['targets'], key=lambda t: t['tp_price'])
+            for target_data in sorted_targets_data:
+                target = SpotTarget(signal=signal,
+                                    tp_price=target_data.get('tp_price'),
+                                    share=round_down(target_data.get('share')))
+                target.save()
+                targets.append(target)
+
+            signal.targets.set(targets)
+
+        position = SpotPosition(signal=signal,
+                                **{k: position_data[k] for k in ['size']})
+
+        position.save()
+
+        new_bot = SpotBot(exchange_id=exchange_id,
+                          credential_id=credential_id,
+                          strategy=strategy,
+                          position=position)
+
         self.init_bot_requirements(bot=new_bot)
-        self._bots.append(new_bot)
         new_bot.save()
+        strategy_developer = SpotStrategyCenter.get_strategy_developer(new_bot.strategy)
+        new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(new_bot.position))
+        self._bots[str(new_bot.id)] = new_bot
         return new_bot
 
     def reload_bots(self):
-        self._bots = list(SpotBot.objects.all())
-        for bot in self._bots:
+        bots = list(SpotBot.objects.filter(is_active=True))
+        for bot in bots:
             self.init_bot_requirements(bot)
-            bot.reload()
+            strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
+            bot.set_strategy_state_data(strategy_developer.reload_strategy_state_data(bot.position))
+            self._bots[str(bot.id)] = bot
 
     def init_bot_requirements(self, bot):
         private_client = PrivateClient(exchange_id=bot.exchange_id, credential_id=bot.credential_id)
@@ -47,19 +98,19 @@ class SpotBotHandler:
             public_client = PublicClient(exchange_id=bot.exchange_id)
             self._public_clients[bot.exchange_id] = public_client
         bot.init_requirements(private_client=private_client, public_client=public_client)
+        bot.ready()
 
     def run_bots(self):
-        # start = int(time.time())
+        start = int(time.time())
         while True:
-            for bot in self._bots:
+            for bot in self._bots.values():
+                finish = int(time.time())
+                if finish - start > 4 * 60 * 60:
+                    start = int(time.time())
+                    bot.reset()
 
-                # finish = int(time.time())
-                # if finish - start > 10:
-                #     bot.reset_strategy()
-                #
-                # print(finish - start)
-
-                price_required_symbols = bot.get_price_required_symbols()
+                strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
+                price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
                 symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
                 while not symbol_prices:
                     self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
@@ -68,9 +119,17 @@ class SpotBotHandler:
 
                 logger = my_get_logger()
                 logger.info('symbol_prices: {}'.format(symbol_prices))
-                bot.run(symbol_prices)
 
-            time.sleep(2)
+                operations = strategy_developer.get_operations(position=bot.position,
+                                                               strategy_state_data=bot.strategy_state_data,
+                                                               symbol_prices=symbol_prices)
+
+                exchange_orders = bot.execute_operations(operations, test=True, symbol_prices=symbol_prices)
+                for exchange_order in exchange_orders:
+                    strategy_developer.update_strategy_state_data(exchange_order=exchange_order,
+                                                                  strategy_state_data=bot.strategy_state_data)
+
+            time.sleep(5)
 
     def _get_prices_if_available(self, exchange_id, symbols: List):
         symbol_prices = self._read_prices(exchange_id, symbols)
