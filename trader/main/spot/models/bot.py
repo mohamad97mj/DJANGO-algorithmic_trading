@@ -41,6 +41,14 @@ class SpotBot(models.Model):
     def set_strategy_state_data(self, strategy_state_data):
         self.strategy_state_data = strategy_state_data
 
+    def ready(self):
+        if not self.strategy == 'manual':
+            self.sell_all_assets()
+
+    def reset(self):
+        if not self.strategy == 'manual':
+            self.sell_all_assets()
+
     def sell_all_assets(self):
         logger = my_get_logger()
         markets = self._public_client.get_markets()
