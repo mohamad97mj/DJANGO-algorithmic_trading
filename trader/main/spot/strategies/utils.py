@@ -1,7 +1,7 @@
-from ..models import SpotOrder, SpotOperation
+from ..models import SpotOrder, SpotOperation, SpotStep, SpotTarget
 
 
-def create_market_buy_in_quote_operation(symbol, operation_type, price, amount_in_quote, position):
+def create_market_buy_in_quote_operation(symbol, operation_type, price, amount_in_quote, step: SpotStep = None):
     buy_market_order = SpotOrder(symbol=symbol,
                                  type='market',
                                  side='buy',
@@ -12,14 +12,15 @@ def create_market_buy_in_quote_operation(symbol, operation_type, price, amount_i
         type=operation_type,
         order=buy_market_order,
         action='create',
-        position=position,
         status='in_progress')
     buy_market_operation.save()
-    position.save()
+    if step:
+        step.operation = buy_market_operation
+        step.save()
     return buy_market_operation
 
 
-def create_market_sell_operation(symbol, operation_type, price, amount, position):
+def create_market_sell_operation(symbol, operation_type, price, amount, target: SpotTarget = None):
     sell_market_order = SpotOrder(symbol=symbol,
                                   type='market',
                                   side='sell',
@@ -30,8 +31,9 @@ def create_market_sell_operation(symbol, operation_type, price, amount, position
         type=operation_type,
         order=sell_market_order,
         action='create',
-        position=position,
         status='in_progress')
     sell_market_operation.save()
-    position.save()
+    if target:
+        target.operation = sell_market_operation
+        target.save()
     return sell_market_operation
