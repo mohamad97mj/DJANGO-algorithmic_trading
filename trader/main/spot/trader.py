@@ -21,6 +21,9 @@ class SpotTrader:
     def get_bot(self, bot_id):
         return self._bot_handler.get_bot(bot_id=bot_id)
 
+    def get_active_bots(self, credential_id):
+        return self._bot_handler.get_active_bots(credential_id=credential_id)
+
     def start(self):
         self._bot_handler.reload_bots()
         self._bot_handler.run_bots()

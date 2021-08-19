@@ -2,6 +2,7 @@ import time
 import asyncio
 import websockets
 from typing import List
+from django.db.models import Q
 from global_utils import async_retry_on_timeout, my_get_logger
 from trader.main.spot.models import SpotPosition, SpotBot
 from trader.clients import PublicClient, PrivateClient
@@ -87,9 +88,12 @@ class SpotBotHandler:
         bots = list(SpotBot.objects.filter(is_active=True))
         for bot in bots:
             self.init_bot_requirements(bot)
-            strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
-            bot.set_strategy_state_data(strategy_developer.reload_strategy_state_data(bot.position))
+            self.set_bot_strategy_state_data(bot)
             self._bots[str(bot.id)] = bot
+
+    def set_bot_strategy_state_data(self, bot):
+        strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
+        bot.set_strategy_state_data(strategy_developer.reload_strategy_state_data(bot.position))
 
     def init_bot_requirements(self, bot):
         private_client = PrivateClient(exchange_id=bot.exchange_id, credential_id=bot.credential_id)
@@ -221,6 +225,12 @@ class SpotBotHandler:
 
     def get_bot(self, bot_id):
         return self._bots[bot_id]
+
+    def get_active_bots(self, credential_id):
+        active_bots = SpotBot.objects.filter(Q(credential_id=credential_id) & Q(is_active=True))
+        for bot in active_bots:
+            self.set_bot_strategy_state_data(bot)
+        return active_bots
 
     def edit_position(self, bot_id, new_position_data):
         bot = self._bots[bot_id]

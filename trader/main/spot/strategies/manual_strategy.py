@@ -151,7 +151,7 @@ class ManualStrategyDeveloper:
         operations = []
         price = symbol_prices[strategy_state_data.symbol]
 
-        if price < strategy_state_data.stoploss:
+        if strategy_state_data.stoploss and price < strategy_state_data.stoploss:
             stoploss_operation = create_sell_operation(
                 symbol=strategy_state_data.symbol,
                 type='market',
