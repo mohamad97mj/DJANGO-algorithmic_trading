@@ -78,9 +78,9 @@ class SpotBotHandler:
                           position=position)
 
         self.init_bot_requirements(bot=new_bot)
-        new_bot.save()
         strategy_developer = SpotStrategyCenter.get_strategy_developer(new_bot.strategy)
         new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(new_bot.position))
+        new_bot.save()
         self._bots[str(new_bot.id)] = new_bot
         return new_bot
 
@@ -285,5 +285,4 @@ class SpotBotHandler:
             if size_was_edited:
                 edited_data.append('size')
 
-        bot.set_strategy_state_data(strategy_developer.reload_strategy_state_data(bot.position))
         return bot.position, edited_data
