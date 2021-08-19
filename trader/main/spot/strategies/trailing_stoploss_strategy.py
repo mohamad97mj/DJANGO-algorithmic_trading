@@ -122,7 +122,9 @@ class TrailingStoplossStrategyDeveloper:
                         symbol=symbol,
                         operation_type='buy_upper_limit',
                         price=price,
-                        amount_in_quote=state_data.balance_data.amount_in_quote,)
+                        amount_in_quote=state_data.balance_data.amount_in_quote,
+                        position=position
+                    )
                     state_data.balance_data.is_cash = False
                     operations.append(buy_upper_limit_operation)
                     logger.info(
@@ -141,7 +143,9 @@ class TrailingStoplossStrategyDeveloper:
                         symbol=symbol,
                         operation_type='buy_lower_limit',
                         price=price,
-                        amount_in_quote=state_data.balance_data.amount_in_quote,)
+                        amount_in_quote=state_data.balance_data.amount_in_quote,
+                        position=position
+                    )
                     state_data.balance_data.is_cash = False
                     operations.append(buy_lower_limit_operation)
                     logger.info('buy_lower_limit_operation: (symbol: {}, price: {}, amount_in_quote: {})'.format(symbol,
@@ -159,7 +163,9 @@ class TrailingStoplossStrategyDeveloper:
                         symbol=symbol,
                         operation_type='stoploss_triggered',
                         price=price,
-                        amount=state_data.balance_data.amount,)
+                        amount=state_data.balance_data.amount,
+                        position=position
+                    )
                     state_data.balance_data.is_cash = True
                     operations.append(stoploss_operation)
                     logger.info('stoploss_triggered_operation: (symbol: {}, price: {}, amount: {})'.format(symbol,
