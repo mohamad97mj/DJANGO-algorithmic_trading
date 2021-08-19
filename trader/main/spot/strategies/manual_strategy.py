@@ -49,8 +49,13 @@ class ManualStrategyDeveloper:
         signal = position.signal
 
         steps = signal.steps.all()
+        targets = signal.targets.all()
+        if signal.step_share_set_mode == 'manual':
+            for step in steps:
+                step.amount_in_quote = position.size * step.share
+                step.save()
 
-        if signal.step_share_set_mode == 'auto':
+        elif signal.step_share_set_mode == 'auto':
             auto_step_share = round_down(1 / len(steps))
             for i in range(len(steps) - 1):
                 step = steps[i]
@@ -61,8 +66,6 @@ class ManualStrategyDeveloper:
             last_step.share = round(1 - (len(steps) - 1) * auto_step_share, 2)
             last_step.amount_in_quote = position.size * last_step.share
             last_step.save()
-
-        targets = signal.targets.all()
 
         if signal.target_share_set_mode == 'auto':
             auto_target_share = round_down(1 / len(targets))
@@ -332,6 +335,7 @@ class ManualStrategyDeveloper:
             signal.steps.filter(is_triggered=False).delete()
 
             new_steps = []
+            steps_data = []
             for step_data in new_steps_data:
                 step = SpotStep(
                     signal=signal,
@@ -342,7 +346,15 @@ class ManualStrategyDeveloper:
                 )
                 step.save()
                 new_steps.append(step)
-
+                steps_data.append(
+                    StepData(
+                        step_id=step.id,
+                        buy_price=step.buy_price,
+                        share=step.share,
+                        amount_in_quote=step.amount_in_quote
+                    )
+                )
+            strategy_state_data.steps_data = steps_data
             signal.steps.set(new_steps)
             signal.save()
             position.save()
@@ -417,6 +429,7 @@ class ManualStrategyDeveloper:
             signal.targets.filter(is_triggered=False).delete()
 
             new_targets = []
+            targets_data = []
             for target_data in new_targets_data:
                 target = SpotTarget(
                     signal=signal,
@@ -426,7 +439,14 @@ class ManualStrategyDeveloper:
                 )
                 target.save()
                 new_targets.append(target)
-
+                targets_data.append(
+                    TargetData(
+                        target_id=target.id,
+                        tp_price=target.tp_price,
+                        share=target.share,
+                    )
+                )
+            strategy_state_data.targets_data = targets_data
             signal.targets.set(new_targets)
             signal.save()
             position.save()
@@ -441,6 +461,12 @@ class ManualStrategyDeveloper:
                 raise CustomException('Editing steps is not possible because one step has been triggered!')
 
             position.size = new_size
+            steps = position.signal.steps.all()
+            for step in steps:
+                step.amount_in_quote = step.share * position.size
+                step.save()
+            for step_data in strategy_state_data.steps_data:
+                step_data.amount_in_quote = step_data.share * position.size
             position.save()
             return True
         return False
@@ -453,6 +479,7 @@ class ManualStrategyDeveloper:
     def edit_stoploss(position: SpotPosition, strategy_state_data: StrategyStateData, new_stoploss):
         edit_is_required = ManualStrategyDeveloper._has_stoploss_changed(position, new_stoploss)
         if edit_is_required:
+            strategy_state_data.stoploss = new_stoploss
             position.signal.stoploss = new_stoploss
             position.save()
             return True
