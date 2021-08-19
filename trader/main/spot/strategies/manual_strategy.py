@@ -159,7 +159,9 @@ class ManualStrategyDeveloper:
                 symbol=strategy_state_data.symbol,
                 operation_type='stoploss_triggered',
                 price=price,
-                amount=strategy_state_data.amount,)
+                amount=strategy_state_data.amount,
+                position=position
+            )
 
             logger.info(
                 'stoploss_triggered_operation: (symbol: {}, price: {}, amount: {})'.format(
@@ -182,7 +184,9 @@ class ManualStrategyDeveloper:
                         operation_type='buy_step',
                         price=price,
                         amount_in_quote=step_data.amount_in_quote,
-                        step=step)
+                        position=position,
+                        step=step,
+                    )
 
                     logger.info(
                         'buy_step_operation: (symbol: {}, price: {}, amount_in_quote: {})'.format(
@@ -205,6 +209,7 @@ class ManualStrategyDeveloper:
                         operation_type='take_profit',
                         price=price,
                         amount=target_data.amount,
+                        position=position,
                         target=target)
 
                     logger.info(
@@ -401,7 +406,8 @@ class ManualStrategyDeveloper:
                 for i in range(len(new_targets_data) - 1):
                     new_targets_data[i]['share'] = auto_target_share
                 new_targets_data[len(new_targets_data) - 1]['share'] = round(
-                    strategy_state_data.none_triggered_targets_share - (len(new_targets_data) - 1) * auto_target_share, 2)
+                    strategy_state_data.none_triggered_targets_share - (len(new_targets_data) - 1) * auto_target_share,
+                    2)
                 if signal.target_share_set_mode == 'manual':
                     if strategy_state_data.targets_data[len(strategy_state_data.targets_data) - 1].is_triggered:
                         signal.target_share_set_mode = 'semi_auto'
