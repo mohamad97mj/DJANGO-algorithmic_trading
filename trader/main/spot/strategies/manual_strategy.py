@@ -1,8 +1,7 @@
-import json
 from dataclasses import dataclass
 from typing import List
-from ..models import SpotPosition, SpotStep
-from .utils import create_sell_operation, create_buy_in_quote_operation
+from ..models import SpotPosition, SpotStep, SpotTarget
+from .utils import create_market_sell_operation, create_market_buy_in_quote_operation
 from trader.utils import round_down
 from global_utils import my_get_logger, CustomException, JsonSerializable
 
@@ -36,7 +35,8 @@ class StrategyStateData(JsonSerializable):
     stoploss: float
     amount_in_quote: float
     amount: float = 0
-    free_share: float = 1
+    none_triggered_steps_share: float = 1
+    none_triggered_targets_share: float = 1
     all_steps_achieved: bool = False
     all_targets_achieved: bool = False
     total_unrealized_pnl: float = 0
@@ -99,11 +99,11 @@ class ManualStrategyDeveloper:
         steps = signal.steps.all()
         sorted_steps = sorted(steps, key=lambda s: s.buy_price)
         steps_data = []
-        free_share = 0
+        none_triggered_steps_share = 0
         amount_in_quote = 0
         for step in sorted_steps:
             if not step.is_triggered:
-                free_share += step.share
+                none_triggered_steps_share += step.share
                 amount_in_quote += step.amount_in_quote
                 all_steps_achieved = False
             steps_data.append(
@@ -116,9 +116,11 @@ class ManualStrategyDeveloper:
         targets = signal.targets.all()
         sorted_targets = sorted(targets, key=lambda t: t.tp_price)
         targets_data = []
+        none_triggered_targets_share = 0
         amount = 0
         for target in sorted_targets:
             if not target.is_triggered:
+                none_triggered_targets_share += target.share
                 all_targets_achieved = False
                 amount += target.amount
             targets_data.append(
@@ -135,7 +137,8 @@ class ManualStrategyDeveloper:
             stoploss=signal.stoploss,
             amount_in_quote=amount_in_quote,
             amount=amount,
-            free_share=round_down(free_share),
+            none_triggered_steps_share=round_down(none_triggered_steps_share),
+            none_triggered_targets_share=round_down(none_triggered_targets_share),
             all_steps_achieved=all_steps_achieved,
             all_targets_achieved=all_targets_achieved,
         )
@@ -152,12 +155,11 @@ class ManualStrategyDeveloper:
         price = symbol_prices[strategy_state_data.symbol]
 
         if strategy_state_data.stoploss and price < strategy_state_data.stoploss:
-            stoploss_operation = create_sell_operation(
+            stoploss_operation = create_market_sell_operation(
                 symbol=strategy_state_data.symbol,
-                type='market',
+                operation_type='stoploss_triggered',
                 price=price,
-                amount=strategy_state_data.amount,
-                position=position)
+                amount=strategy_state_data.amount,)
 
             logger.info(
                 'stoploss_triggered_operation: (symbol: {}, price: {}, amount: {})'.format(
@@ -173,13 +175,14 @@ class ManualStrategyDeveloper:
                 if not step_data.is_triggered and (price < step_data.buy_price or step_data.buy_price == -1):
                     if n == 0:
                         strategy_state_data.all_steps_achieved = True
-                    strategy_state_data.free_share -= step_data.share
-                    buy_step_operation = create_buy_in_quote_operation(
+                    strategy_state_data.none_triggered_steps_share -= step_data.share
+                    step = SpotStep.objects.get(id=step_data.step_id)
+                    buy_step_operation = create_market_buy_in_quote_operation(
                         symbol=strategy_state_data.symbol,
-                        type='market',
+                        operation_type='buy_step',
                         price=price,
                         amount_in_quote=step_data.amount_in_quote,
-                        position=position)
+                        step=step)
 
                     logger.info(
                         'buy_step_operation: (symbol: {}, price: {}, amount_in_quote: {})'.format(
@@ -196,12 +199,13 @@ class ManualStrategyDeveloper:
                 if not target_data.is_triggered and price > target_data.tp_price:
                     if i == len(strategy_state_data.targets_data) - 1:
                         strategy_state_data.all_targets_achieved = True
-                    tp_operation = create_sell_operation(
+                    target = SpotTarget.objects.get(id=target_data.target_id)
+                    tp_operation = create_market_sell_operation(
                         symbol=strategy_state_data.symbol,
-                        type='market',
+                        operation_type='take_profit',
                         price=price,
                         amount=target_data.amount,
-                        position=position)
+                        target=target)
 
                     logger.info(
                         'tp_operation: (symbol: {}, price: {}, amount: {})'.format(
@@ -220,7 +224,7 @@ class ManualStrategyDeveloper:
         return operations
 
     @staticmethod
-    def update_strategy_state_data(exchange_order, position, strategy_state_data):
+    def update_strategy_state_data(exchange_order, strategy_state_data):
         if exchange_order['side'] == 'buy':
             pure_buy_amount = exchange_order['amount'] - exchange_order['fee']['cost']
             strategy_state_data.amount += pure_buy_amount
@@ -273,8 +277,7 @@ class ManualStrategyDeveloper:
     def _has_steps_changed(position, new_steps_data, step_share_set_mode):
         signal = position.signal
         current_step_share_set_mode = signal.step_share_set_mode
-        current_steps = signal.steps.filter(is_triggered
-                                            =False)
+        current_steps = signal.steps.filter(is_triggered=False)
         sorted_current_steps = sorted(current_steps, key=lambda step: step.buy_price)
         sorted_current_steps_data = [
             {
@@ -301,20 +304,20 @@ class ManualStrategyDeveloper:
                     if not step_data['share']:
                         raise CustomException('Step share is required in manual mode')
                     total_share += round_down(step_data['share'])
-                if round_down(total_share) != round_down(strategy_state_data.free_share):
+                if round_down(total_share) != round_down(strategy_state_data.none_triggered_steps_share):
                     raise CustomException('Total shares must be equal to free share, free share is : {}'.format(
-                        strategy_state_data.free_share))
+                        strategy_state_data.none_triggered_steps_share))
                 if signal.step_share_set_mode == 'auto':
                     if strategy_state_data.steps_data[len(strategy_state_data.steps_data) - 1].is_triggered:
                         signal.step_share_set_mode = 'semi_auto'
                     else:
                         signal.step_share_set_mode = 'manual'
             elif step_share_set_mode == 'auto':
-                auto_step_share = round_down(strategy_state_data.free_share / len(new_steps_data))
+                auto_step_share = round_down(strategy_state_data.none_triggered_steps_share / len(new_steps_data))
                 for i in range(len(new_steps_data) - 1):
                     new_steps_data[i]['share'] = auto_step_share
                 new_steps_data[len(new_steps_data) - 1]['share'] = round(
-                    strategy_state_data.free_share - (len(new_steps_data) - 1) * auto_step_share, 2)
+                    strategy_state_data.none_triggered_steps_share - (len(new_steps_data) - 1) * auto_step_share, 2)
                 if signal.step_share_set_mode == 'manual':
                     if strategy_state_data.targets_data[len(strategy_state_data.targets_data) - 1].is_triggered:
                         signal.step_share_set_mode = 'semi_auto'
@@ -336,6 +339,89 @@ class ManualStrategyDeveloper:
                 new_steps.append(step)
 
             signal.steps.set(new_steps)
+            signal.save()
+            position.save()
+
+        return position
+
+    @staticmethod
+    def edit_targets(position, strategy_state_data, new_targets_data, target_share_set_mode='auto'):
+        edit_is_required = ManualStrategyDeveloper._has_targets_changed(position,
+                                                                        new_targets_data,
+                                                                        target_share_set_mode)
+        if edit_is_required:
+            ManualStrategyDeveloper._edit_none_triggered_targets(position,
+                                                                 strategy_state_data,
+                                                                 new_targets_data,
+                                                                 target_share_set_mode)
+            return True
+        return False
+
+    @staticmethod
+    def _has_targets_changed(position, new_targets_data, target_share_set_mode):
+        signal = position.signal
+        current_target_share_set_mode = signal.target_share_set_mode
+        current_targets = signal.targets.filter(is_triggered=False)
+        sorted_current_targets = sorted(current_targets, key=lambda target: target.tp_price)
+        sorted_current_targets_data = [
+            {
+                'tp_price': t.tp_price,
+                'share': t.share,
+            } for t in sorted_current_targets
+        ]
+        sorted_new_targets_data = sorted(new_targets_data, key=lambda target: target['tp_price'])
+        return sorted_current_targets_data != sorted_new_targets_data or (
+                current_target_share_set_mode != 'semi_auto' and current_target_share_set_mode != target_share_set_mode)
+
+    @staticmethod
+    def _edit_none_triggered_targets(position: SpotPosition,
+                                     strategy_state_data: StrategyStateData,
+                                     new_targets_data: List[dict],
+                                     target_share_set_mode):
+        signal = position.signal
+        if strategy_state_data.all_targets_achieved:
+            raise CustomException('Editing targets is not possible because all targets has been triggered!')
+        else:
+            if target_share_set_mode == 'manual':
+                total_share = 0
+                for target_data in new_targets_data:
+                    if not target_data['share']:
+                        raise CustomException('target share is required in manual mode')
+                    total_share += round_down(target_data['share'])
+                if round_down(total_share) != round_down(strategy_state_data.none_triggered_targets_share):
+                    raise CustomException('Total shares must be equal to free share, free share is : {}'.format(
+                        strategy_state_data.none_triggered_targets_share))
+                if signal.target_share_set_mode == 'auto':
+                    if strategy_state_data.targets_data[len(strategy_state_data.targets_data) - 1].is_triggered:
+                        signal.target_share_set_mode = 'semi_auto'
+                    else:
+                        signal.target_share_set_mode = 'manual'
+            elif target_share_set_mode == 'auto':
+                auto_target_share = round_down(strategy_state_data.none_triggered_targets_share / len(new_targets_data))
+                for i in range(len(new_targets_data) - 1):
+                    new_targets_data[i]['share'] = auto_target_share
+                new_targets_data[len(new_targets_data) - 1]['share'] = round(
+                    strategy_state_data.none_triggered_targets_share - (len(new_targets_data) - 1) * auto_target_share, 2)
+                if signal.target_share_set_mode == 'manual':
+                    if strategy_state_data.targets_data[len(strategy_state_data.targets_data) - 1].is_triggered:
+                        signal.target_share_set_mode = 'semi_auto'
+                    else:
+                        signal.target_share_set_mode = 'auto'
+
+            signal.targets.filter(is_triggered=False).delete()
+
+            new_targets = []
+            for target_data in new_targets_data:
+                target = SpotTarget(
+                    signal=signal,
+                    tp_price=target_data['tp_price'],
+                    share=target_data['share'],
+                    is_triggered=False,
+                )
+                target.save()
+                new_targets.append(target)
+
+            signal.targets.set(new_targets)
             signal.save()
             position.save()
 
