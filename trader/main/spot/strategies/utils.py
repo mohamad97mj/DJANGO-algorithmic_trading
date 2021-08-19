@@ -1,7 +1,12 @@
-from ..models import SpotOrder, SpotOperation, SpotStep, SpotTarget
+from ..models import SpotOrder, SpotOperation, SpotStep, SpotTarget, SpotPosition
 
 
-def create_market_buy_in_quote_operation(symbol, operation_type, price, amount_in_quote, step: SpotStep = None):
+def create_market_buy_in_quote_operation(symbol,
+                                         operation_type,
+                                         price,
+                                         amount_in_quote,
+                                         position: SpotPosition,
+                                         step: SpotStep = None):
     buy_market_order = SpotOrder(symbol=symbol,
                                  type='market',
                                  side='buy',
@@ -10,6 +15,7 @@ def create_market_buy_in_quote_operation(symbol, operation_type, price, amount_i
     buy_market_order.save()
     buy_market_operation = SpotOperation(
         type=operation_type,
+        position=position,
         order=buy_market_order,
         action='create',
         status='in_progress')
@@ -20,7 +26,11 @@ def create_market_buy_in_quote_operation(symbol, operation_type, price, amount_i
     return buy_market_operation
 
 
-def create_market_sell_operation(symbol, operation_type, price, amount, target: SpotTarget = None):
+def create_market_sell_operation(symbol,
+                                 operation_type,
+                                 price, amount,
+                                 position: SpotPosition,
+                                 target: SpotTarget = None):
     sell_market_order = SpotOrder(symbol=symbol,
                                   type='market',
                                   side='sell',
@@ -29,6 +39,7 @@ def create_market_sell_operation(symbol, operation_type, price, amount, target: 
     sell_market_order.save()
     sell_market_operation = SpotOperation(
         type=operation_type,
+        position=position,
         order=sell_market_order,
         action='create',
         status='in_progress')
