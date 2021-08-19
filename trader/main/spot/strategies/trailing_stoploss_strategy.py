@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from copy import deepcopy
 from trader.utils import truncate, my_copy, intersection
-from trader.main.spot.models import SpotPosition, SpotOrder, SpotOperation
+from trader.main.spot.models import SpotPosition
 from global_utils import my_get_logger
-from .utils import create_buy_in_quote_operation, create_sell_operation
+from .utils import create_market_buy_in_quote_operation, create_market_sell_operation
 
 
 @dataclass
@@ -118,12 +118,11 @@ class TrailingStoplossStrategyDeveloper:
             price_precision = markets[symbol]['precision']['price']
             if (not state_data.setup_data.upper_buy_limit_price) or price > state_data.setup_data.upper_buy_limit_price:
                 if state_data.balance_data.is_cash:
-                    buy_upper_limit_operation = create_buy_in_quote_operation(
+                    buy_upper_limit_operation = create_market_buy_in_quote_operation(
                         symbol=symbol,
-                        type='market',
+                        operation_type='buy_upper_limit',
                         price=price,
-                        amount_in_quote=state_data.balance_data.amount_in_quote,
-                        position=position)
+                        amount_in_quote=state_data.balance_data.amount_in_quote,)
                     state_data.balance_data.is_cash = False
                     operations.append(buy_upper_limit_operation)
                     logger.info(
@@ -138,12 +137,11 @@ class TrailingStoplossStrategyDeveloper:
 
             elif price < state_data.setup_data.lower_buy_limit_price:
                 if state_data.balance_data.is_cash:
-                    buy_lower_limit_operation = create_buy_in_quote_operation(
+                    buy_lower_limit_operation = create_market_buy_in_quote_operation(
                         symbol=symbol,
-                        type='market',
+                        operation_type='buy_lower_limit',
                         price=price,
-                        amount_in_quote=state_data.balance_data.amount_in_quote,
-                        position=position)
+                        amount_in_quote=state_data.balance_data.amount_in_quote,)
                     state_data.balance_data.is_cash = False
                     operations.append(buy_lower_limit_operation)
                     logger.info('buy_lower_limit_operation: (symbol: {}, price: {}, amount_in_quote: {})'.format(symbol,
@@ -157,12 +155,11 @@ class TrailingStoplossStrategyDeveloper:
 
             elif price < state_data.setup_data.stoploss_price:
                 if not state_data.balance_data.is_cash:
-                    stoploss_operation = create_sell_operation(
+                    stoploss_operation = create_market_sell_operation(
                         symbol=symbol,
-                        type='market',
+                        operation_type='stoploss_triggered',
                         price=price,
-                        amount=state_data.balance_data.amount,
-                        position=position)
+                        amount=state_data.balance_data.amount,)
                     state_data.balance_data.is_cash = True
                     operations.append(stoploss_operation)
                     logger.info('stoploss_triggered_operation: (symbol: {}, price: {}, amount: {})'.format(symbol,
