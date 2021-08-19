@@ -237,15 +237,53 @@ class SpotBotHandler:
         strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
 
         edited_data = []
-        steps_was_edited = self._run_strategy_developer_command(
-            bot,
-            strategy_developer,
-            'edit_steps',
-            new_position_data['signal']['steps'],
-            new_position_data['signal'].get('step_share_set_mode', 'auto'),
-        )
-        if steps_was_edited:
-            edited_data.append('steps')
+        new_signal_data = new_position_data.get('signal')
+        if new_signal_data:
+            new_steps_data = new_signal_data.get('steps')
+            if new_steps_data:
+                steps_was_edited = self._run_strategy_developer_command(
+                    bot,
+                    strategy_developer,
+                    'edit_steps',
+                    new_steps_data,
+                    new_signal_data.get('step_share_set_mode', 'auto'),
+                )
+                if steps_was_edited:
+                    edited_data.append('steps')
+
+            new_targets_data = new_signal_data.get('targets')
+            if new_targets_data:
+                targets_was_edited = self._run_strategy_developer_command(
+                    bot,
+                    strategy_developer,
+                    'edit_targets',
+                    new_targets_data,
+                    new_signal_data.get('target_share_set_mode', 'auto')
+                )
+                if targets_was_edited:
+                    edited_data.append('targets')
+
+            new_stoploss = new_signal_data.get('stoploss')
+            if new_stoploss:
+                stoploss_was_edited = self._run_strategy_developer_command(
+                    bot,
+                    strategy_developer,
+                    'edit_stoploss',
+                    new_stoploss,
+                )
+                if stoploss_was_edited:
+                    edited_data.append('stoploss')
+
+        new_size = new_position_data.get('size')
+        if new_size:
+            size_was_edited = self._run_strategy_developer_command(
+                bot,
+                strategy_developer,
+                'edit_size',
+                new_size
+            )
+            if size_was_edited:
+                edited_data.append('size')
 
         bot.set_strategy_state_data(strategy_developer.reload_strategy_state_data(bot.position))
         return bot.position, edited_data
