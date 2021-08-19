@@ -1,10 +1,11 @@
 import time
+import asyncio
+import websockets
 from typing import List
 from global_utils import async_retry_on_timeout, my_get_logger
 from trader.main.spot.models import SpotPosition, SpotBot
 from trader.clients import PublicClient, PrivateClient
 from trader.utils import with2without_slash, CacheUtils
-import asyncio
 from binance import AsyncClient, BinanceSocketManager
 from threading import Thread
 from aiohttp.client_exceptions import ClientConnectorError
@@ -100,7 +101,7 @@ class SpotBotHandler:
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
-    def run_bots(self):
+    def run_bots(self, test=True):
         start = int(time.time())
         while True:
             for bot in self._bots.values():
@@ -113,7 +114,10 @@ class SpotBotHandler:
                 price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
                 symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
                 while not symbol_prices:
-                    self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
+                    if test:
+                        self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
+                    else:
+                        self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
                     time.sleep(7)
                     symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
 
@@ -138,6 +142,28 @@ class SpotBotHandler:
                 return
 
         return symbol_prices
+
+    def _start_muck_symbols_price_ticker(self, exchange_id, symbols: List):
+        symbol_prices = self._read_prices(exchange_id, symbols)
+
+        for symbol in symbols:
+            if not (symbol in symbol_prices and symbol_prices[symbol]):
+                t = Thread(target=asyncio.run, args=(self._start_muck_symbol_price_ticker(exchange_id, symbol),))
+                t.start()
+
+    async def _start_muck_symbol_price_ticker(self, exchange_id, symbol):
+        uri = "ws://localhost:9000"
+        cache_name = '{}_price'.format(exchange_id)
+
+        async with websockets.connect(uri) as websocket:
+            await websocket.send(symbol)
+            while True:
+                try:
+                    price = await websocket.recv()
+                    CacheUtils.write_to_cache(symbol, float(price), cache_name)
+                except Exception as e:
+                    logger = my_get_logger()
+                    logger.error(e)
 
     def _start_symbols_price_ticker(self, exchange_id, symbols: List):
 
@@ -174,7 +200,8 @@ class SpotBotHandler:
                     if res['e'] != 'error':
                         CacheUtils.write_to_cache(symbol, float(res['c']), cache_name)
                 except Exception as e:
-                    print(e)
+                    logger = my_get_logger()
+                    logger.error(e)
 
     async def _get_async_client(self):
         return await AsyncClient.create()
@@ -198,8 +225,9 @@ class SpotBotHandler:
     def edit_position(self, bot_id, new_position_data):
         bot = self._bots[bot_id]
         strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
+
         edited_data = []
-        new_position, steps_was_edited = self._run_strategy_developer_command(
+        steps_was_edited = self._run_strategy_developer_command(
             bot,
             strategy_developer,
             'edit_steps',
@@ -208,4 +236,6 @@ class SpotBotHandler:
         )
         if steps_was_edited:
             edited_data.append('steps')
-        return new_position, edited_data
+
+        bot.set_strategy_state_data(strategy_developer.reload_strategy_state_data(bot.position))
+        return bot.position, edited_data
