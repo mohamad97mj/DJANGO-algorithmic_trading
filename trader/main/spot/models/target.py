@@ -8,4 +8,6 @@ class SpotTarget(models.Model):
     share = models.FloatField(null=True, blank=True)
     is_triggered = models.BooleanField(default=False)
     amount = models.FloatField(default=0)
+    cost = models.FloatField(default=0)
+    operation = models.OneToOneField('SpotOperation', related_name='target', on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
