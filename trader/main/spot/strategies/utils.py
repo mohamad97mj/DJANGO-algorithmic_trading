@@ -1,14 +1,15 @@
-from ..models import SpotPosition, SpotOrder, SpotOperation
+from ..models import SpotOrder, SpotOperation
 
 
-def create_buy_in_quote_operation(symbol, type, price, amount_in_quote, position):
+def create_market_buy_in_quote_operation(symbol, operation_type, price, amount_in_quote, position):
     buy_market_order = SpotOrder(symbol=symbol,
-                                 type=type,
+                                 type='market',
                                  side='buy',
                                  price=price,
                                  amount_in_quote=amount_in_quote)
     buy_market_order.save()
     buy_market_operation = SpotOperation(
+        type=operation_type,
         order=buy_market_order,
         action='create',
         position=position,
@@ -18,14 +19,15 @@ def create_buy_in_quote_operation(symbol, type, price, amount_in_quote, position
     return buy_market_operation
 
 
-def create_sell_operation(symbol, type, price, amount, position):
+def create_market_sell_operation(symbol, operation_type, price, amount, position):
     sell_market_order = SpotOrder(symbol=symbol,
-                                  type=type,
+                                  type='market',
                                   side='sell',
                                   price=price,
                                   amount=amount)
     sell_market_order.save()
     sell_market_operation = SpotOperation(
+        type=operation_type,
         order=sell_market_order,
         action='create',
         position=position,
