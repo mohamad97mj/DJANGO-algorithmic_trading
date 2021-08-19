@@ -342,13 +342,30 @@ class ManualStrategyDeveloper:
         return position
 
     @staticmethod
-    def edit_step():
-        return 'edit_step'
+    def edit_size(position: SpotPosition, strategy_state_data: StrategyStateData, new_size):
+        edit_is_required = ManualStrategyDeveloper._has_size_changed(position, new_size)
+        if edit_is_required:
+            if strategy_state_data.steps_data[len(strategy_state_data.steps_data) - 1].is_triggered:
+                raise CustomException('Editing steps is not possible because one step has been triggered!')
+
+            position.size = new_size
+            position.save()
+            return True
+        return False
 
     @staticmethod
-    def add_target():
-        return 'add_target'
+    def _has_size_changed(position, new_size):
+        return position.size != new_size
 
     @staticmethod
-    def edit_target():
-        return 'edit_target'
+    def edit_stoploss(position: SpotPosition, strategy_state_data: StrategyStateData, new_stoploss):
+        edit_is_required = ManualStrategyDeveloper._has_stoploss_changed(position, new_stoploss)
+        if edit_is_required:
+            position.signal.stoploss = new_stoploss
+            position.save()
+            return True
+        return False
+
+    @staticmethod
+    def _has_stoploss_changed(position: SpotPosition, new_stoploss):
+        return position.signal.stoploss != new_stoploss
