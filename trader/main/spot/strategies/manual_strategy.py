@@ -462,12 +462,15 @@ class ManualStrategyDeveloper:
 
             position.size = new_size
             steps = position.signal.steps.all()
+            amount_in_quote = 0
             for step in steps:
                 step.amount_in_quote = step.share * position.size
                 step.save()
             for step_data in strategy_state_data.steps_data:
                 step_data.amount_in_quote = step_data.share * position.size
+                amount_in_quote += step_data.amount_in_quote
             position.save()
+            strategy_state_data.amount_in_quote = amount_in_quote
             return True
         return False
 
