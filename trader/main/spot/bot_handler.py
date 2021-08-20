@@ -310,4 +310,14 @@ class SpotBotHandler:
         else:
             raise CustomException('bot with id {} could not be started because it is closed!')
 
-
+    def stop_bot(self, bot_id):
+        if bot_id in self._bots:
+            bot = self._bots[bot_id]
+        else:
+            bot = SpotBot.objects.get(id=bot_id)
+            if bot.status not in (SpotBot.Status.RUNNING.value, SpotBot.Status.PAUSED.value):
+                raise CustomException('bot with id {} is already closed!'.format(bot_id))
+        bot.status = SpotBot.Status.STOPPED_MANUALY
+        bot.is_active = False
+        bot.close_position()
+        bot.save()
