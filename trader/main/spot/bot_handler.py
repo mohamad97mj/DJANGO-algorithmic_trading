@@ -15,6 +15,7 @@ from concurrent.futures._base import TimeoutError
 from .strategies.strategy_center import SpotStrategyCenter
 from .models import SpotSignal, SpotStep, SpotTarget
 from trader.utils import round_down
+from global_utils import CustomException
 
 
 @dataclass
@@ -290,8 +291,11 @@ class SpotBotHandler:
 
         return bot.position, edited_data
 
-    def stop_bot(self, bot_id):
+    def pause_bot(self, bot_id):
         bot = self._bots.pop(bot_id)
         bot.is_active = False
+        bot.status = SpotBot.Status.PAUSED.value
         bot.save()
         return bot
+
+
