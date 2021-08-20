@@ -79,6 +79,8 @@ class ManualStrategyDeveloper:
 
         # TODO check if it is sorted already
         sorted_steps = sorted(steps, key=lambda s: s.buy_price)
+        if sorted_steps[0].buy_price == -1:
+            sorted_steps.append(sorted_steps.pop(0))
         sorted_targets = sorted(targets, key=lambda t: t.tp_price)
 
         steps_data = [
@@ -101,6 +103,8 @@ class ManualStrategyDeveloper:
         all_targets_achieved = True
         steps = signal.steps.all()
         sorted_steps = sorted(steps, key=lambda s: s.buy_price)
+        if sorted_steps[0].buy_price == -1:
+            sorted_steps.append(sorted_steps.pop(0))
         steps_data = []
         none_triggered_steps_share = 0
         amount_in_quote = 0
@@ -178,10 +182,15 @@ class ManualStrategyDeveloper:
             n = 0
             for step_data in strategy_state_data.steps_data:
                 if not step_data.is_triggered and (price < step_data.buy_price or step_data.buy_price == -1):
+                    step = SpotStep.objects.get(id=step_data.step_id)
                     if n == 0:
+                        if step_data.buy_price == -1:
+                            step_data.buy_price = price
+                            step.buy_price = step_data.buy_price
+                            step.save()
+
                         strategy_state_data.all_steps_achieved = True
                     strategy_state_data.none_triggered_steps_share -= step_data.share
-                    step = SpotStep.objects.get(id=step_data.step_id)
                     buy_step_operation = create_market_buy_in_quote_operation(
                         symbol=strategy_state_data.symbol,
                         operation_type='buy_step',
@@ -228,6 +237,8 @@ class ManualStrategyDeveloper:
                             strategy_state_data.steps_data[len(strategy_state_data.steps_data) - 1].buy_price
                     else:
                         strategy_state_data.stoploss = strategy_state_data.targets_data[i - 1].tp_price
+                    position.signal.stoploss = strategy_state_data.stoploss
+                    position.signal.save()
 
         return operations
 
