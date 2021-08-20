@@ -38,5 +38,5 @@ class SpotBotTrader:
         return bot_handler.start_bot(bot_id)
 
     @staticmethod
-    def stop_bot(blot_id):
-        pass
+    def stop_bot(bot_id):
+        return bot_handler.stop_bot(bot_id)

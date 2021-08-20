@@ -75,7 +75,7 @@ class SpotBot(models.Model):
                                 exchange_order['price'],
                                 balance))
 
-    def execute_operations(self, operations: List[SpotOperation], test=False, symbol_prices=None):
+    def execute_operations(self, operations: List[SpotOperation], test=True, symbol_prices=None):
         exchange_orders = []
         for operation in operations:
             if operation.action == 'create':
