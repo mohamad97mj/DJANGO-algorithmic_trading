@@ -158,16 +158,19 @@ class SpotBotHandler:
     async def _start_muck_symbol_price_ticker(self, exchange_id, symbol):
         uri = "ws://localhost:9000"
         cache_name = '{}_price'.format(exchange_id)
-
-        async with websockets.connect(uri) as websocket:
-            await websocket.send(symbol)
-            while True:
-                try:
-                    price = await websocket.recv()
-                    CacheUtils.write_to_cache(symbol, float(price), cache_name)
-                except Exception as e:
-                    logger = my_get_logger()
-                    logger.error(e)
+        try:
+            async with websockets.connect(uri) as websocket:
+                await websocket.send(symbol)
+                while True:
+                    try:
+                        price = await websocket.recv()
+                        CacheUtils.write_to_cache(symbol, float(price), cache_name)
+                    except Exception as e:
+                        logger = my_get_logger()
+                        logger.error(e)
+        except OSError:
+            logger = my_get_logger()
+            logger.warning('Could not connect to muck price server!')
 
     def _start_symbols_price_ticker(self, exchange_id, symbols: List):
 
@@ -286,3 +289,9 @@ class SpotBotHandler:
                 edited_data.append('size')
 
         return bot.position, edited_data
+
+    def stop_bot(self, bot_id):
+        bot = self._bots.pop(bot_id)
+        bot.is_active = False
+        bot.save()
+        return bot
