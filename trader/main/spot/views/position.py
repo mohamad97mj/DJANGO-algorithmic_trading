@@ -3,7 +3,7 @@ from rest_framework import renderers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from global_utils import catch_all_exceptions
-from ..services import SpotBotService
+from ..services import SpotBotTrader
 from ..serializers import SpotPositionSerializer
 
 
@@ -15,7 +15,7 @@ class SpotPositionView(APIView):
         body = request.body
         data = json.loads(body)
         new_position_data = data['position']
-        new_position, edited_data = SpotBotService.edit_position(bot_id, new_position_data, )
+        new_position, edited_data = SpotBotTrader.edit_position(bot_id, new_position_data, )
 
         position_serializer = SpotPositionSerializer(instance=new_position)
         return Response(

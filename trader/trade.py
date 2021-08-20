@@ -1,9 +1,7 @@
-import asyncio
-from trader.main.spot.trader import trader
 from threading import Thread
+from trader.main.spot.services import SpotBotTrader
 
 
 def trade():
-
-    t1 = Thread(target=trader.start)
+    t1 = Thread(target=SpotBotTrader.start_trading)
     t1.start()
