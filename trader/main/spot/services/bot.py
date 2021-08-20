@@ -13,7 +13,6 @@ class SpotBotService():
     def get_active_bots(credential_id):
         return trader.get_active_bots(credential_id)
 
-
     @staticmethod
     def create_bot(bot_data: dict):
         return trader.create_bot(exchange_id=bot_data['exchange_id'],
@@ -24,3 +23,7 @@ class SpotBotService():
     @staticmethod
     def edit_position(bot_id, new_position_data):
         return trader.edit_position(bot_id, new_position_data, )
+
+    @staticmethod
+    def stop_bot(bot_id):
+        return trader.stop_bot(bot_id)

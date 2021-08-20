@@ -41,3 +41,7 @@ class SpotBotDetailView(APIView):
         bot_instance = SpotBotService.get_bot(bot_id=bot_id)
         return Response(data=SpotBotSerializer(instance=bot_instance).data)
 
+    def delete(self, request, bot_id, format=None):
+        bot_instance = SpotBotService.stop_bot(bot_id)
+        return Response(data=SpotBotSerializer(instance=bot_instance).data)
+
