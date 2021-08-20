@@ -298,4 +298,16 @@ class SpotBotHandler:
         bot.save()
         return bot
 
+    def start_bot(self, bot_id):
+        if bot_id in self._bots:
+            raise CustomException('bot with id {} is already running!'.format(bot_id))
+        bot = SpotBot.objects.get(bot=bot_id)
+        if bot.status == SpotBot.Status.PAUSED.value:
+            bot.is_active = True
+            bot.status = SpotBot.Status.RUNNING.value
+            bot.save()
+            self._bots[bot_id] = bot
+        else:
+            raise CustomException('bot with id {} could not be started because it is closed!')
+
 
