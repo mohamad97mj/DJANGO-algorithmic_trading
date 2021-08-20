@@ -13,6 +13,9 @@ class SpotSignalSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['steps'] = sorted(ret['steps'], key=lambda s: s['buy_price'])
+        sorted_steps = sorted(ret['steps'], key=lambda s: s['buy_price'])
+        if sorted_steps[0]['buy_price'] == -1:
+            sorted_steps.append(sorted_steps.pop(0))
+        ret['steps'] = sorted_steps
         ret['targets'] = sorted(ret['targets'], key=lambda s: s['tp_price'])
         return ret

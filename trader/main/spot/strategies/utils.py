@@ -22,6 +22,7 @@ def create_market_buy_in_quote_operation(symbol,
     buy_market_operation.save()
     if step:
         step.operation = buy_market_operation
+        step.is_triggered = True
         step.save()
     return buy_market_operation
 
@@ -46,5 +47,6 @@ def create_market_sell_operation(symbol,
     sell_market_operation.save()
     if target:
         target.operation = sell_market_operation
+        target.is_triggered = True
         target.save()
     return sell_market_operation

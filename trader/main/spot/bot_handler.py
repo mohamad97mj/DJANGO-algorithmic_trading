@@ -16,6 +16,7 @@ from .strategies.strategy_center import SpotStrategyCenter
 from .models import SpotSignal, SpotStep, SpotTarget
 from trader.utils import round_down
 from global_utils import CustomException
+from websockets.exceptions import ConnectionClosedError
 
 
 @dataclass
@@ -48,6 +49,9 @@ class SpotBotHandler:
 
             steps = []
             sorted_steps_data = sorted(signal_data['steps'], key=lambda s: s['buy_price'])
+            if sorted_steps_data[0]['buy_price'] == -1:
+                sorted_steps_data.append(sorted_steps_data.pop(0))
+
             for step_data in sorted_steps_data:
                 step = SpotStep(signal=signal,
                                 buy_price=step_data.get('buy_price'),
@@ -110,10 +114,10 @@ class SpotBotHandler:
         start = int(time.time())
         while True:
             for bot in self._bots.values():
-                finish = int(time.time())
-                if finish - start > 4 * 60 * 60:
-                    start = int(time.time())
-                    bot.reset()
+                # finish = int(time.time())
+                # if finish - start > 4 * 60 * 60:
+                #     start = int(time.time())
+                #     bot.reset()
 
                 strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
                 price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
@@ -159,19 +163,21 @@ class SpotBotHandler:
     async def _start_muck_symbol_price_ticker(self, exchange_id, symbol):
         uri = "ws://localhost:9000"
         cache_name = '{}_price'.format(exchange_id)
-        try:
-            async with websockets.connect(uri) as websocket:
-                await websocket.send(symbol)
-                while True:
-                    try:
-                        price = await websocket.recv()
-                        CacheUtils.write_to_cache(symbol, float(price), cache_name)
-                    except Exception as e:
-                        logger = my_get_logger()
-                        logger.error(e)
-        except OSError:
-            logger = my_get_logger()
-            logger.warning('Could not connect to muck price server!')
+        while True:
+            try:
+                async with websockets.connect(uri) as websocket:
+                    await websocket.send(symbol)
+                    while True:
+                        try:
+                            price = await websocket.recv()
+                            CacheUtils.write_to_cache(symbol, float(price), cache_name)
+                        except Exception as e:
+                            logger = my_get_logger()
+                            logger.error(e)
+                            break
+            except (OSError, ConnectionClosedError):
+                logger = my_get_logger()
+                logger.warning('Could not connect to muck price server!')
 
     def _start_symbols_price_ticker(self, exchange_id, symbols: List):
 
@@ -241,10 +247,11 @@ class SpotBotHandler:
     def get_bots(self, credential_id, is_active):
         if is_active is True:
             bots = SpotBot.objects.filter(Q(credential_id=credential_id) & Q(is_active=True))
-            for bot in bots:
-                self.set_bot_strategy_state_data(bot)
         else:
             bots = SpotBot.objects.filter(Q(credential_id=credential_id))
+        for bot in bots:
+            if bot.is_active:
+                self.set_bot_strategy_state_data(bot)
         return bots
 
     def edit_position(self, bot_id, new_position_data):
@@ -312,12 +319,13 @@ class SpotBotHandler:
     def start_bot(self, bot_id):
         if bot_id in self._bots:
             raise CustomException('bot with id {} is already running!'.format(bot_id))
-        bot = SpotBot.objects.get(bot=bot_id)
+        bot = SpotBot.objects.get(id=bot_id)
         if bot.status == SpotBot.Status.PAUSED.value:
             bot.is_active = True
             bot.status = SpotBot.Status.RUNNING.value
             bot.save()
             self._bots[bot_id] = bot
+            return bot
         else:
             raise CustomException('bot with id {} could not be started because it is closed!')
 
@@ -327,8 +335,9 @@ class SpotBotHandler:
         else:
             bot = SpotBot.objects.get(id=bot_id)
             if bot.status not in (SpotBot.Status.RUNNING.value, SpotBot.Status.PAUSED.value):
-                raise CustomException('bot with id {} is already closed!'.format(bot_id))
-        bot.status = SpotBot.Status.STOPPED_MANUALY
+                raise CustomException('bot with id {} is already stopped!'.format(bot_id))
+        bot.status = SpotBot.Status.STOPPED_MANUALY.value
         bot.is_active = False
         bot.close_position()
         bot.save()
+        return bot
