@@ -1,3 +1,4 @@
+import json
 from rest_framework import renderers
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -15,7 +16,8 @@ class SpotBotsView(APIView):
     @catch_all_exceptions(reraise=True)
     def get(self, request, format=None):
         credential_id = request.query_params.get('credential_id', 'test')
-        bot_instances = SpotBotTrader.get_active_bots(credential_id=credential_id)
+        is_active = request.query_params.get('is_active', 'false') == 'true'
+        bot_instances = SpotBotTrader.get_bots(credential_id=credential_id, is_active=is_active)
         return Response(data=SpotBotSerializer(bot_instances, many=True).data)
 
     @catch_all_exceptions(reraise=True)
@@ -38,10 +40,20 @@ class SpotBotsView(APIView):
 class SpotBotDetailView(APIView):
     @catch_all_exceptions(reraise=True)
     def get(self, request, bot_id, format=None):
-        bot_instance = SpotBotTrader.get_bot(bot_id=bot_id)
+        credential_id = request.query_params.get('credential_id', 'test')
+        bot_instance = SpotBotTrader.get_bot(bot_id=bot_id, credential_id=credential_id)
         return Response(data=SpotBotSerializer(instance=bot_instance).data)
 
-    def delete(self, request, bot_id, format=None):
-        bot_instance = SpotBotTrader.stop_bot(bot_id)
+    @catch_all_exceptions(reraise=True)
+    def put(self, request, bot_id, format=None):
+        data = json.loads(request.body)
+        command = data['command']
+        bot_instance = command_mapper[command](bot_id)
         return Response(data=SpotBotSerializer(instance=bot_instance).data)
 
+
+command_mapper = {
+    'pause': SpotBotTrader.pause_bot,
+    'start': SpotBotTrader.start_bot,
+    'stop': SpotBotTrader.stop_bot,
+}
