@@ -18,6 +18,12 @@ class SpotBotManager(models.Manager):
 
 
 class SpotBot(models.Model):
+    class Status(models.TextChoices):
+        RUNNING = 'running'
+        PAUSED = 'paused'
+        STOPPED_SYSTEMATICALLY = 'stopped_systematically'
+        STOPPED_MANUALY = 'stopped_manualy'
+
     objects = SpotBotManager()
 
     # bot_id = models.CharField(max_length=100, unique=True)
@@ -27,7 +33,8 @@ class SpotBot(models.Model):
     position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
-    status = models.CharField(default='running', max_length=50)  # stopped, closed_buy_strategy_developer, closed_buy_admin
+    status = models.CharField(default=Status.RUNNING.value,
+                              max_length=50)  # paused, stopped_systematically, stopped_manualy
 
     def __init__(self, *args, **kwargs):
         super(SpotBot, self).__init__(*args, **kwargs)
@@ -137,4 +144,4 @@ class SpotBot(models.Model):
         return exchange_orders
 
     def close_position(self):
-        pass
+        self.sell_all_assets()
