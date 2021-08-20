@@ -227,10 +227,18 @@ class SpotBotHandler:
     def get_strategy_state_data(self, bot_id):
         return self._bots[bot_id].strategy_state_data
 
-    def get_bot(self, bot_id):
-        return self._bots[bot_id]
+    def get_bot(self, bot_id, credential_id):
+        if bot_id in self._bots:
+            bot = self._bots[bot_id]
+            if bot.credential_id == credential_id:
+                return self._bots[bot_id]
+        else:
+            bot = SpotBot.objects.filter(Q(id=bot_id) & Q(credential_id=credential_id)).first()
+            if bot:
+                return bot
+        raise CustomException('No bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
 
-    def get_active_bots(self, credential_id):
+    def get_bots(self, credential_id):
         active_bots = SpotBot.objects.filter(Q(credential_id=credential_id) & Q(is_active=True))
         for bot in active_bots:
             self.set_bot_strategy_state_data(bot)
