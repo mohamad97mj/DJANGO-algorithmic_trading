@@ -1,1 +1,1 @@
-from .bot import SpotBotService
+from .trader import SpotBotTrader
