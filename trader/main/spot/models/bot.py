@@ -27,6 +27,7 @@ class SpotBot(models.Model):
     position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
+    status = models.CharField(default='running', max_length=50)  # stopped, closed_buy_strategy_developer, closed_buy_admin
 
     def __init__(self, *args, **kwargs):
         super(SpotBot, self).__init__(*args, **kwargs)
