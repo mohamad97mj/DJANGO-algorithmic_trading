@@ -3,7 +3,6 @@ from django.utils import timezone
 
 
 class SpotStoploss(models.Model):
-    signal = models.ForeignKey('SpotSignal', related_name='targets', on_delete=models.CASCADE)
     trigger_price = models.FloatField()
     is_triggered = models.BooleanField(default=False)
     amount = models.FloatField(default=0)
