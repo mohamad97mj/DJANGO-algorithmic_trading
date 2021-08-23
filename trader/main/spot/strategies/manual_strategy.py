@@ -28,11 +28,20 @@ class TargetData(JsonSerializable):
 
 
 @dataclass
+class StoplossData(JsonSerializable):
+    stoploss_id: int
+    trigger_price: float
+    amount: float = 0
+    is_triggered: bool = False
+    released_amount_in_quote: float = None
+
+
+@dataclass
 class StrategyStateData(JsonSerializable):
     symbol: str
     steps_data: List[StepData]
     targets_data: List[TargetData]
-    stoploss: float
+    stoploss_data: StoplossData
     amount_in_quote: float
     amount: float = 0
     none_triggered_steps_share: float = 1
@@ -43,6 +52,37 @@ class StrategyStateData(JsonSerializable):
 
 
 class ManualStrategyDeveloper:
+
+    @staticmethod
+    def validate_position_data(position_data: dict):
+
+        signal_data = position_data.get('signal')
+        steps_data = signal_data['steps']
+        step_share_set_mode = signal_data['step_share_set_mode']
+        targets_data = signal_data['targets']
+        target_share_set_mode = signal_data['target_share_set_mode']
+
+        if step_share_set_mode == 'manual':
+            total_share = 0
+            for step_data in steps_data:
+                total_share += round_down(step_data['share'])
+                if not step_data['share']:
+                    raise CustomException('Step share is required in manual mode')
+            if round_down(total_share) != 1:
+                raise CustomException('Total shares must be equal to 1')
+
+        if target_share_set_mode == 'manual':
+            total_share = 0
+            for target_data in targets_data:
+                if not target_data['share']:
+                    raise CustomException('Target share is required in manual mode')
+                total_share += round_down(target_data.share)
+            if round_down(total_share) != 1:
+                raise CustomException('Total shares must be equal to 1')
+
+    @staticmethod
+    def get_strategy_symbols(position: SpotPosition):
+        return [position.signal.symbol, ]
 
     @staticmethod
     def init_strategy_state_data(position: SpotPosition):
@@ -88,11 +128,15 @@ class ManualStrategyDeveloper:
             for s in sorted_steps
         ]
         targets_data = [TargetData(target_id=t.id, tp_price=t.tp_price, share=t.share) for t in sorted_targets]
+        stoploss = signal.stoploss
+        stoploss_data = None
+        if stoploss:
+            stoploss_data = StoplossData(stoploss_id=stoploss.id, trigger_price=stoploss.trigger_price)
 
         strategy_state_data = StrategyStateData(symbol=signal.symbol,
                                                 steps_data=steps_data,
                                                 targets_data=targets_data,
-                                                stoploss=signal.stoploss,
+                                                stoploss_data=stoploss_data,
                                                 amount_in_quote=position.size)
         return strategy_state_data
 
@@ -136,12 +180,15 @@ class ManualStrategyDeveloper:
                            share=target.share,
                            amount=target.amount,
                            is_triggered=target.is_triggered))
-
+        stoploss = signal.stoploss
+        stoploss_data = StoplossData(stoploss_id=stoploss.id,
+                                     trigger_price=stoploss.trigger_price,
+                                     amount=stoploss.amount)
         strategy_state_data = StrategyStateData(
             symbol=signal.symbol,
             steps_data=steps_data,
             targets_data=targets_data,
-            stoploss=signal.stoploss,
+            stoploss_data=stoploss_data,
             amount_in_quote=amount_in_quote,
             amount=amount,
             none_triggered_steps_share=round_down(none_triggered_steps_share),
@@ -152,22 +199,20 @@ class ManualStrategyDeveloper:
         return strategy_state_data
 
     @staticmethod
-    def get_strategy_symbols(position: SpotPosition):
-        return [position.signal.symbol, ]
-
-    @staticmethod
     def get_operations(position: SpotPosition, strategy_state_data: StrategyStateData, symbol_prices: dict):
         logger = my_get_logger()
         operations = []
         price = symbol_prices[strategy_state_data.symbol]
 
         if strategy_state_data.stoploss and price < strategy_state_data.stoploss:
+            stoploss = position.signal.stoploss
             stoploss_operation = create_market_sell_operation(
                 symbol=strategy_state_data.symbol,
                 operation_type='stoploss_triggered',
                 price=price,
                 amount=strategy_state_data.amount,
-                position=position
+                position=position,
+                sell_step=stoploss
             )
 
             logger.info(
@@ -222,7 +267,7 @@ class ManualStrategyDeveloper:
                         price=price,
                         amount=target_data.amount,
                         position=position,
-                        target=target)
+                        sell_step=target)
 
                     logger.info(
                         'tp_operation: (symbol: {}, price: {}, amount: {})'.format(
@@ -251,33 +296,6 @@ class ManualStrategyDeveloper:
                 target_data.amount += pure_buy_amount * target_data.share
         elif exchange_order['side'] == 'sell':
             strategy_state_data.amount -= exchange_order['amount']
-
-    @staticmethod
-    def validate_position_data(position_data: dict):
-
-        signal_data = position_data.get('signal')
-        steps_data = signal_data['steps']
-        step_share_set_mode = signal_data['step_share_set_mode']
-        targets_data = signal_data['targets']
-        target_share_set_mode = signal_data['target_share_set_mode']
-
-        if step_share_set_mode == 'manual':
-            total_share = 0
-            for step_data in steps_data:
-                total_share += round_down(step_data['share'])
-                if not step_data['share']:
-                    raise CustomException('Step share is required in manual mode')
-            if round_down(total_share) != 1:
-                raise CustomException('Total shares must be equal to 1')
-
-        if target_share_set_mode == 'manual':
-            total_share = 0
-            for target_data in targets_data:
-                if not target_data['share']:
-                    raise CustomException('Target share is required in manual mode')
-                total_share += round_down(target_data.share)
-            if round_down(total_share) != 1:
-                raise CustomException('Total shares must be equal to 1')
 
     @staticmethod
     def edit_steps(position, strategy_state_data, new_steps_data, step_share_set_mode='auto'):
