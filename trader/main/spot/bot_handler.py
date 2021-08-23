@@ -139,7 +139,7 @@ class SpotBotHandler:
 
                 exchange_orders = bot.execute_operations(operations, test=True, symbol_prices=symbol_prices)
                 for exchange_order in exchange_orders:
-                    strategy_developer.update_strategy_state_data(exchange_order=exchange_order,
+                    strategy_developer.update_strategy_state_data(exchange_order_data=exchange_order,
                                                                   strategy_state_data=bot.strategy_state_data)
 
             time.sleep(5)

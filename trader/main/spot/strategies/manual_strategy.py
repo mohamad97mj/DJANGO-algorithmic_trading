@@ -288,14 +288,14 @@ class ManualStrategyDeveloper:
         return operations
 
     @staticmethod
-    def update_strategy_state_data(exchange_order, strategy_state_data):
-        if exchange_order['side'] == 'buy':
-            pure_buy_amount = exchange_order['amount'] - exchange_order['fee']['cost']
+    def update_strategy_state_data(exchange_order_data, strategy_state_data):
+        if exchange_order_data.side == 'buy':
+            pure_buy_amount = exchange_order_data.amount - exchange_order_data.fee
             strategy_state_data.amount += pure_buy_amount
             for target_data in strategy_state_data.targets_data:
                 target_data.amount += pure_buy_amount * target_data.share
-        elif exchange_order['side'] == 'sell':
-            strategy_state_data.amount -= exchange_order['amount']
+        elif exchange_order_data.side == 'sell':
+            strategy_state_data.amount -= exchange_order_data.amount
 
     @staticmethod
     def edit_steps(position, strategy_state_data, new_steps_data, step_share_set_mode='auto'):

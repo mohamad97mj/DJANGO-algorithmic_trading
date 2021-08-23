@@ -6,6 +6,7 @@ from trader.clients import PrivateClient, PublicClient
 from trader.utils import truncate
 from .utils.exceptions import BotDoesNotExistsException
 from .operation import SpotOperation
+from dataclasses import dataclass
 
 
 class SpotBotManager(models.Manager):
@@ -23,6 +24,14 @@ class SpotBot(models.Model):
         PAUSED = 'paused'
         STOPPED_SYSTEMATICALLY = 'stopped_systematically'
         STOPPED_MANUALY = 'stopped_manualy'
+
+    @dataclass
+    class ExchangeOrderData:
+        side: str
+        symbol: str
+        cost: float
+        fee: float
+        amount: float
 
     objects = SpotBotManager()
 
@@ -76,8 +85,9 @@ class SpotBot(models.Model):
                                 balance))
 
     def execute_operations(self, operations: List[SpotOperation], test=True, symbol_prices=None):
-        exchange_orders = []
+        exchange_orders_data = []
         for operation in operations:
+            exchange_order_data = None
             if operation.action == 'create':
                 if operation.order.type == 'market':
 
@@ -96,17 +106,24 @@ class SpotBot(models.Model):
                                 amount_precision)
                             fee_amount = truncated_buy_amount_before_fee * fee
                             real_buy_amount_in_quote = truncated_buy_amount_before_fee * buy_price
-                            exchange_order = {'side': 'buy',
-                                              'symbol': symbol,
-                                              'cost': real_buy_amount_in_quote,
-                                              'amount': truncated_buy_amount_before_fee,
-                                              'fee': {'cost': fee_amount}}
+                            exchange_order_data = SpotBot.ExchangeOrderData(side='buy',
+                                                                            symbol=symbol,
+                                                                            cost=real_buy_amount_in_quote,
+                                                                            amount=truncated_buy_amount_before_fee,
+                                                                            fee=fee_amount)
+
                             pure_buy_amount = truncated_buy_amount_before_fee - fee_amount
                             operation.step.purchased_amount = pure_buy_amount
                         else:
                             exchange_order = self._private_client.create_market_buy_order_in_quote(
                                 symbol=symbol,
                                 amount_in_qoute=operation.order.amount_in_quote)
+                            exchange_order_data = SpotBot.ExchangeOrderData(side='buy',
+                                                                            symbol=symbol,
+                                                                            cost=exchange_order['cost'],
+                                                                            amount=exchange_order['amount'],
+                                                                            fee=exchange_order['fee']['cost'])
+
                             pure_buy_amount = exchange_order['amount'] - exchange_order['fee']['cost']
                             operation.step.purchased_amount = pure_buy_amount
                         operation.step.save()
@@ -119,29 +136,32 @@ class SpotBot(models.Model):
                             truncated_sell_amount_before_fee = truncate(sell_amount, amount_precision)
                             sell_amount_in_quote = truncated_sell_amount_before_fee * (sell_price * (1 - deviation))
                             fee_amount_in_quote = sell_amount_in_quote * fee
+                            exchange_order_data = SpotBot.ExchangeOrderData(side='sell',
+                                                                            symbol=symbol,
+                                                                            cost=sell_amount_in_quote,
+                                                                            fee=fee_amount_in_quote,
+                                                                            amount=truncated_sell_amount_before_fee)
 
-                            exchange_order = {
-                                'side': 'sell',
-                                'symbol': symbol,
-                                'cost': sell_amount_in_quote,
-                                'fee': {'cost': fee_amount_in_quote},
-                                'amount': truncated_sell_amount_before_fee
-                            }
                             pure_sell_amount_in_quote = sell_amount_in_quote - fee_amount_in_quote
                             operation.target.released_amount_in_quote = pure_sell_amount_in_quote
                         else:
                             exchange_order = self._private_client.create_market_sell_order(
                                 symbol=symbol,
                                 amount=operation.order.amount)
+                            exchange_order_data = SpotBot.ExchangeOrderData(side='sell',
+                                                                            symbol=symbol,
+                                                                            cost=exchange_order['cost'],
+                                                                            fee=exchange_order['fee']['cost'],
+                                                                            amount=exchange_order['amount'])
                             pure_sell_amount_in_quote = exchange_order['cost'] - exchange_order['fee']['cost']
                             operation.target.released_amount_in_quote = pure_sell_amount_in_quote
                         operation.target.save()
 
             logger = my_get_logger()
-            logger.info('exchange_order: {}'.format(exchange_order))
-            exchange_orders.append(exchange_order)
+            logger.info('exchange_order: {}'.format(exchange_order_data))
+            exchange_orders_data.append(exchange_order_data)
 
-        return exchange_orders
+        return exchange_orders_data
 
     def close_position(self):
         self.sell_all_assets()
