@@ -16,6 +16,8 @@ class StrategyStateData(JsonSerializable):
     all_steps_achieved: bool = False
     all_targets_achieved: bool = False
     unrealized_amount_in_quote: float = 0
+    profit_in_quote: float = None  # unrealized_amount_in_quote + amount_in_quote - position.size
+    profit_rate: float = None  # profit_in_quote / position.size
 
 
 class ManualStrategyDeveloper:
@@ -135,10 +137,15 @@ class ManualStrategyDeveloper:
     def get_operations(position: SpotPosition, strategy_state_data: StrategyStateData, symbol_prices: dict):
         logger = my_get_logger()
         operations = []
-        price = symbol_prices[strategy_state_data.symbol]
         signal = position.signal
         symbol = signal.symbol
         stoploss = signal.stoploss
+        price = symbol_prices[symbol]
+
+        strategy_state_data.unrealized_amount_in_quote = strategy_state_data.amount * price
+        strategy_state_data.profit_in_quote = \
+            strategy_state_data.unrealized_amount_in_quote + strategy_state_data.amount_in_quote - position.size
+        strategy_state_data.profit_rate = strategy_state_data.profit_in_quote / position.size
 
         if stoploss and price < stoploss.trigger_price:
             stoploss_operation = create_market_sell_operation(
@@ -165,10 +172,9 @@ class ManualStrategyDeveloper:
             n = 0
             for step in steps:
                 if not step.is_triggered and (price < step.buy_price or step.buy_price == -1):
+                    if step.buy_price == -1:
+                        step.buy_price = price
                     if n == 0:
-                        if step.buy_price == -1:
-                            step.buy_price = price
-
                         strategy_state_data.all_steps_achieved = True
                     strategy_state_data.none_triggered_steps_share -= step.share
                     buy_step_operation = create_market_buy_in_quote_operation(
@@ -213,9 +219,15 @@ class ManualStrategyDeveloper:
                     operations.append(tp_operation)
                     target.is_triggered = True
                     if i == 0:
-                        stoploss.trigger_price = steps[len(steps) - 1].buy_price
+                        new_trigger_price = steps[len(steps) - 1].buy_price
                     else:
-                        stoploss.trigger_price = targets[i - 1].tp_price
+                        new_trigger_price = targets[i - 1].tp_price
+                    if stoploss:
+                        stoploss.trigger_price = new_trigger_price
+                        stoploss.save()
+                    else:
+                        stoploss = SpotStoploss(trigger_price=new_trigger_price)
+                        signal.stoploss = stoploss
                     stoploss.save()
                 target.save()
 
@@ -444,14 +456,19 @@ class ManualStrategyDeveloper:
     def edit_stoploss(position: SpotPosition, strategy_state_data: StrategyStateData, new_stoploss_data):
         edit_is_required = ManualStrategyDeveloper._has_stoploss_changed(position, new_stoploss_data)
         if edit_is_required:
-            if position.signal.stoploss:
-                position.signal.stoploss.trigger_price = new_stoploss_data['trigger_price']
+            signal = position.signal
+            stoploss = signal.stoploss
+            if stoploss:
+                stoploss.trigger_price = new_stoploss_data['trigger_price']
             else:
-                position.signal.stoploss = SpotStoploss(trigger_price=new_stoploss_data['trigger_price'])
-            position.signal.stoploss.save()
+                stoploss = SpotStoploss(trigger_price=new_stoploss_data['trigger_price'])
+                signal.stoploss = stoploss
+            stoploss.save()
             return True
         return False
 
     @staticmethod
     def _has_stoploss_changed(position: SpotPosition, new_stoploss):
-        return position.signal.stoploss != new_stoploss
+        if position.signal.stoploss:
+            return position.signal.stoploss.trigger_price != new_stoploss['trigger_price']
+        return True
