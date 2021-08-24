@@ -41,10 +41,12 @@ class SpotBotHandler:
         signal_data = position_data.get('signal')
         if signal_data:
             signal = SpotSignal(**{key: signal_data.get(key) for key in
-                                   ['symbol',
-                                    'stoploss',
-                                    'step_share_set_mode',
-                                    'target_share_set_mode']})
+                                   ['symbol']})
+            step_share_set_mode = signal_data.get('step_share_set_mode', 'manual')
+            target_share_set_mode = signal_data.get('target_share_set_mode', 'manual')
+
+            signal.step_share_set_mode = step_share_set_mode
+            signal.target_share_set_mode = target_share_set_mode
             signal.save()
 
             steps = []
@@ -60,17 +62,21 @@ class SpotBotHandler:
                 steps.append(step)
 
             signal.steps.set(steps)
+            signal.related_steps = steps
 
             targets = []
-            sorted_targets_data = sorted(signal_data['targets'], key=lambda t: t['tp_price'])
-            for target_data in sorted_targets_data:
-                target = SpotTarget(signal=signal,
-                                    tp_price=target_data.get('tp_price'),
-                                    share=round_down(target_data.get('share')))
-                target.save()
-                targets.append(target)
+            targets_data = signal_data.get('targets')
+            if targets_data:
+                sorted_targets_data = sorted(targets_data, key=lambda t: t['tp_price'])
+                for target_data in sorted_targets_data:
+                    target = SpotTarget(signal=signal,
+                                        tp_price=target_data.get('tp_price'),
+                                        share=round_down(target_data.get('share')))
+                    target.save()
+                    targets.append(target)
 
             signal.targets.set(targets)
+            signal.related_targets = targets
 
         position = SpotPosition(signal=signal,
                                 **{k: position_data[k] for k in ['size']})
@@ -139,8 +145,8 @@ class SpotBotHandler:
 
                 exchange_orders = bot.execute_operations(operations, test=True, symbol_prices=symbol_prices)
                 for exchange_order in exchange_orders:
-                    strategy_developer.update_strategy_state_data(exchange_order_data=exchange_order,
-                                                                  strategy_state_data=bot.strategy_state_data)
+                    strategy_developer.apply_operation(exchange_order_data=exchange_order,
+                                                       strategy_state_data=bot.strategy_state_data)
 
             time.sleep(5)
 
