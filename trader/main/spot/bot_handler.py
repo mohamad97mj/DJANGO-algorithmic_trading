@@ -42,8 +42,8 @@ class SpotBotHandler:
         if signal_data:
             signal = SpotSignal(**{key: signal_data.get(key) for key in
                                    ['symbol']})
-            step_share_set_mode = signal_data.get('step_share_set_mode', 'manual')
-            target_share_set_mode = signal_data.get('target_share_set_mode', 'manual')
+            step_share_set_mode = signal_data.get('step_share_set_mode', 'auto')
+            target_share_set_mode = signal_data.get('target_share_set_mode', 'auto')
 
             signal.step_share_set_mode = step_share_set_mode
             signal.target_share_set_mode = target_share_set_mode
@@ -145,8 +145,10 @@ class SpotBotHandler:
 
                 exchange_orders = bot.execute_operations(operations, test=True, symbol_prices=symbol_prices)
                 for exchange_order in exchange_orders:
-                    strategy_developer.apply_operation(exchange_order_data=exchange_order,
-                                                       strategy_state_data=bot.strategy_state_data)
+                    strategy_developer.apply_operation(
+                        exchange_order_data=exchange_order,
+                        position=bot.position,
+                        strategy_state_data=bot.strategy_state_data)
 
             time.sleep(5)
 
