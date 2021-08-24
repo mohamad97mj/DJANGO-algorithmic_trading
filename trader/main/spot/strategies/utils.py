@@ -23,8 +23,6 @@ def create_market_buy_in_quote_operation(symbol,
     buy_market_operation.save()
     if step:
         step.operation = buy_market_operation
-        step.is_triggered = True
-        step.save()
     return buy_market_operation
 
 
@@ -32,7 +30,8 @@ def create_market_sell_operation(symbol,
                                  operation_type,
                                  price, amount,
                                  position: SpotPosition,
-                                 sell_step: Union[SpotTarget, SpotStoploss] = None):
+                                 target: SpotTarget = None,
+                                 stoploss: SpotStoploss = None):
     sell_market_order = SpotOrder(symbol=symbol,
                                   type='market',
                                   side='sell',
@@ -46,8 +45,8 @@ def create_market_sell_operation(symbol,
         action='create',
         status='in_progress')
     sell_market_operation.save()
-    if sell_step:
-        sell_step.operation = sell_market_operation
-        sell_step.is_triggered = True
-        sell_step.save()
+    if target:
+        target.operation = sell_market_operation
+    if stoploss:
+        stoploss.operation = sell_market_operation
     return sell_market_operation
