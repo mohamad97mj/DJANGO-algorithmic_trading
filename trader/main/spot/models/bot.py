@@ -1,5 +1,5 @@
 from global_utils import my_get_logger
-from typing import List
+from typing import List, Union
 from django.utils import timezone
 from django.db import models
 from trader.clients import PrivateClient, PublicClient
@@ -7,6 +7,9 @@ from trader.utils import truncate
 from .utils.exceptions import BotDoesNotExistsException
 from .operation import SpotOperation
 from dataclasses import dataclass
+from .step import SpotStep
+from .target import SpotTarget
+from .stoploss import SpotStoploss
 
 
 class SpotBotManager(models.Manager):
@@ -32,6 +35,7 @@ class SpotBot(models.Model):
         cost: float
         fee: float
         amount: float
+        related_setup: Union[SpotStep, SpotTarget, SpotStoploss]  # could be step_id, target_id or stoploss_id
 
     objects = SpotBotManager()
 
@@ -98,6 +102,7 @@ class SpotBot(models.Model):
                     deviation = 0.0001
 
                     if operation.order.side == 'buy':
+                        related_setup = operation.step
                         if test:
                             buy_amount_in_quote = operation.order.amount_in_quote
                             buy_price = symbol_prices[symbol]
@@ -110,7 +115,8 @@ class SpotBot(models.Model):
                                                                             symbol=symbol,
                                                                             cost=real_buy_amount_in_quote,
                                                                             amount=truncated_buy_amount_before_fee,
-                                                                            fee=fee_amount)
+                                                                            fee=fee_amount,
+                                                                            related_setup=related_setup)
 
                             pure_buy_amount = truncated_buy_amount_before_fee - fee_amount
                             operation.step.purchased_amount = pure_buy_amount
@@ -122,13 +128,15 @@ class SpotBot(models.Model):
                                                                             symbol=symbol,
                                                                             cost=exchange_order['cost'],
                                                                             amount=exchange_order['amount'],
-                                                                            fee=exchange_order['fee']['cost'])
+                                                                            fee=exchange_order['fee']['cost'],
+                                                                            related_setup=related_setup)
 
                             pure_buy_amount = exchange_order['amount'] - exchange_order['fee']['cost']
                             operation.step.purchased_amount = pure_buy_amount
                         operation.step.save()
 
                     elif operation.order.side == 'sell':
+                        related_setup = operation.stoploss if operation.type == 'stoploss_triggered' else operation.target
                         if test:
 
                             sell_amount = operation.order.amount
@@ -140,7 +148,8 @@ class SpotBot(models.Model):
                                                                             symbol=symbol,
                                                                             cost=sell_amount_in_quote,
                                                                             fee=fee_amount_in_quote,
-                                                                            amount=truncated_sell_amount_before_fee)
+                                                                            amount=truncated_sell_amount_before_fee,
+                                                                            related_setup=related_setup)
 
                             pure_sell_amount_in_quote = sell_amount_in_quote - fee_amount_in_quote
                             operation.target.released_amount_in_quote = pure_sell_amount_in_quote
@@ -152,7 +161,8 @@ class SpotBot(models.Model):
                                                                             symbol=symbol,
                                                                             cost=exchange_order['cost'],
                                                                             fee=exchange_order['fee']['cost'],
-                                                                            amount=exchange_order['amount'])
+                                                                            amount=exchange_order['amount'],
+                                                                            related_setup=related_setup)
                             pure_sell_amount_in_quote = exchange_order['cost'] - exchange_order['fee']['cost']
                             operation.target.released_amount_in_quote = pure_sell_amount_in_quote
                         operation.target.save()
