@@ -226,7 +226,11 @@ class ManualStrategyDeveloper:
         if exchange_order_data.side == 'buy':
             pure_buy_amount = exchange_order_data.amount - exchange_order_data.fee
             strategy_state_data.amount += pure_buy_amount
-            exchange_order_data.related_setup.purchased_amount += pure_buy_amount
+            strategy_state_data.amount_in_quote -= exchange_order_data.cost
+            related_setup = exchange_order_data.related_setup
+            related_setup.amount_in_quote -= exchange_order_data.cost
+            related_setup.purchased_amount += pure_buy_amount
+            related_setup.save()
             targets = position.signal.related_targets
             for target in targets:
                 target.amount += pure_buy_amount * target.share
@@ -234,7 +238,9 @@ class ManualStrategyDeveloper:
         elif exchange_order_data.side == 'sell':
             strategy_state_data.amount -= exchange_order_data.amount
             related_setup = exchange_order_data.related_setup
+            related_setup.amount -= exchange_order_data.amount
             related_setup.released_amount_in_quote = exchange_order_data.cost - exchange_order_data.fee
+            related_setup.save()
 
     @staticmethod
     def edit_steps(position, strategy_state_data, new_steps_data, step_share_set_mode='auto'):
