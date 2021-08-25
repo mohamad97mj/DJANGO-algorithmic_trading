@@ -26,8 +26,8 @@ class SpotBotTrader:
                                       position_data=bot_data['position'])
 
     @staticmethod
-    def edit_position(bot_id, new_position_data):
-        return bot_handler.edit_position(bot_id, new_position_data, )
+    def edit_position(bot_id, credential_id, new_position_data):
+        return bot_handler.edit_position(bot_id, credential_id, new_position_data)
 
     @staticmethod
     def pause_bot(bot_id):

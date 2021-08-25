@@ -12,10 +12,10 @@ class SpotPositionView(APIView):
 
     @catch_all_exceptions(reraise=True)
     def put(self, request, bot_id, format=None):
-        body = request.body
-        data = json.loads(body)
+        credential_id = request.query_params.get('credential_id', 'test')
+        data = json.loads(request.body)
         new_position_data = data['position']
-        new_position, edited_data = SpotBotTrader.edit_position(bot_id, new_position_data, )
+        new_position, edited_data = SpotBotTrader.edit_position(bot_id, credential_id, new_position_data, )
 
         position_serializer = SpotPositionSerializer(instance=new_position)
         return Response(
