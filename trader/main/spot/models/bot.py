@@ -119,7 +119,6 @@ class SpotBot(models.Model):
                                                                             amount=truncated_buy_amount_before_fee,
                                                                             fee=fee_amount,
                                                                             related_setup=related_setup)
-
                             pure_buy_amount = truncated_buy_amount_before_fee - fee_amount
                             operation.step.purchased_amount = pure_buy_amount
                         else:
