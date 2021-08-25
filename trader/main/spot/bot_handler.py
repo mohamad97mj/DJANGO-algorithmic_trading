@@ -119,7 +119,7 @@ class SpotBotHandler:
     def run_bots(self, test=True):
         start = int(time.time())
         while True:
-            for bot in self._bots.values():
+            for bot in list(self._bots.values()).copy():
                 # finish = int(time.time())
                 # if finish - start > 4 * 60 * 60:
                 #     start = int(time.time())
@@ -150,7 +150,7 @@ class SpotBotHandler:
                         position=bot.position,
                         strategy_state_data=bot.strategy_state_data)
 
-            time.sleep(5)
+            time.sleep(2)
 
     def _get_prices_if_available(self, exchange_id, symbols: List):
         symbol_prices = self._read_prices(exchange_id, symbols)
