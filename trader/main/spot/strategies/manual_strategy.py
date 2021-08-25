@@ -27,7 +27,7 @@ class ManualStrategyDeveloper:
 
         signal_data = position_data.get('signal')
         steps_data = signal_data['steps']
-        step_share_set_mode = signal_data.get('step_share_set_mode', 'manual')
+        step_share_set_mode = signal_data.get('step_share_set_mode')
         targets_data = signal_data.get('targets')
         target_share_set_mode = signal_data.get('target_share_set_mode')
 
@@ -103,7 +103,7 @@ class ManualStrategyDeveloper:
         amount_in_quote = 0
         for step in steps:
             if step.is_triggered:
-                none_triggered_steps_share -= step.share
+                none_triggered_steps_share = round(none_triggered_steps_share - step.share, 2)
             else:
                 amount_in_quote += step.amount_in_quote
                 all_steps_achieved = False
@@ -115,7 +115,8 @@ class ManualStrategyDeveloper:
         if targets:
             for target in targets:
                 if target.is_triggered:
-                    none_triggered_targets_share -= target.share
+                    amount_in_quote += target.released_amount_in_quote
+                    none_triggered_targets_share = round(none_triggered_targets_share - target.share, 2)
                 else:
                     all_targets_achieved = False
                     amount += target.amount
@@ -130,6 +131,7 @@ class ManualStrategyDeveloper:
             none_triggered_targets_share=round_down(none_triggered_targets_share),
             all_steps_achieved=all_steps_achieved,
             all_targets_achieved=all_targets_achieved,
+
         )
         return strategy_state_data
 
@@ -144,8 +146,9 @@ class ManualStrategyDeveloper:
 
         strategy_state_data.unrealized_amount_in_quote = strategy_state_data.amount * price
         strategy_state_data.profit_in_quote = \
-            strategy_state_data.unrealized_amount_in_quote + strategy_state_data.amount_in_quote - position.size
-        strategy_state_data.profit_rate = strategy_state_data.profit_in_quote / position.size
+            round_down(
+                strategy_state_data.unrealized_amount_in_quote + strategy_state_data.amount_in_quote - position.size)
+        strategy_state_data.profit_rate = round_down((strategy_state_data.profit_in_quote / position.size) * 100)
 
         if stoploss and price < stoploss.trigger_price:
             stoploss_operation = create_market_sell_operation(
@@ -176,7 +179,9 @@ class ManualStrategyDeveloper:
                         step.buy_price = price
                     if n == 0:
                         strategy_state_data.all_steps_achieved = True
-                    strategy_state_data.none_triggered_steps_share -= step.share
+                    strategy_state_data.none_triggered_steps_share = \
+                        round(strategy_state_data.none_triggered_steps_share - step.share, 2)
+
                     buy_step_operation = create_market_buy_in_quote_operation(
                         symbol=symbol,
                         operation_type='buy_step',
@@ -203,6 +208,9 @@ class ManualStrategyDeveloper:
                 if price > target.tp_price and not target.is_triggered:
                     if i == len(targets) - 1:
                         strategy_state_data.all_targets_achieved = True
+                    strategy_state_data.none_triggered_targets_share = \
+                        strategy_state_data.none_triggered_targets_share - target.share
+
                     tp_operation = create_market_sell_operation(
                         symbol=symbol,
                         operation_type='take_profit',
@@ -224,7 +232,6 @@ class ManualStrategyDeveloper:
                         new_trigger_price = targets[i - 1].tp_price
                     if stoploss:
                         stoploss.trigger_price = new_trigger_price
-                        stoploss.save()
                     else:
                         stoploss = SpotStoploss(trigger_price=new_trigger_price)
                         signal.stoploss = stoploss
@@ -241,7 +248,7 @@ class ManualStrategyDeveloper:
             strategy_state_data.amount_in_quote -= exchange_order_data.cost
             related_setup = exchange_order_data.related_setup
             related_setup.amount_in_quote -= exchange_order_data.cost
-            related_setup.purchased_amount += pure_buy_amount
+            related_setup.purchased_amount = pure_buy_amount
             related_setup.save()
             targets = position.signal.related_targets
             for target in targets:
@@ -249,9 +256,11 @@ class ManualStrategyDeveloper:
                 target.save()
         elif exchange_order_data.side == 'sell':
             strategy_state_data.amount -= exchange_order_data.amount
+            pure_sell_amount_in_quote = exchange_order_data.cost - exchange_order_data.fee
+            strategy_state_data.amount_in_quote += pure_sell_amount_in_quote
             related_setup = exchange_order_data.related_setup
             related_setup.amount -= exchange_order_data.amount
-            related_setup.released_amount_in_quote = exchange_order_data.cost - exchange_order_data.fee
+            related_setup.released_amount_in_quote = pure_sell_amount_in_quote
             related_setup.save()
 
     @staticmethod
