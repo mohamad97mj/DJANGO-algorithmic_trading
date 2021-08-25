@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List
-from ..models import SpotPosition, SpotStep, SpotTarget, SpotStoploss
+from ..models import SpotPosition, SpotStep, SpotTarget, SpotStoploss, SpotBot
 from .utils import create_market_sell_operation, create_market_buy_in_quote_operation
 from trader.utils import round_down
 from global_utils import my_get_logger, CustomException, JsonSerializable
@@ -150,23 +150,34 @@ class ManualStrategyDeveloper:
                 strategy_state_data.unrealized_amount_in_quote + strategy_state_data.amount_in_quote - position.size)
         strategy_state_data.profit_rate = round_down((strategy_state_data.profit_in_quote / position.size) * 100)
 
-        if stoploss and price < stoploss.trigger_price:
+        if stoploss and not stoploss.is_triggered and price < stoploss.trigger_price:
             stoploss_operation = create_market_sell_operation(
                 symbol=symbol,
                 operation_type='stoploss_triggered',
                 price=price,
-                amount=strategy_state_data.amount,
+                amount=stoploss.amount,
                 position=position,
                 stoploss=stoploss
             )
 
             stoploss.is_triggered = True
             stoploss.save()
+            bot = position.bot
+            bot.is_active = False
+
+            if stoploss.is_trailed:
+                status = SpotBot.Status.STOPPED_BY_TRAILING_STOPLOSS.value
+            else:
+                status = SpotBot.Status.STOPPED_BY_STOPLOSS.value
+
+            bot.status = status
+            bot.save()
+
             logger.info(
                 'stoploss_triggered_operation: (symbol: {}, price: {}, amount: {})'.format(
                     symbol,
                     price,
-                    strategy_state_data.amount))
+                    stoploss.amount))
 
             operations.append(stoploss_operation)
 
@@ -235,9 +246,10 @@ class ManualStrategyDeveloper:
                     else:
                         stoploss = SpotStoploss(trigger_price=new_trigger_price)
                         signal.stoploss = stoploss
+                    stoploss.is_trailed = True
                     stoploss.save()
-                target.save()
 
+                target.save()
         return operations
 
     @staticmethod
@@ -246,11 +258,16 @@ class ManualStrategyDeveloper:
             pure_buy_amount = exchange_order_data.amount - exchange_order_data.fee
             strategy_state_data.amount += pure_buy_amount
             strategy_state_data.amount_in_quote -= exchange_order_data.cost
+            signal = position.signal
+            stoploss = signal.stoploss
+            if stoploss:
+                stoploss.amount += pure_buy_amount
+                stoploss.save()
             related_setup = exchange_order_data.related_setup
             related_setup.amount_in_quote -= exchange_order_data.cost
             related_setup.purchased_amount = pure_buy_amount
             related_setup.save()
-            targets = position.signal.related_targets
+            targets = signal.related_targets
             for target in targets:
                 target.amount += pure_buy_amount * target.share
                 target.save()
@@ -470,7 +487,8 @@ class ManualStrategyDeveloper:
             if stoploss:
                 stoploss.trigger_price = new_stoploss_data['trigger_price']
             else:
-                stoploss = SpotStoploss(trigger_price=new_stoploss_data['trigger_price'])
+                stoploss = SpotStoploss(trigger_price=new_stoploss_data['trigger_price'],
+                                        amount=strategy_state_data.amount)
                 signal.stoploss = stoploss
             stoploss.save()
             return True
