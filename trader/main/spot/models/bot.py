@@ -25,7 +25,9 @@ class SpotBot(models.Model):
     class Status(models.TextChoices):
         RUNNING = 'running'
         PAUSED = 'paused'
-        STOPPED_SYSTEMATICALLY = 'stopped_systematically'
+        STOPPED_BY_STOPLOSS = 'stopped_by_stoploss'
+        STOPPED_BY_TRAILING_STOPLOSS = 'stopped_by_trailing_stoploss'
+        STOPPED_AFTER_FULL_TARGET = 'stopped_after_full_target'
         STOPPED_MANUALY = 'stopped_manualy'
 
     @dataclass
@@ -152,7 +154,7 @@ class SpotBot(models.Model):
                                                                             related_setup=related_setup)
 
                             pure_sell_amount_in_quote = sell_amount_in_quote - fee_amount_in_quote
-                            operation.target.released_amount_in_quote = pure_sell_amount_in_quote
+                            related_setup.released_amount_in_quote = pure_sell_amount_in_quote
                         else:
                             exchange_order = self._private_client.create_market_sell_order(
                                 symbol=symbol,
@@ -164,8 +166,8 @@ class SpotBot(models.Model):
                                                                             amount=exchange_order['amount'],
                                                                             related_setup=related_setup)
                             pure_sell_amount_in_quote = exchange_order['cost'] - exchange_order['fee']['cost']
-                            operation.target.released_amount_in_quote = pure_sell_amount_in_quote
-                        operation.target.save()
+                            related_setup.released_amount_in_quote = pure_sell_amount_in_quote
+                        related_setup.save()
 
             logger = my_get_logger()
             logger.info('exchange_order: {}'.format(exchange_order_data))
