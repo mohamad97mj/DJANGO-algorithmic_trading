@@ -133,7 +133,7 @@ class SpotBotHandler:
                         self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
                     else:
                         self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
-                    time.sleep(7)
+                    time.sleep(5)
                     symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
 
                 logger = my_get_logger()
@@ -263,8 +263,10 @@ class SpotBotHandler:
                 self.set_bot_strategy_state_data(bot)
         return bots
 
-    def edit_position(self, bot_id, new_position_data):
-        bot = self._bots[bot_id]
+    def edit_position(self, bot_id, credential_id, new_position_data):
+        bot = self.get_bot(bot_id, credential_id)
+        if bot.status.startswith('stopped'):
+            raise CustomException('This bot was stopped and could not be edited!')
         strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
 
         edited_data = []
