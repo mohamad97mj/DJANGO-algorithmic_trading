@@ -491,6 +491,7 @@ class ManualStrategyDeveloper:
                                         amount=strategy_state_data.amount)
                 signal.stoploss = stoploss
             stoploss.save()
+            signal.save()
             return True
         return False
 
