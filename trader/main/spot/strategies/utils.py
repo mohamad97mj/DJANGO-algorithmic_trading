@@ -28,7 +28,8 @@ def create_market_buy_in_quote_operation(symbol,
 
 def create_market_sell_operation(symbol,
                                  operation_type,
-                                 price, amount,
+                                 price,
+                                 amount,
                                  position: SpotPosition,
                                  target: SpotTarget = None,
                                  stoploss: SpotStoploss = None):
