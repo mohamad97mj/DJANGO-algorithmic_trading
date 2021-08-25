@@ -149,7 +149,8 @@ class SpotBotHandler:
                         exchange_order_data=exchange_order,
                         position=bot.position,
                         strategy_state_data=bot.strategy_state_data)
-
+                if not bot.is_active:
+                    self._bots.pop(str(bot.id))
             time.sleep(2)
 
     def _get_prices_if_available(self, exchange_id, symbols: List):
