@@ -238,7 +238,7 @@ class ManualStrategyDeveloper:
                     operations.append(tp_operation)
                     target.is_triggered = True
                     if i == 0:
-                        new_trigger_price = steps[len(steps) - 1].buy_price
+                        new_trigger_price = (steps[len(steps) - 1].buy_price + targets[0].tp_price) / 2
                     else:
                         new_trigger_price = targets[i - 1].tp_price
                     if stoploss:
