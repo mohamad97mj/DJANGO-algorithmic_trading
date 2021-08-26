@@ -15,7 +15,7 @@ class SpotBotsView(APIView):
 
     @catch_all_exceptions(reraise=True)
     def get(self, request, format=None):
-        credential_id = request.query_params.get('credential_id', 'test')
+        credential_id = request.query_params.get('credential_id', 'kucoin_test')
         is_active = request.query_params.get('is_active', 'false') == 'true'
         bot_instances = SpotBotTrader.get_bots(credential_id=credential_id, is_active=is_active)
         return Response(data=SpotBotSerializer(bot_instances, many=True).data)
