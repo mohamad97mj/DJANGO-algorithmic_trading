@@ -194,9 +194,9 @@ class SpotBotHandler:
 
         for symbol in symbols:
             if not (symbol in symbol_prices and symbol_prices[symbol]):
-                if symbol not in self._price_tickers or self._price_tickers[symbol].client:
+                if symbol not in self._price_tickers or self._price_tickers[symbol].trade_client:
                     if symbol in self._price_tickers:
-                        asyncio.run(self._price_tickers[symbol].client.close_connection())
+                        asyncio.run(self._price_tickers[symbol].trade_client.close_connection())
 
                     self._init_price_ticker(exchange_id, symbol)
 
@@ -209,7 +209,7 @@ class SpotBotHandler:
         client = await async_retry_on_timeout(
             self._public_clients[exchange_id],
             timeout_errors=(ClientConnectorError, TimeoutError))(self._get_async_client)()
-        self._price_tickers[symbol].client = client
+        self._price_tickers[symbol].trade_client = client
 
         bm = BinanceSocketManager(client)
         ts = bm.symbol_ticker_socket(with2without_slash(symbol))

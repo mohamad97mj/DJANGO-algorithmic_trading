@@ -29,8 +29,8 @@ class PrivateClient:
     def create_market_buy_order(self, symbol, amount):
         return self._exchange.create_market_buy_order(symbol=symbol, amount=amount)
 
-    def create_market_buy_order_in_quote(self, symbol, amount_in_qoute):
-        return self._exchange.create_market_buy_order_in_quote(symbol=symbol, amount=amount_in_qoute, price=1)
+    def create_market_buy_order_in_quote(self, symbol, amount_in_quote):
+        return self._exchange.create_market_buy_order_in_quote(symbol=symbol, amount_in_quote=amount_in_quote)
 
     def create_market_sell_order(self, symbol, amount):
         return self._exchange.create_market_sell_order(symbol=symbol, amount=amount)
