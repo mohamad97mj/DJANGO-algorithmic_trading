@@ -124,7 +124,7 @@ class SpotBot(models.Model):
                         else:
                             exchange_order = self._private_client.create_market_buy_order_in_quote(
                                 symbol=symbol,
-                                amount_in_qoute=operation.order.amount_in_quote)
+                                amount_in_quote=operation.order.amount_in_quote)
                             exchange_order_data = SpotBot.ExchangeOrderData(side='buy',
                                                                             symbol=symbol,
                                                                             cost=exchange_order['cost'],
