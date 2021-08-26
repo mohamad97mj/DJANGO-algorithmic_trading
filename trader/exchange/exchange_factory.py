@@ -4,6 +4,7 @@ from binance.client import Client as PythonBinanceExchange
 from trader.auth import credentials
 from global_utils import retry_on_timeout
 from .exchange import Exchange
+from .sdk_exchange import SdkExchange
 
 
 class ExchangeFactory:
@@ -17,35 +18,70 @@ class ExchangeFactory:
                         enable_rate_limit: bool = True,
                         verbose: bool = True) -> Exchange:
 
-        api_key = secret_key = None
+        api_key = secret = password = None
         if credential_id:
             api_key = credentials[credential_id]['api_key']
-            secret_key = credentials[credential_id]['secret_key']
+            secret = credentials[credential_id]['secret']
+            password = credentials[credential_id].get('password', '')
 
         ccxt_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
             'enableRateLimit': enable_rate_limit,
-            # 'verbose': verbose,
+            'verbose': verbose,
             'apiKey': api_key,
-            'secret': secret_key,
+            'secret': secret,
+            'password': password
         })
-        ccxt_exchange.set_sandbox_mode(enabled=credential_id == 'test')
+        is_sandbox = credential_id.endswith('test')
+        ccxt_exchange.set_sandbox_mode(enabled=is_sandbox)
         # ccxt_exchange.options['createMarketBuyOrderRequiresPrice'] = False
 
-        pb_exchange = None
-        if not exchange_id == 'binance':
-            pb_exchange = self._create_pb_exchange(api_key=api_key, secret_key=secret_key, credential_id=credential_id)
+        python_exchange = None
+        if exchange_id in ('binance',):
+            python_exchange = self._create_python_exchange(
+                exchange_id=exchange_id,
+                api_key=api_key,
+                secret=secret,
+                is_sandbox=is_sandbox
+            )
 
-        exchange = Exchange(ccxt_exchange=ccxt_exchange, pb_exchange=pb_exchange)
+        sdk_exchange = None
+        if exchange_id in ('kucoin',):
+            sdk_exchange = self._create_sdk_exchange(exchange_id=exchange_id,
+                                                     api_key=api_key,
+                                                     secret=secret,
+                                                     password=password,
+                                                     is_sandbox=is_sandbox)
+
+        exchange = Exchange(exchange_id=exchange_id,
+                            ccxt_exchange=ccxt_exchange,
+                            python_exchange=python_exchange,
+                            sdk_exchange=sdk_exchange
+                            )
         self._exchanges.append(exchange)
         return exchange
 
     @retry_on_timeout(attempts=3)
-    def _create_pb_exchange(self, api_key, secret_key, credential_id):
-        exchange = PythonBinanceExchange(
-            api_key=api_key,
-            api_secret=secret_key,
-            testnet=credential_id == 'test',
-        )
+    def _create_python_exchange(self, exchange_id, api_key, secret, is_sandbox):
+        exchange = None
+        if exchange_id == 'binance':
+            exchange = PythonBinanceExchange(
+                api_key=api_key,
+                api_secret=secret,
+                testnet=is_sandbox,
+            )
+
+        return exchange
+
+    def _create_sdk_exchange(self, exchange_id, api_key, secret, password, is_sandbox):
+        exchange = None
+        if exchange_id == 'kucoin':
+            return SdkExchange(
+                api_key=api_key,
+                secret=secret,
+                password=password,
+                is_sandbox=is_sandbox
+            )
+
         return exchange
 
     def close_all_exchanges(self):
