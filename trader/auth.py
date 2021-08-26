@@ -11,10 +11,12 @@ credentials = {
     },
     'kucoin_main': {
         'api_key': os.environ.get('KUCOIN_MAIN_API_KEY'),
-        'secret': os.environ.get('KUCOIN_MAIN_SECRET')
+        'secret': os.environ.get('KUCOIN_MAIN_SECRET'),
+        'password': os.environ.get('KUCOIN_MAIN_PASSWORD')
     },
     'kucoin_test': {
         'api_key': os.environ.get('KUCOIN_TEST_API_KEY'),
-        'secret': os.environ.get('KUCOIN_TEST_SECRET')
+        'secret': os.environ.get('KUCOIN_TEST_SECRET'),
+        'password': os.environ.get('KUCOIN_TEST_PASSWORD')
     }
 }
