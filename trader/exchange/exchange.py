@@ -1,7 +1,8 @@
 import ccxt
 from ccxt.base.errors import NetworkError
 from global_utils import retry_on_timeout
-from trader.utils import apply2all_methods
+from trader.utils import apply2all_methods, slash2dash
+from .sdk_exchange import SdkExchange
 
 
 @apply2all_methods(retry_on_timeout(timeout_errors=NetworkError))
@@ -10,9 +11,15 @@ class Exchange:
         'recvWindow': 10000
     }
 
-    def __init__(self, ccxt_exchange: ccxt.Exchange, pb_exchange):  # pb stands for python binance
+    def __init__(self,
+                 exchange_id,
+                 ccxt_exchange: ccxt.Exchange,
+                 python_exchange,
+                 sdk_exchange: SdkExchange):  # pb stands for python binance
+        self._exchange_id = exchange_id
         self._ccxt_exchange = ccxt_exchange
-        self._pb_exchange = pb_exchange
+        self._python_exchange = python_exchange
+        self._sdk_exchange = sdk_exchange
 
     def fetch_status(self):
         return self._ccxt_exchange.fetch_status()
@@ -61,10 +68,13 @@ class Exchange:
         return self._ccxt_exchange.timeframes
 
     def fetch_total_balance(self):
-        return self._ccxt_exchange.fetch_total_balance()
+        if self._exchange_id == 'binance':
+            return self._ccxt_exchange.fetch_total_balance()
+        elif self._exchange_id == 'kucoin':
+            return self._sdk_exchange.user_client.get_account_ledger()
 
-    def fetch_balance(self, symbol='BTC/USDT'):
-        return self._ccxt_exchange.fetch_total_balance()[symbol]
+    def fetch_balance(self):
+        return self._ccxt_exchange.fetch_balance()
 
     def fetch_orders(self):
         return self._ccxt_exchange.fetch_orders()
@@ -79,14 +89,32 @@ class Exchange:
         return self._ccxt_exchange.fetch_my_trades(symbol=symbol)
 
     def create_market_buy_order(self, symbol, amount):
-        return self._ccxt_exchange.create_market_buy_order(symbol=symbol, amount=amount)
+        if self._exchange_id == 'binance':
+            return self._ccxt_exchange.create_market_buy_order(symbol=symbol, amount=amount)
+        elif self._exchange_id == 'kucoin':
+            return self._sdk_exchange.trade_client.create_market_order(symbol=slash2dash(symbol),
+                                                                       side='buy',
+                                                                       size=str(amount))
 
-    def create_market_buy_order_in_quote(self, symbol, amount, price):
-        return self._ccxt_exchange.create_order(symbol=symbol, type='market', side='buy', amount=amount, price=price,
-                                                params=self.default_params)
+    def create_market_buy_order_in_quote(self, symbol, amount_in_quote):
+        if self._exchange_id == 'binance':
+            return self._ccxt_exchange.create_order(symbol=symbol,
+                                                    type='market',
+                                                    side='buy',
+                                                    amount=amount_in_quote,
+                                                    price=1,
+                                                    params=self.default_params)
+        elif self._exchange_id == 'kucoin':
+            return self._sdk_exchange.trade_client.create_market_order(symbol=slash2dash(symbol),
+                                                                       side='buy',
+                                                                       funds=str(amount_in_quote))
 
     def create_market_sell_order(self, symbol, amount):
-        return self._ccxt_exchange.create_market_sell_order(symbol=symbol, amount=amount)
+        if self._exchange_id == 'binance':
+            return self._ccxt_exchange.create_market_sell_order(symbol=symbol, amount=amount)
+        elif self._exchange_id == 'kucoin':
+            symbol = slash2dash(symbol)
+            return self._sdk_exchange.trade_client.create_market_order(symbol=symbol, side='sell', size=str(amount))
 
     def create_limit_buy_order(self, symbol, amount, price):
         return self._ccxt_exchange.create_limit_buy_order(symbol=symbol, amount=amount, price=price)
