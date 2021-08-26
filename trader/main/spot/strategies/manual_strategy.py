@@ -57,13 +57,8 @@ class ManualStrategyDeveloper:
     def init_strategy_state_data(position: SpotPosition):
         signal = position.signal
 
-<<<<<<< HEAD
         steps = signal.related_steps
         targets = signal.related_targets
-=======
-        steps = signal.steps.all()
-        targets = signal.targets.all()
->>>>>>> 1a07d5f... bug in not saving amount in quote for steps in manual mode was fixed
         if signal.step_share_set_mode == 'manual':
             for step in steps:
                 step.amount_in_quote = position.size * step.share
@@ -81,7 +76,6 @@ class ManualStrategyDeveloper:
             last_step.amount_in_quote = position.size * last_step.share
             last_step.save()
 
-<<<<<<< HEAD
         if targets:
             if signal.target_share_set_mode == 'auto':
                 auto_target_share = round_down(1 / len(targets))
@@ -92,27 +86,6 @@ class ManualStrategyDeveloper:
                 last_target = targets[len(targets) - 1]
                 last_target.share = round(1 - (len(targets) - 1) * auto_target_share, 2)
                 last_target.save()
-=======
-        if signal.target_share_set_mode == 'auto':
-            auto_target_share = round_down(1 / len(targets))
-            for i in range(len(targets) - 1):
-                target = targets[i]
-                target.share = auto_target_share
-                target.save()
-            last_target = targets[len(targets) - 1]
-            last_target.share = round(1 - (len(targets) - 1) * auto_target_share, 2)
-            last_target.save()
-
-        # TODO check if it is sorted already
-        sorted_steps = sorted(steps, key=lambda s: s.buy_price)
-        sorted_targets = sorted(targets, key=lambda t: t.tp_price)
-
-        steps_data = [
-            StepData(step_id=s.id, buy_price=s.buy_price, share=s.share, amount_in_quote=s.share * position.size)
-            for s in sorted_steps
-        ]
-        targets_data = [TargetData(target_id=t.id, tp_price=t.tp_price, share=t.share) for t in sorted_targets]
->>>>>>> 1a07d5f... bug in not saving amount in quote for steps in manual mode was fixed
 
         strategy_state_data = StrategyStateData(symbol=signal.symbol,
                                                 amount_in_quote=position.size)
@@ -377,7 +350,6 @@ class ManualStrategyDeveloper:
                     step.delete()
 
             new_steps = []
-            steps_data = []
             for step_data in new_steps_data:
                 step = SpotStep(
                     signal=signal,
@@ -388,15 +360,7 @@ class ManualStrategyDeveloper:
                 )
                 step.save()
                 new_steps.append(step)
-                steps_data.append(
-                    StepData(
-                        step_id=step.id,
-                        buy_price=step.buy_price,
-                        share=step.share,
-                        amount_in_quote=step.amount_in_quote
-                    )
-                )
-            strategy_state_data.steps_data = steps_data
+
             signal.steps.set(new_steps)
             signal.related_steps = new_steps
             signal.save()
@@ -473,7 +437,6 @@ class ManualStrategyDeveloper:
                     target.delete()
 
             new_targets = []
-            targets_data = []
             for target_data in new_targets_data:
                 target = SpotTarget(
                     signal=signal,
@@ -483,14 +446,7 @@ class ManualStrategyDeveloper:
                 )
                 target.save()
                 new_targets.append(target)
-                targets_data.append(
-                    TargetData(
-                        target_id=target.id,
-                        tp_price=target.tp_price,
-                        share=target.share,
-                    )
-                )
-            strategy_state_data.targets_data = targets_data
+
             signal.targets.set(new_targets)
             signal.related_targets = new_targets
             signal.save()
@@ -513,12 +469,6 @@ class ManualStrategyDeveloper:
                 step.save()
             strategy_state_data.amount_in_quote = amount_in_quote
             position.size = new_size
-            steps = position.signal.steps.all()
-            for step in steps:
-                step.amount_in_quote = step.share * position.size
-                step.save()
-            for step_data in strategy_state_data.steps_data:
-                step_data.amount_in_quote = step_data.share * position.size
             position.save()
 
             return True
@@ -532,7 +482,6 @@ class ManualStrategyDeveloper:
     def edit_stoploss(position: SpotPosition, strategy_state_data: StrategyStateData, new_stoploss_data):
         edit_is_required = ManualStrategyDeveloper._has_stoploss_changed(position, new_stoploss_data)
         if edit_is_required:
-<<<<<<< HEAD
             signal = position.signal
             stoploss = signal.stoploss
             if stoploss:
@@ -543,11 +492,6 @@ class ManualStrategyDeveloper:
                 signal.stoploss = stoploss
             stoploss.save()
             signal.save()
-=======
-            strategy_state_data.stoploss = new_stoploss
-            position.signal.stoploss = new_stoploss
-            position.save()
->>>>>>> 1a07d5f... bug in not saving amount in quote for steps in manual mode was fixed
             return True
         return False
 
