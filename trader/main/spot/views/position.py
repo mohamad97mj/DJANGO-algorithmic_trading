@@ -12,7 +12,7 @@ class SpotPositionView(APIView):
 
     @catch_all_exceptions(reraise=True)
     def put(self, request, bot_id, format=None):
-        credential_id = request.query_params.get('credential_id', 'test')
+        credential_id = request.query_params.get('credential_id', 'kucoin_test')
         data = json.loads(request.body)
         new_position_data = data['position']
         new_position, edited_data = SpotBotTrader.edit_position(bot_id, credential_id, new_position_data, )
