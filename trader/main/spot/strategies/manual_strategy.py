@@ -219,6 +219,12 @@ class ManualStrategyDeveloper:
                 if price > target.tp_price and not target.is_triggered:
                     if i == len(targets) - 1:
                         strategy_state_data.all_targets_achieved = True
+                        if not position.keep_open:
+                            bot = position.bot
+                            bot.is_active = False
+                            bot.status = SpotBot.Status.STOPPED_AFTER_FULL_TARGET.value
+                            bot.save()
+
                     strategy_state_data.none_triggered_targets_share = \
                         strategy_state_data.none_triggered_targets_share - target.share
 
@@ -238,7 +244,7 @@ class ManualStrategyDeveloper:
                     operations.append(tp_operation)
                     target.is_triggered = True
                     if i == 0:
-                        new_trigger_price = (steps[len(steps) - 1].buy_price + targets[0].tp_price) / 2
+                        new_trigger_price = (steps[len(steps) - 1].buy_price + target.tp_price) / 2
                     else:
                         new_trigger_price = targets[i - 1].tp_price
                     if stoploss:

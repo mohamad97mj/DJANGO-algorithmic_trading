@@ -81,6 +81,7 @@ class SpotBotHandler:
         position = SpotPosition(signal=signal,
                                 **{k: position_data[k] for k in ['size']})
 
+        position.keep_open = position_data.get('keep_open', 'false') == 'true'
         position.save()
 
         new_bot = SpotBot(exchange_id=exchange_id,
