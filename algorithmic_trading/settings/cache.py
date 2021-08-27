@@ -15,6 +15,15 @@ CACHES = {
             'MAX_ENTRIES': MEMORY_MAX_ENTRIES,
         },
         'TIMEOUT': DEFAULT_TIMOUT,
+    },
+    'kucoin_price': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'kp',
+        'KEY_FUNCTION': "trader.utils.key_function.my_key_function",
+        'OPTIONS': {
+            'MAX_ENTRIES': MEMORY_MAX_ENTRIES,
+        },
+        'TIMEOUT': DEFAULT_TIMOUT,
     }
 
 }

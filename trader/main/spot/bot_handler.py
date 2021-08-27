@@ -125,7 +125,7 @@ class SpotBotHandler:
     def run_bots(self, test=True):
         start = int(time.time())
         while True:
-            credentials = list(self._bots.values())
+            credentials = list(self._bots.keys())
             running_bots = []
             for credential in credentials:
                 running_bots += [bot for bot in list(self._bots[credential].values()) if bot.is_active]
@@ -180,7 +180,7 @@ class SpotBotHandler:
                 t.start()
 
     async def _start_muck_symbol_price_ticker(self, exchange_id, symbol):
-        uri = "ws://localhost:9000"
+        uri = "ws://localhost:9001"
         cache_name = '{}_price'.format(exchange_id)
         while True:
             try:

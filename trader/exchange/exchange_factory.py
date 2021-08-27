@@ -18,11 +18,12 @@ class ExchangeFactory:
                         enable_rate_limit: bool = True,
                         verbose: bool = True) -> Exchange:
 
-        api_key = secret = password = None
+        api_key = secret = password = is_sandbox = None
         if credential_id:
             api_key = credentials[credential_id]['api_key']
             secret = credentials[credential_id]['secret']
             password = credentials[credential_id].get('password', '')
+            is_sandbox = credential_id.endswith('test')
 
         ccxt_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
             'enableRateLimit': enable_rate_limit,
@@ -31,7 +32,6 @@ class ExchangeFactory:
             'secret': secret,
             'password': password
         })
-        is_sandbox = credential_id.endswith('test')
         ccxt_exchange.set_sandbox_mode(enabled=is_sandbox)
         # ccxt_exchange.options['createMarketBuyOrderRequiresPrice'] = False
 
