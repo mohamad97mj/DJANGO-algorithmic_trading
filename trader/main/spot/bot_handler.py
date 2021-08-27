@@ -92,7 +92,10 @@ class SpotBotHandler:
         strategy_developer = SpotStrategyCenter.get_strategy_developer(new_bot.strategy)
         new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(new_bot.position))
         new_bot.save()
-        self._bots[str(new_bot.id)] = new_bot
+        if credential_id in self._bots:
+            self._bots[credential_id][str(new_bot.id)] = new_bot
+        else:
+            self._bots[credential_id] = {str(new_bot.id): new_bot}
         return new_bot
 
     def reload_bots(self):
@@ -100,7 +103,10 @@ class SpotBotHandler:
         for bot in bots:
             self.init_bot_requirements(bot)
             self.set_bot_strategy_state_data(bot)
-            self._bots[str(bot.id)] = bot
+            if bot.credential_id in bots:
+                self._bots[bot.credential_id][str(bot.id)] = bot
+            else:
+                self._bots[bot.credential_id] = {str(bot.id): bot}
 
     def set_bot_strategy_state_data(self, bot):
         strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
@@ -119,7 +125,11 @@ class SpotBotHandler:
     def run_bots(self, test=True):
         start = int(time.time())
         while True:
-            for bot in list(self._bots.values()).copy():
+            credentials = list(self._bots.values())
+            running_bots = []
+            for credential in credentials:
+                running_bots += [bot for bot in list(self._bots[credential].values()) if bot.is_active]
+            for bot in running_bots:
                 # finish = int(time.time())
                 # if finish - start > 4 * 60 * 60:
                 #     start = int(time.time())
@@ -150,7 +160,7 @@ class SpotBotHandler:
                         position=bot.position,
                         strategy_state_data=bot.strategy_state_data)
                 if not bot.is_active:
-                    self._bots.pop(str(bot.id))
+                    self._bots[bot.credential_id].pop(str(bot.id))
             time.sleep(2)
 
     def _get_prices_if_available(self, exchange_id, symbols: List):
@@ -239,15 +249,15 @@ class SpotBotHandler:
         method2run = getattr(strategy_developer, command)
         return method2run(bot.position, bot.strategy_state_data, *args, **kwargs)
 
-    def get_strategy_state_data(self, bot_id):
-        return self._bots[bot_id].strategy_state_data
-
-    def get_bot(self, bot_id, credential_id):
-        if bot_id in self._bots:
-            bot = self._bots[bot_id]
+    def get_active_bot(self, credential_id, bot_id):
+        if credential_id in self._bots and bot_id in self._bots[credential_id]:
+            bot = self._bots[credential_id][bot_id]
             if bot.credential_id == credential_id:
-                return self._bots[bot_id]
-        else:
+                return bot
+
+    def get_bot(self, credential_id, bot_id):
+        bot = self.get_active_bot(credential_id, bot_id)
+        if not bot:
             bot = SpotBot.objects.filter(Q(id=bot_id) & Q(credential_id=credential_id)).first()
             if bot:
                 return bot
@@ -255,7 +265,7 @@ class SpotBotHandler:
 
     def get_bots(self, credential_id, is_active):
         if is_active is True:
-            bots = SpotBot.objects.filter(Q(credential_id=credential_id) & Q(is_active=True))
+            bots = list(self._bots[credential_id].values())
         else:
             bots = SpotBot.objects.filter(Q(credential_id=credential_id))
         for bot in bots:
@@ -263,10 +273,11 @@ class SpotBotHandler:
                 self.set_bot_strategy_state_data(bot)
         return bots
 
-    def edit_position(self, bot_id, credential_id, new_position_data):
-        bot = self.get_bot(bot_id, credential_id)
-        if bot.status.startswith('stopped'):
-            raise CustomException('This bot was stopped and could not be edited!')
+    def edit_position(self, credential_id, bot_id, new_position_data):
+        bot = self.get_active_bot(credential_id, bot_id)
+        if not bot:
+            raise CustomException('No active bot with id {} was found for credential_id {}')
+
         strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
 
         edited_data = []
@@ -320,33 +331,37 @@ class SpotBotHandler:
 
         return bot.position, edited_data
 
-    def pause_bot(self, bot_id):
-        bot = self._bots.pop(bot_id)
-        bot.is_active = False
-        bot.status = SpotBot.Status.PAUSED.value
-        bot.save()
-        return bot
+    def pause_bot(self, credential_id, bot_id):
+        bot = self.get_active_bot(credential_id, bot_id)
+        if not bot:
+            raise CustomException('No active bot with id {} was found for credential_id {}')
 
-    def start_bot(self, bot_id):
-        if bot_id in self._bots:
-            raise CustomException('bot with id {} is already running!'.format(bot_id))
-        bot = SpotBot.objects.get(id=bot_id)
         if bot.status == SpotBot.Status.PAUSED.value:
-            bot.is_active = True
+            raise CustomException('bot with id {} is already paused!!')
+
+        if bot.status == SpotBot.Status.RUNNING.value:
+            bot.status = SpotBot.Status.PAUSED.value
+            bot.save()
+            return bot
+
+    def start_bot(self, credential_id, bot_id):
+        bot = self.get_active_bot(credential_id, bot_id)
+        if not bot:
+            raise CustomException('No active bot with id {} was found for credential_id {}')
+
+        if bot.status == SpotBot.Status.RUNNING.value:
+            raise CustomException('bot with id {} is already running!!')
+
+        if bot.status == SpotBot.Status.PAUSED.value:
             bot.status = SpotBot.Status.RUNNING.value
             bot.save()
-            self._bots[bot_id] = bot
             return bot
-        else:
-            raise CustomException('bot with id {} could not be started because it is closed!')
 
-    def stop_bot(self, bot_id):
-        if bot_id in self._bots:
-            bot = self._bots[bot_id]
-        else:
-            bot = SpotBot.objects.get(id=bot_id)
-            if bot.status not in (SpotBot.Status.RUNNING.value, SpotBot.Status.PAUSED.value):
-                raise CustomException('bot with id {} is already stopped!'.format(bot_id))
+    def stop_bot(self, credential_id, bot_id):
+        bot = self.get_active_bot(credential_id, bot_id)
+        if not bot:
+            raise CustomException('No active bot with id {} was found for credential_id {}')
+
         bot.status = SpotBot.Status.STOPPED_MANUALY.value
         bot.is_active = False
         bot.close_position()
