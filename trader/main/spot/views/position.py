@@ -15,7 +15,7 @@ class SpotPositionView(APIView):
         credential_id = request.query_params.get('credential_id', 'kucoin_test')
         data = json.loads(request.body)
         new_position_data = data['position']
-        new_position, edited_data = SpotBotTrader.edit_position(bot_id, credential_id, new_position_data, )
+        new_position, edited_data = SpotBotTrader.edit_position(credential_id, bot_id, new_position_data, )
 
         position_serializer = SpotPositionSerializer(instance=new_position)
         return Response(

@@ -11,8 +11,8 @@ class SpotBotTrader:
         bot_handler.run_bots()
 
     @staticmethod
-    def get_bot(bot_id: str, credential_id: str):
-        return bot_handler.get_bot(bot_id, credential_id)
+    def get_bot(credential_id: str, bot_id: str):
+        return bot_handler.get_bot(credential_id, bot_id)
 
     @staticmethod
     def get_bots(credential_id, is_active):
@@ -26,17 +26,17 @@ class SpotBotTrader:
                                       position_data=bot_data['position'])
 
     @staticmethod
-    def edit_position(bot_id, credential_id, new_position_data):
-        return bot_handler.edit_position(bot_id, credential_id, new_position_data)
+    def edit_position(credential_id, bot_id, new_position_data):
+        return bot_handler.edit_position(credential_id, bot_id, new_position_data)
 
     @staticmethod
-    def pause_bot(bot_id):
-        return bot_handler.pause_bot(bot_id)
+    def pause_bot(credential_id, bot_id):
+        return bot_handler.pause_bot(credential_id, bot_id)
 
     @staticmethod
-    def start_bot(bot_id):
-        return bot_handler.start_bot(bot_id)
+    def start_bot(credential_id, bot_id):
+        return bot_handler.start_bot(credential_id, bot_id)
 
     @staticmethod
-    def stop_bot(bot_id):
-        return bot_handler.stop_bot(bot_id)
+    def stop_bot(credential_id, bot_id):
+        return bot_handler.stop_bot(credential_id, bot_id)
