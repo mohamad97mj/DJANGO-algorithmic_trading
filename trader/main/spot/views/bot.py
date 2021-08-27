@@ -41,14 +41,15 @@ class SpotBotDetailView(APIView):
     @catch_all_exceptions(reraise=True)
     def get(self, request, bot_id, format=None):
         credential_id = request.query_params.get('credential_id', 'kucoin_test')
-        bot_instance = SpotBotTrader.get_bot(bot_id=bot_id, credential_id=credential_id)
+        bot_instance = SpotBotTrader.get_bot(credential_id=credential_id, bot_id=bot_id)
         return Response(data=SpotBotSerializer(instance=bot_instance).data)
 
     @catch_all_exceptions(reraise=True)
     def put(self, request, bot_id, format=None):
         data = json.loads(request.body)
         command = data['command']
-        bot_instance = command_mapper[command](bot_id)
+        credential_id = data.get('credential_id', 'kucoin_test')
+        bot_instance = command_mapper[command](credential_id, bot_id)
         return Response(data=SpotBotSerializer(instance=bot_instance).data)
 
 
