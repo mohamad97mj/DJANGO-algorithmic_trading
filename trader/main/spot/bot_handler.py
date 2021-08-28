@@ -125,7 +125,7 @@ class SpotBotHandler:
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
-    def run_bots(self, test=False):
+    def run_bots(self, test=True):
         start = int(time.time())
         while True:
             credentials = list(self._bots.keys())
@@ -164,7 +164,7 @@ class SpotBotHandler:
                         strategy_state_data=bot.strategy_state_data)
                 if not bot.is_active:
                     self._bots[bot.credential_id].pop(str(bot.id))
-            time.sleep(2)
+            time.sleep(1)
 
     def _get_prices_if_available(self, exchange_id, symbols: List):
         symbol_prices = self._read_prices(exchange_id, symbols)
@@ -212,9 +212,8 @@ class SpotBotHandler:
                         if exchange_id == 'binance':
                             asyncio.run(self._price_tickers[symbol].trade_client.close_connection())
                         elif exchange_id == 'kucoin':
-                            # asyncio.run(self._price_tickers[symbol].trade_client.unsubscribe(
-                            #     '/market/ticker:{}'.format(slash2dash(symbol))))
-                            pass
+                            logger = my_get_logger()
+                            logger.warning('Error in price ticker was occurred!')
 
                     self._init_price_ticker(exchange_id, symbol)
 
@@ -297,7 +296,8 @@ class SpotBotHandler:
     def edit_position(self, credential_id, bot_id, new_position_data):
         bot = self.get_active_bot(credential_id, bot_id)
         if not bot:
-            raise CustomException('No active bot with id {} was found for credential_id {}')
+            raise CustomException(
+                'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
 
         strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
 
@@ -355,10 +355,11 @@ class SpotBotHandler:
     def pause_bot(self, credential_id, bot_id):
         bot = self.get_active_bot(credential_id, bot_id)
         if not bot:
-            raise CustomException('No active bot with id {} was found for credential_id {}')
+            raise CustomException(
+                'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
 
         if bot.status == SpotBot.Status.PAUSED.value:
-            raise CustomException('bot with id {} is already paused!!')
+            raise CustomException('bot with id {} is already paused!'.format(bot_id))
 
         if bot.status == SpotBot.Status.RUNNING.value:
             bot.status = SpotBot.Status.PAUSED.value
@@ -368,10 +369,11 @@ class SpotBotHandler:
     def start_bot(self, credential_id, bot_id):
         bot = self.get_active_bot(credential_id, bot_id)
         if not bot:
-            raise CustomException('No active bot with id {} was found for credential_id {}')
+            raise CustomException(
+                'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
 
         if bot.status == SpotBot.Status.RUNNING.value:
-            raise CustomException('bot with id {} is already running!!')
+            raise CustomException('bot with id {} is already running!'.format(bot_id))
 
         if bot.status == SpotBot.Status.PAUSED.value:
             bot.status = SpotBot.Status.RUNNING.value
@@ -381,7 +383,8 @@ class SpotBotHandler:
     def stop_bot(self, credential_id, bot_id):
         bot = self.get_active_bot(credential_id, bot_id)
         if not bot:
-            raise CustomException('No active bot with id {} was found for credential_id {}')
+            raise CustomException(
+                'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
 
         bot.status = SpotBot.Status.STOPPED_MANUALY.value
         bot.is_active = False
