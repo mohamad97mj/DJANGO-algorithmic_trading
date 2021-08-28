@@ -185,7 +185,8 @@ class ManualStrategyDeveloper:
             steps = signal.related_steps
             n = 0
             for step in steps:
-                if bot.status == SpotBot.Status.RUNNING.value and not step.is_triggered and (price < step.buy_price or step.buy_price == -1):
+                if bot.status == SpotBot.Status.RUNNING.value and not step.is_triggered and (
+                        price < step.buy_price or step.buy_price == -1):
                     if step.buy_price == -1:
                         step.buy_price = price
                     if n == 0:
@@ -242,6 +243,7 @@ class ManualStrategyDeveloper:
 
                     operations.append(tp_operation)
                     target.is_triggered = True
+                    stoploss_is_created = False
                     if i == 0:
                         new_trigger_price = (steps[len(steps) - 1].buy_price + target.tp_price) / 2
                     else:
@@ -250,10 +252,12 @@ class ManualStrategyDeveloper:
                         stoploss.trigger_price = new_trigger_price
                     else:
                         stoploss = SpotStoploss(trigger_price=new_trigger_price, amount=strategy_state_data.amount)
-                        signal.stoploss = stoploss
-                        signal.save()
+                        stoploss_is_created = True
                     stoploss.is_trailed = True
                     stoploss.save()
+                    if stoploss_is_created:
+                        signal.stoploss = stoploss
+                        signal.save()
                 target.save()
         return operations
 
