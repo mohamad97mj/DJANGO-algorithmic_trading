@@ -139,6 +139,7 @@ class ManualStrategyDeveloper:
     def get_operations(position: SpotPosition, strategy_state_data: StrategyStateData, symbol_prices: dict):
         logger = my_get_logger()
         operations = []
+        bot = position.bot
         signal = position.signal
         symbol = signal.symbol
         stoploss = signal.stoploss
@@ -150,7 +151,7 @@ class ManualStrategyDeveloper:
                 strategy_state_data.unrealized_amount_in_quote + strategy_state_data.amount_in_quote - position.size)
         strategy_state_data.profit_rate = round_down((strategy_state_data.profit_in_quote / position.size) * 100)
 
-        if stoploss and not stoploss.is_triggered and price < stoploss.trigger_price:
+        if bot.is_active and stoploss and not stoploss.is_triggered and price < stoploss.trigger_price:
             stoploss_operation = create_market_sell_operation(
                 symbol=symbol,
                 operation_type='stoploss_triggered',
@@ -162,7 +163,6 @@ class ManualStrategyDeveloper:
 
             stoploss.is_triggered = True
             stoploss.save()
-            bot = position.bot
             bot.is_active = False
 
             if stoploss.is_trailed:
@@ -185,7 +185,7 @@ class ManualStrategyDeveloper:
             steps = signal.related_steps
             n = 0
             for step in steps:
-                if not step.is_triggered and (price < step.buy_price or step.buy_price == -1):
+                if bot.is_active and not step.is_triggered and (price < step.buy_price or step.buy_price == -1):
                     if step.buy_price == -1:
                         step.buy_price = price
                     if n == 0:
@@ -216,11 +216,10 @@ class ManualStrategyDeveloper:
             targets = signal.related_targets
             for i in range(len(targets)):
                 target = targets[i]
-                if price > target.tp_price and not target.is_triggered:
+                if bot.status == SpotBot.Status.RUNNING.value and price > target.tp_price and not target.is_triggered:
                     if i == len(targets) - 1:
                         strategy_state_data.all_targets_achieved = True
                         if not position.keep_open:
-                            bot = position.bot
                             bot.is_active = False
                             bot.status = SpotBot.Status.STOPPED_AFTER_FULL_TARGET.value
                             bot.save()
