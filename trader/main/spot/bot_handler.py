@@ -14,9 +14,11 @@ from dataclasses import dataclass
 from concurrent.futures._base import TimeoutError
 from .strategies.strategy_center import SpotStrategyCenter
 from .models import SpotSignal, SpotStep, SpotTarget
-from trader.utils import round_down
+from trader.utils import round_down, slash2dash
 from global_utils import CustomException
 from websockets.exceptions import ConnectionClosedError
+from kucoin.client import WsToken
+from kucoin.ws_client import KucoinWsClient
 
 
 @dataclass
@@ -123,7 +125,7 @@ class SpotBotHandler:
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
-    def run_bots(self, test=True):
+    def run_bots(self, test=False):
         start = int(time.time())
         while True:
             credentials = list(self._bots.keys())
@@ -207,7 +209,12 @@ class SpotBotHandler:
             if not (symbol in symbol_prices and symbol_prices[symbol]):
                 if symbol not in self._price_tickers or self._price_tickers[symbol].trade_client:
                     if symbol in self._price_tickers:
-                        asyncio.run(self._price_tickers[symbol].trade_client.close_connection())
+                        if exchange_id == 'binance':
+                            asyncio.run(self._price_tickers[symbol].trade_client.close_connection())
+                        elif exchange_id == 'kucoin':
+                            # asyncio.run(self._price_tickers[symbol].trade_client.unsubscribe(
+                            #     '/market/ticker:{}'.format(slash2dash(symbol))))
+                            pass
 
                     self._init_price_ticker(exchange_id, symbol)
 
@@ -217,25 +224,38 @@ class SpotBotHandler:
         t.start()
 
     async def _start_symbol_price_ticker(self, exchange_id, symbol):
-        client = await async_retry_on_timeout(
-            self._public_clients[exchange_id],
-            timeout_errors=(ClientConnectorError, TimeoutError))(self._get_async_client)()
-        self._price_tickers[symbol].trade_client = client
-
-        bm = BinanceSocketManager(client)
-        ts = bm.symbol_ticker_socket(with2without_slash(symbol))
-
         cache_name = '{}_price'.format(exchange_id)
+        if exchange_id == 'binance':
+            client = await async_retry_on_timeout(
+                self._public_clients[exchange_id],
+                timeout_errors=(ClientConnectorError, TimeoutError))(self._get_async_client)()
+            self._price_tickers[symbol].trade_client = client
 
-        async with ts as tscm:
+            bm = BinanceSocketManager(client)
+            ts = bm.symbol_ticker_socket(with2without_slash(symbol))
+
+            async with ts as tscm:
+                while True:
+                    try:
+                        res = await tscm.recv()
+                        if res['e'] != 'error':
+                            CacheUtils.write_to_cache(symbol, float(res['c']), cache_name)
+                    except Exception as e:
+                        logger = my_get_logger()
+                        logger.error(e)
+        elif exchange_id == 'kucoin':
+            loop = asyncio.get_event_loop()
+
+            async def deal_msg(msg):
+                if msg['topic'] == '/market/ticker:{}'.format(slash2dash(symbol)):
+                    CacheUtils.write_to_cache(symbol, float(msg['data']['price']), cache_name)
+
+            client = WsToken()
+            ws_client = await KucoinWsClient.create(loop, client, deal_msg, private=False)
+            self._price_tickers[symbol].trade_client = ws_client
+            await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
             while True:
-                try:
-                    res = await tscm.recv()
-                    if res['e'] != 'error':
-                        CacheUtils.write_to_cache(symbol, float(res['c']), cache_name)
-                except Exception as e:
-                    logger = my_get_logger()
-                    logger.error(e)
+                await asyncio.sleep(60, loop=loop)
 
     async def _get_async_client(self):
         return await AsyncClient.create()
