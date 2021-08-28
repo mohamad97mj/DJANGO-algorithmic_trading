@@ -151,7 +151,7 @@ class ManualStrategyDeveloper:
                 strategy_state_data.unrealized_amount_in_quote + strategy_state_data.amount_in_quote - position.size)
         strategy_state_data.profit_rate = round_down((strategy_state_data.profit_in_quote / position.size) * 100)
 
-        if bot.is_active and stoploss and not stoploss.is_triggered and price < stoploss.trigger_price:
+        if bot.status == SpotBot.Status.RUNNING.value and stoploss and not stoploss.is_triggered and price < stoploss.trigger_price:
             stoploss_operation = create_market_sell_operation(
                 symbol=symbol,
                 operation_type='stoploss_triggered',
@@ -185,7 +185,7 @@ class ManualStrategyDeveloper:
             steps = signal.related_steps
             n = 0
             for step in steps:
-                if bot.is_active and not step.is_triggered and (price < step.buy_price or step.buy_price == -1):
+                if bot.status == SpotBot.Status.RUNNING.value and not step.is_triggered and (price < step.buy_price or step.buy_price == -1):
                     if step.buy_price == -1:
                         step.buy_price = price
                     if n == 0:
@@ -249,11 +249,11 @@ class ManualStrategyDeveloper:
                     if stoploss:
                         stoploss.trigger_price = new_trigger_price
                     else:
-                        stoploss = SpotStoploss(trigger_price=new_trigger_price)
+                        stoploss = SpotStoploss(trigger_price=new_trigger_price, amount=strategy_state_data.amount)
                         signal.stoploss = stoploss
+                        signal.save()
                     stoploss.is_trailed = True
                     stoploss.save()
-
                 target.save()
         return operations
 
