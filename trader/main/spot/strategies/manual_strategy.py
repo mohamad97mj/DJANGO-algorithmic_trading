@@ -164,12 +164,7 @@ class ManualStrategyDeveloper:
             stoploss.is_triggered = True
             stoploss.save()
             bot.is_active = False
-
-            if stoploss.is_trailed:
-                status = SpotBot.Status.STOPPED_BY_TRAILING_STOPLOSS.value
-            else:
-                status = SpotBot.Status.STOPPED_BY_STOPLOSS.value
-
+            status = SpotBot.Status.STOPPED_BY_STOPLOSS.value
             bot.status = status
             bot.save()
 
@@ -243,21 +238,6 @@ class ManualStrategyDeveloper:
 
                     operations.append(tp_operation)
                     target.is_triggered = True
-                    stoploss_is_created = False
-                    if i == 0:
-                        new_trigger_price = (steps[len(steps) - 1].buy_price + target.tp_price) / 2
-                    else:
-                        new_trigger_price = targets[i - 1].tp_price
-                    if stoploss:
-                        stoploss.trigger_price = new_trigger_price
-                    else:
-                        stoploss = SpotStoploss(trigger_price=new_trigger_price, amount=strategy_state_data.amount)
-                        stoploss_is_created = True
-                    stoploss.is_trailed = True
-                    stoploss.save()
-                    if stoploss_is_created:
-                        signal.stoploss = stoploss
-                        signal.save()
                 target.save()
         return operations
 
