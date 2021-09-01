@@ -2,7 +2,7 @@ from global_utils import my_get_logger
 from typing import List, Union
 from django.utils import timezone
 from django.db import models
-from trader.clients import PrivateClient, PublicClient
+from trader.main.spot.clients import PrivateClient, PublicClient
 from trader.utils import truncate
 from .utils.exceptions import BotDoesNotExistsException
 from .operation import SpotOperation

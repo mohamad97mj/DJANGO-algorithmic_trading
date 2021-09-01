@@ -5,7 +5,7 @@ from typing import List
 from django.db.models import Q
 from global_utils import async_retry_on_timeout, my_get_logger
 from trader.main.spot.models import SpotPosition, SpotBot
-from trader.clients import PublicClient, PrivateClient
+from trader.main.spot.clients import PublicClient, PrivateClient
 from trader.utils import with2without_slash, CacheUtils
 from binance import AsyncClient, BinanceSocketManager
 from threading import Thread

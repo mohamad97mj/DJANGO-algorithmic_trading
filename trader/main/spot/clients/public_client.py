@@ -1,4 +1,4 @@
-from trader.exchange import ef
+from trader.main.spot.exchange import ef
 
 
 class PublicClient:
