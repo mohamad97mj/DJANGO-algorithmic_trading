@@ -71,13 +71,16 @@ class Exchange:
         if self._exchange_id == 'binance':
             return self._ccxt_exchange.fetch_total_balance()
         elif self._exchange_id == 'kucoin':
-            return self._sdk_exchange.user_client.get_account_ledger()
+            return self._sdk_exchange.user_client.get_account_list()
 
     def fetch_balance(self):
         return self._ccxt_exchange.fetch_balance()
 
     def fetch_orders(self):
         return self._ccxt_exchange.fetch_orders()
+
+    def fetch_order(self, order_id):
+        return self._ccxt_exchange.fetch_order(order_id)
 
     def fetch_open_orders(self, symbol):
         return self._ccxt_exchange.fetch_open_orders(symbol=symbol)
@@ -89,12 +92,10 @@ class Exchange:
         return self._ccxt_exchange.fetch_my_trades(symbol=symbol)
 
     def create_market_buy_order(self, symbol, amount):
-        if self._exchange_id == 'binance':
-            return self._ccxt_exchange.create_market_buy_order(symbol=symbol, amount=amount)
-        elif self._exchange_id == 'kucoin':
-            return self._sdk_exchange.trade_client.create_market_order(symbol=slash2dash(symbol),
-                                                                       side='buy',
-                                                                       size=str(amount))
+        exchange_order = self._ccxt_exchange.create_market_buy_order(symbol=symbol, amount=amount)
+        if self._exchange_id == 'kucoin':
+            exchange_order = self.fetch_order(exchange_order['id'])
+        return exchange_order
 
     def create_market_buy_order_in_quote(self, symbol, amount_in_quote):
         if self._exchange_id == 'binance':
@@ -105,16 +106,17 @@ class Exchange:
                                                     price=1,
                                                     params=self.default_params)
         elif self._exchange_id == 'kucoin':
-            return self._sdk_exchange.trade_client.create_market_order(symbol=slash2dash(symbol),
-                                                                       side='buy',
-                                                                       funds=str(amount_in_quote))
+            exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=slash2dash(symbol),
+                                                                                 side='buy',
+                                                                                 funds=str(amount_in_quote))
+
+            return self.fetch_order(exchange_order['orderId'])
 
     def create_market_sell_order(self, symbol, amount):
-        if self._exchange_id == 'binance':
-            return self._ccxt_exchange.create_market_sell_order(symbol=symbol, amount=amount)
-        elif self._exchange_id == 'kucoin':
-            symbol = slash2dash(symbol)
-            return self._sdk_exchange.trade_client.create_market_order(symbol=symbol, side='sell', size=str(amount))
+        exchange_order = self._ccxt_exchange.create_market_sell_order(symbol=symbol, amount=amount)
+        if self._exchange_id == 'kucoin':
+            exchange_order = self.fetch_order(exchange_order['id'])
+        return exchange_order
 
     def create_limit_buy_order(self, symbol, amount, price):
         return self._ccxt_exchange.create_limit_buy_order(symbol=symbol, amount=amount, price=price)
