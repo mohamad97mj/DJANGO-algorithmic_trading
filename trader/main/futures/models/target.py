@@ -1,0 +1,13 @@
+from django.db import models
+from django.utils import timezone
+
+
+class FuturesTarget(models.Model):
+    signal = models.ForeignKey('FuturesSignal', related_name='targets', on_delete=models.CASCADE)
+    tp_price = models.FloatField()
+    share = models.FloatField(null=True, blank=True)
+    is_triggered = models.BooleanField(default=False)
+    amount = models.FloatField(default=0)
+    released_amount_in_quote = models.FloatField(default=0)
+    operation = models.OneToOneField('FuturesOperation', related_name='target', on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(default=timezone.now, blank=True)
