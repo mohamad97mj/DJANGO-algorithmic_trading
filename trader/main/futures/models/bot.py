@@ -12,7 +12,7 @@ from .target import FuturesTarget
 from .stoploss import FuturesStoploss
 
 
-class SpotBotManager(models.Manager):
+class FuturesBotManager(models.Manager):
     def find_from_db(self, bot_id):
         try:
             bot = self.get(bot_id=bot_id)
@@ -21,7 +21,7 @@ class SpotBotManager(models.Manager):
             raise BotDoesNotExistsException()
 
 
-class SpotBot(models.Model):
+class FuturesBot(models.Model):
     class Status(models.TextChoices):
         RUNNING = 'running'
         PAUSED = 'paused'
@@ -39,7 +39,7 @@ class SpotBot(models.Model):
         amount: float
         related_setup: Union[FuturesStep, FuturesTarget, FuturesStoploss]  # could be step_id, target_id or stoploss_id
 
-    objects = SpotBotManager()
+    objects = FuturesBotManager()
 
     # bot_id = models.CharField(max_length=100, unique=True)
     exchange_id = models.CharField(max_length=100)
@@ -52,7 +52,7 @@ class SpotBot(models.Model):
                               max_length=50)  # paused, stopped_systematically, stopped_manualy
 
     def __init__(self, *args, **kwargs):
-        super(SpotBot, self).__init__(*args, **kwargs)
+        super(FuturesBot, self).__init__(*args, **kwargs)
         self._private_client = None
         self._public_client = None
         self.strategy_state_data = None
@@ -113,24 +113,24 @@ class SpotBot(models.Model):
                                 amount_precision)
                             fee_amount = truncated_buy_amount_before_fee * fee
                             real_buy_amount_in_quote = truncated_buy_amount_before_fee * buy_price
-                            exchange_order_data = SpotBot.ExchangeOrderData(side='buy',
-                                                                            symbol=symbol,
-                                                                            cost=real_buy_amount_in_quote,
-                                                                            amount=truncated_buy_amount_before_fee,
-                                                                            fee=fee_amount,
-                                                                            related_setup=related_setup)
+                            exchange_order_data = FuturesBot.ExchangeOrderData(side='buy',
+                                                                               symbol=symbol,
+                                                                               cost=real_buy_amount_in_quote,
+                                                                               amount=truncated_buy_amount_before_fee,
+                                                                               fee=fee_amount,
+                                                                               related_setup=related_setup)
                             pure_buy_amount = truncated_buy_amount_before_fee - fee_amount
                             operation.step.purchased_amount = pure_buy_amount
                         else:
                             exchange_order = self._private_client.create_market_buy_order_in_quote(
                                 symbol=symbol,
                                 amount_in_quote=operation.order.amount_in_quote)
-                            exchange_order_data = SpotBot.ExchangeOrderData(side='buy',
-                                                                            symbol=symbol,
-                                                                            cost=exchange_order['cost'],
-                                                                            amount=exchange_order['amount'],
-                                                                            fee=exchange_order['fee']['cost'],
-                                                                            related_setup=related_setup)
+                            exchange_order_data = FuturesBot.ExchangeOrderData(side='buy',
+                                                                               symbol=symbol,
+                                                                               cost=exchange_order['cost'],
+                                                                               amount=exchange_order['amount'],
+                                                                               fee=exchange_order['fee']['cost'],
+                                                                               related_setup=related_setup)
 
                             pure_buy_amount = exchange_order['amount'] - exchange_order['fee']['cost']
                             operation.step.purchased_amount = pure_buy_amount
@@ -145,12 +145,12 @@ class SpotBot(models.Model):
                             truncated_sell_amount_before_fee = truncate(sell_amount, amount_precision)
                             sell_amount_in_quote = truncated_sell_amount_before_fee * (sell_price * (1 - deviation))
                             fee_amount_in_quote = sell_amount_in_quote * fee
-                            exchange_order_data = SpotBot.ExchangeOrderData(side='sell',
-                                                                            symbol=symbol,
-                                                                            cost=sell_amount_in_quote,
-                                                                            fee=fee_amount_in_quote,
-                                                                            amount=truncated_sell_amount_before_fee,
-                                                                            related_setup=related_setup)
+                            exchange_order_data = FuturesBot.ExchangeOrderData(side='sell',
+                                                                               symbol=symbol,
+                                                                               cost=sell_amount_in_quote,
+                                                                               fee=fee_amount_in_quote,
+                                                                               amount=truncated_sell_amount_before_fee,
+                                                                               related_setup=related_setup)
 
                             pure_sell_amount_in_quote = sell_amount_in_quote - fee_amount_in_quote
                             related_setup.released_amount_in_quote = pure_sell_amount_in_quote
@@ -159,12 +159,12 @@ class SpotBot(models.Model):
                             exchange_order = self._private_client.create_market_sell_order(
                                 symbol=symbol,
                                 amount=operation.order.amount)
-                            exchange_order_data = SpotBot.ExchangeOrderData(side='sell',
-                                                                            symbol=symbol,
-                                                                            cost=exchange_order['cost'],
-                                                                            fee=exchange_order['fee']['cost'],
-                                                                            amount=exchange_order['amount'],
-                                                                            related_setup=related_setup)
+                            exchange_order_data = FuturesBot.ExchangeOrderData(side='sell',
+                                                                               symbol=symbol,
+                                                                               cost=exchange_order['cost'],
+                                                                               fee=exchange_order['fee']['cost'],
+                                                                               amount=exchange_order['amount'],
+                                                                               related_setup=related_setup)
                             pure_sell_amount_in_quote = exchange_order['cost'] - exchange_order['fee']['cost']
                             related_setup.released_amount_in_quote = pure_sell_amount_in_quote
                             related_setup.save()
