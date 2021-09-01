@@ -1,1 +1,0 @@
-from .trader import SpotBotTrader
