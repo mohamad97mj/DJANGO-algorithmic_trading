@@ -14,8 +14,8 @@ class PrivateClient:
     def fetch_orders(self, symbol='BTC/USDT'):
         return self._exchange.fetch_orders()
 
-    def fetch_order(self, order_id, symbol='BTC/USDT'):
-        return self._exchange.fetch_orders()
+    def fetch_order(self, order_id):
+        return self._exchange.fetch_order(order_id)
 
     def fetch_open_orders(self, symbol='BTC/USDT'):
         return self._exchange.fetch_open_orders(symbol=symbol)
