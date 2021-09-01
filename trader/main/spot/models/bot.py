@@ -26,7 +26,7 @@ class SpotBot(models.Model):
         RUNNING = 'running'
         PAUSED = 'paused'
         STOPPED_BY_STOPLOSS = 'stopped_by_stoploss'
-        STOPPED_BY_TRAILING_STOPLOSS = 'stopped_by_trailing_stoploss'
+        # STOPPED_BY_TRAILING_STOPLOSS = 'stopped_by_trailing_stoploss'
         STOPPED_AFTER_FULL_TARGET = 'stopped_after_full_target'
         STOPPED_MANUALY = 'stopped_manualy'
 
