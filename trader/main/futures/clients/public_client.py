@@ -13,3 +13,12 @@ class PublicClient:
 
     def get_contract(self, symbol):
         return self._exchange.get_contract(symbol=symbol)
+
+    def fetch_status(self):
+        return self._exchange.fetch_status()
+
+    def load_markets(self, reload=False):
+        return self._exchange.load_markets(reload=reload)
+
+    def get_markets(self):
+        return self._exchange.get_markets()
