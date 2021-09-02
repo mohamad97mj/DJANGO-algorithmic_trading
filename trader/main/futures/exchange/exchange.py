@@ -12,8 +12,10 @@ class Exchange:
 
     def __init__(self,
                  exchange_id,
+                 ccxt_exchange: ccxt.Exchange,
                  sdk_exchange: SdkExchange):
         self._exchange_id = exchange_id
+        self._ccxt_exchange = ccxt_exchange
         self._sdk_exchange = sdk_exchange
 
     def get_order(self, order_id):
@@ -55,3 +57,15 @@ class Exchange:
 
     def get_contract(self, symbol):
         return self._sdk_exchange.market_client.get_contract_detail(symbol=symbol)
+
+    def fetch_status(self):
+        return self._ccxt_exchange.fetch_status()
+
+    def load_markets(self, reload):
+        return self._ccxt_exchange.load_markets(reload=reload)
+
+    def get_markets(self):
+        if not self._ccxt_exchange.markets:
+            self._ccxt_exchange.load_markets()
+
+        return self._ccxt_exchange.markets

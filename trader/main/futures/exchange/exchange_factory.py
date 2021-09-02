@@ -1,3 +1,4 @@
+import ccxt
 from typing import List
 from .exchange import Exchange
 from .sdk_exchange import SdkExchange
@@ -12,12 +13,23 @@ class ExchangeFactory:
     def create_exchange(self,
                         exchange_id: str,
                         credential_id: str = None,
+                        enable_rate_limit: bool = True,
+                        verbose: bool = True
                         ) -> Exchange:
 
         api_key = secret = password = is_sandbox = None
         if credential_id:
             api_key, secret, password = obtain_credential(credential_id, market='futures')
             is_sandbox = credential_id.endswith('test')
+
+        ccxt_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
+            'enableRateLimit': enable_rate_limit,
+            'verbose': verbose,
+            'apiKey': api_key,
+            'secret': secret,
+            'password': password
+        })
+        ccxt_exchange.set_sandbox_mode(enabled=is_sandbox)
 
         sdk_exchange = None
         if exchange_id in ('kucoin',):
@@ -28,6 +40,7 @@ class ExchangeFactory:
                                                      is_sandbox=is_sandbox)
 
         exchange = Exchange(exchange_id=exchange_id,
+                            ccxt_exchange=ccxt_exchange,
                             sdk_exchange=sdk_exchange)
         self._exchanges.append(exchange)
         return exchange
