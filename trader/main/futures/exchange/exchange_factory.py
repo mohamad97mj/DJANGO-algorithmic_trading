@@ -16,7 +16,7 @@ class ExchangeFactory:
 
         api_key = secret = password = is_sandbox = None
         if credential_id:
-            api_key, secret, password = obtain_credential(credential_id)
+            api_key, secret, password = obtain_credential(credential_id, market='futures')
             is_sandbox = credential_id.endswith('test')
 
         sdk_exchange = None

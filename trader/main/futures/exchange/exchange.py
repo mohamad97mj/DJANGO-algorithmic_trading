@@ -17,7 +17,7 @@ class Exchange:
         self._sdk_exchange = sdk_exchange
 
     def get_order(self, order_id):
-        return self._sdk_exchange.trade_client.get_order_details(order_id=order_id)
+        return self._sdk_exchange.trade_client.get_order_details(orderId=order_id)
 
     def create_market_buy_order(self, symbol, leverage, size):
         exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
@@ -34,11 +34,11 @@ class Exchange:
         return self.get_order(exchange_order['orderId'])
 
     def create_market_buy_order_in_cost(self, symbol, leverage, cost, price):
-        size = int((cost * leverage) / price)
+        size = int((cost * int(leverage)) / price)
         return self.create_market_buy_order(symbol=symbol, leverage=leverage, size=size)
 
     def create_market_sell_order_in_cost(self, symbol, leverage, cost, price):
-        size = int((cost * leverage) / price)
+        size = int((cost * int(leverage)) / price)
         return self.create_market_sell_order(symbol=symbol, leverage=leverage, size=size)
 
     def get_all_positions(self):
