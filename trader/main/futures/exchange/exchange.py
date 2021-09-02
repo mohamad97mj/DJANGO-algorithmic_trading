@@ -22,5 +22,9 @@ class Exchange:
                                                             lever=leverage,
                                                             size=size)
 
-
+    def create_market_sell_order(self, symbol, leverage, size):
+        self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
+                                                            side='sell',
+                                                            lever=leverage,
+                                                            size=size)
 
