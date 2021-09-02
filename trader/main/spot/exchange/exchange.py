@@ -8,7 +8,6 @@ from .sdk_exchange import SdkExchange
 @apply2all_methods(retry_on_timeout(timeout_errors=NetworkError))
 class Exchange:
     default_params = {
-        'recvWindow': 10000
     }
 
     def __init__(self,
