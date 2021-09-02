@@ -27,7 +27,10 @@ class ExchangeFactory:
             'verbose': verbose,
             'apiKey': api_key,
             'secret': secret,
-            'password': password
+            'password': password,
+            'options': {
+                'defaultType': 'future',  # ←-------------- quotes and 'future'
+            },
         })
         ccxt_exchange.set_sandbox_mode(enabled=is_sandbox)
 
