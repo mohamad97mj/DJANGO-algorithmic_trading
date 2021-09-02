@@ -1,6 +1,4 @@
 from typing import List
-from trader.auth import credentials
-from global_utils import retry_on_timeout
 from .exchange import Exchange
 from .sdk_exchange import SdkExchange
 from trader.utils import obtain_credential
@@ -45,3 +43,6 @@ class ExchangeFactory:
             )
 
         return exchange
+
+
+ef = ExchangeFactory()

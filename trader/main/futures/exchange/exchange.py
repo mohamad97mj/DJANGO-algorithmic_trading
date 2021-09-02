@@ -47,4 +47,11 @@ class Exchange:
     def get_position(self, symbol):
         return self._sdk_exchange.trade_client.get_position_details(symbol=symbol)
 
+    def fetch_ticker(self, symbol):
+        return self._sdk_exchange.market_client.get_ticker(symbol)
 
+    def get_contracts(self):
+        return self._sdk_exchange.market_client.get_contracts_list()
+
+    def get_contract(self, symbol):
+        return self._sdk_exchange.market_client.get_contract_detail(symbol=symbol)
