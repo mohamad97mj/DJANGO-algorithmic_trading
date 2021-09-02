@@ -7,3 +7,4 @@ from .log import log
 from .apply2all_methods import apply2all_methods
 from .cache import CacheUtils
 from .math import round_down
+from .obtain_credential import obtain_credential

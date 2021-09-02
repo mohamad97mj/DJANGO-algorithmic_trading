@@ -46,6 +46,8 @@ class SpotBot(models.Model):
     credential_id = models.CharField(max_length=100)
     strategy = models.CharField(max_length=100)
     position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.CASCADE)
+    total_pnl = models.FloatField(default=0)
+    total_pnl_percentage = models.FloatField(default=0)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
     status = models.CharField(default=Status.RUNNING.value,
@@ -90,7 +92,7 @@ class SpotBot(models.Model):
                                 exchange_order['price'],
                                 balance))
 
-    def execute_operations(self, operations: List[SpotOperation], test=True, symbol_prices=None):
+    def execute_operations(self, operations: List[SpotOperation], symbol_prices=None, test=True):
         exchange_orders_data = []
         for operation in operations:
             exchange_order_data = None

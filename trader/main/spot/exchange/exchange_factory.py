@@ -1,7 +1,6 @@
 from typing import List
 import ccxt
 from binance.client import Client as PythonBinanceExchange
-from trader.auth import credentials
 from global_utils import retry_on_timeout
 from .exchange import Exchange
 from .sdk_exchange import SdkExchange
@@ -21,7 +20,7 @@ class ExchangeFactory:
 
         api_key = secret = password = is_sandbox = None
         if credential_id:
-            api_key, secret, password = obtain_credential(credential_id)
+            api_key, secret, password = obtain_credential(credential_id, market='spot')
             is_sandbox = credential_id.endswith('test')
 
         ccxt_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
