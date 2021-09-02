@@ -37,5 +37,8 @@ class Exchange:
         size = int((cost * leverage) / price)
         return self.create_market_buy_order(symbol=symbol, leverage=leverage, size=size)
 
+    def create_market_sell_order_in_cost(self, symbol, leverage, cost, price):
+        size = int((cost * leverage) / price)
+        return self.create_market_sell_order(symbol=symbol, leverage=leverage, size=size)
 
 
