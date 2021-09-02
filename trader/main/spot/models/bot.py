@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.db import models
 from trader.main.spot.clients import PrivateClient, PublicClient
 from trader.utils import truncate
-from .utils.exceptions import BotDoesNotExistsException
+from global_utils.does_not_exists_exceptions import BotDoesNotExistsException
 from .operation import SpotOperation
 from dataclasses import dataclass
 from .step import SpotStep
