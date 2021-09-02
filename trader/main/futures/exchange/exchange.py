@@ -33,4 +33,9 @@ class Exchange:
                                                                              size=size)
         return self.get_order(exchange_order['orderId'])
 
+    def create_market_buy_order_in_cost(self, symbol, leverage, cost, price):
+        size = int((cost * leverage) / price)
+        return self.create_market_buy_order(symbol=symbol, leverage=leverage, size=size)
+
+
 
