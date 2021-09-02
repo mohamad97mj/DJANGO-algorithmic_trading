@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.db import models
 from trader.main.spot.clients import PrivateClient, PublicClient
 from trader.utils import truncate
-from .utils.exceptions import BotDoesNotExistsException
+from global_utils.does_not_exists_exceptions import BotDoesNotExistsException
 from .operation import FuturesOperation
 from dataclasses import dataclass
 from .step import FuturesStep
@@ -46,6 +46,8 @@ class FuturesBot(models.Model):
     credential_id = models.CharField(max_length=100)
     strategy = models.CharField(max_length=100)
     position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.CASCADE)
+    total_pnl = models.FloatField(default=0)
+    total_pnl_percentage = models.FloatField(default=0)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
     status = models.CharField(default=Status.RUNNING.value,
@@ -66,31 +68,13 @@ class FuturesBot(models.Model):
 
     def ready(self):
         if not self.strategy == 'manual':
-            self.sell_all_assets()
+            self.close_position()
 
     def reset(self):
         if not self.strategy == 'manual':
-            self.sell_all_assets()
+            self.close_position()
 
-    def sell_all_assets(self):
-        logger = my_get_logger()
-        markets = self._public_client.get_markets()
-        total_balances = self._private_client.fetch_total_balance()
-        for currency, balance in total_balances.items():
-            symbol = '{}/USDT'.format(currency)
-            if symbol in markets:
-                if currency != 'USDT' and balance > markets[symbol]['limits']['amount']['min']:
-                    ticker = self._public_client.fetch_ticker(symbol)
-                    price = ticker['last']
-                    if balance * price > markets[symbol]['limits']['cost']['min']:
-                        exchange_order = self._private_client.create_market_sell_order(symbol, balance)
-                        logger.info(
-                            'sold in reset: (symbol: {}, price: {}, amount: {})'.format(
-                                symbol,
-                                exchange_order['price'],
-                                balance))
-
-    def execute_operations(self, operations: List[FuturesOperation], test=True, symbol_prices=None):
+    def execute_operations(self, operations: List[FuturesOperation], symbol_prices=None, test=True):
         exchange_orders_data = []
         for operation in operations:
             exchange_order_data = None
@@ -176,4 +160,4 @@ class FuturesBot(models.Model):
         return exchange_orders_data
 
     def close_position(self):
-        self.sell_all_assets()
+        pass
