@@ -41,4 +41,10 @@ class Exchange:
         size = int((cost * leverage) / price)
         return self.create_market_sell_order(symbol=symbol, leverage=leverage, size=size)
 
+    def get_all_positions(self):
+        return self._sdk_exchange.trade_client.get_all_position()
+
+    def get_position(self, symbol):
+        return self._sdk_exchange.trade_client.get_position_details(symbol=symbol)
+
 
