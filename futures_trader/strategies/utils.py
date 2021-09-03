@@ -2,17 +2,19 @@ from typing import Union
 from ..models import FuturesOrder, FuturesOperation, FuturesStep, FuturesTarget, FuturesPosition, FuturesStoploss
 
 
-def create_market_buy_in_quote_operation(symbol,
-                                         operation_type,
-                                         price,
-                                         amount_in_quote,
-                                         position: FuturesPosition,
-                                         step: FuturesStep = None):
+def create_market_buy_operation(symbol,
+                                operation_type,
+                                price,
+                                size,
+                                leverage,
+                                position: FuturesPosition,
+                                step: FuturesStep = None):
     buy_market_order = FuturesOrder(symbol=symbol,
                                     type='market',
                                     side='buy',
                                     price=price,
-                                    amount_in_quote=amount_in_quote)
+                                    leverage=leverage,
+                                    size=size)
     buy_market_order.save()
     buy_market_operation = FuturesOperation(
         type=operation_type,
@@ -29,14 +31,16 @@ def create_market_buy_in_quote_operation(symbol,
 def create_market_sell_operation(symbol,
                                  operation_type,
                                  price,
-                                 amount,
+                                 size,
+                                 leverage,
                                  position: FuturesPosition,
                                  stoploss: FuturesStoploss = None):
     sell_market_order = FuturesOrder(symbol=symbol,
                                      type='market',
                                      side='sell',
                                      price=price,
-                                     amount=amount)
+                                     leverage=leverage,
+                                     size=size)
     sell_market_order.save()
     sell_market_operation = FuturesOperation(
         type=operation_type,
