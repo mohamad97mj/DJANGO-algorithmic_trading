@@ -15,7 +15,7 @@ class FuturesOrder(models.Model):
     average = models.FloatField(null=True, blank=True)
     size = models.FloatField(null=True, blank=True)
     value = models.FloatField(null=True, blank=True)
-    leverage = models.FloatField(null=True, blank=True)
+    leverage = models.IntegerField(null=True, blank=True)
     cost = models.FloatField(null=True, blank=True)
     filled_value = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
