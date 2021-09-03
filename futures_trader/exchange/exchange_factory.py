@@ -2,7 +2,7 @@ import ccxt
 from typing import List
 from .exchange import Exchange
 from .sdk_exchange import SdkExchange
-from trader.utils import obtain_credential
+from futures_trader.utils import obtain_credential
 
 
 class ExchangeFactory:
@@ -19,7 +19,7 @@ class ExchangeFactory:
 
         api_key = secret = password = is_sandbox = None
         if credential_id:
-            api_key, secret, password = obtain_credential(credential_id, market='futures')
+            api_key, secret, password = obtain_credential(credential_id)
             is_sandbox = credential_id.endswith('test')
 
         ccxt_exchange: ccxt.Exchange = getattr(ccxt, exchange_id)({
