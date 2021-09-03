@@ -10,3 +10,4 @@ class SdkExchange:
                                          is_sandbox=is_sandbox,)
         self.user_client = client.User(key=api_key, secret=secret, passphrase=password, is_sandbox=is_sandbox)
 
+
