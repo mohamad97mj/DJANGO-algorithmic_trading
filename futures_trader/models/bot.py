@@ -2,9 +2,8 @@ from global_utils import my_get_logger
 from typing import List, Union
 from django.utils import timezone
 from django.db import models
-from spot_trader.clients import PrivateClient, PublicClient
-from trader.utils import truncate
-from global_utils.does_not_exists_exceptions import BotDoesNotExistsException
+from futures_trader.clients import PrivateClient, PublicClient
+from global_utils import BotDoesNotExistsException, truncate
 from .operation import FuturesOperation
 from dataclasses import dataclass
 from .step import FuturesStep
@@ -34,9 +33,10 @@ class FuturesBot(models.Model):
     class ExchangeOrderData:
         side: str
         symbol: str
+        size: float
+        value: float
         cost: float
         fee: float
-        amount: float
         related_setup: Union[FuturesStep, FuturesTarget, FuturesStoploss]  # could be step_id, target_id or stoploss_id
 
     objects = FuturesBotManager()
@@ -45,7 +45,7 @@ class FuturesBot(models.Model):
     exchange_id = models.CharField(max_length=100)
     credential_id = models.CharField(max_length=100)
     strategy = models.CharField(max_length=100)
-    position = models.OneToOneField('SpotPosition', related_name='bot', on_delete=models.CASCADE)
+    position = models.OneToOneField('FuturesPosition', related_name='bot', on_delete=models.CASCADE)
     total_pnl = models.FloatField(default=0)
     total_pnl_percentage = models.FloatField(default=0)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
@@ -78,86 +78,92 @@ class FuturesBot(models.Model):
         exchange_orders_data = []
         for operation in operations:
             exchange_order_data = None
+            position = operation.position
+            order = operation.order
             if operation.action == 'create':
-                if operation.order.type == 'market':
+                if order.type == 'market':
 
-                    symbol = operation.order.symbol
+                    symbol = order.symbol
                     markets = self._public_client.get_markets()
                     amount_precision = markets[symbol]['precision']['amount']
                     fee = markets[symbol]['maker']
-                    deviation = 0.0001
 
                     if operation.order.side == 'buy':
-                        related_setup = operation.step
+                        step = operation.step
+                        buy_price = symbol_prices[symbol]
+                        size = int((order.cost * position.leverage) / buy_price)
                         if test:
-                            buy_amount_in_quote = operation.order.amount_in_quote
-                            buy_price = symbol_prices[symbol]
-                            truncated_buy_amount_before_fee = truncate(
-                                buy_amount_in_quote / (buy_price * (1 + deviation)),
-                                amount_precision)
-                            fee_amount = truncated_buy_amount_before_fee * fee
-                            real_buy_amount_in_quote = truncated_buy_amount_before_fee * buy_price
+                            value = size * buy_price
+                            cost = value / order.leverage
+                            fee = cost * fee
                             exchange_order_data = FuturesBot.ExchangeOrderData(side='buy',
                                                                                symbol=symbol,
-                                                                               cost=real_buy_amount_in_quote,
-                                                                               amount=truncated_buy_amount_before_fee,
-                                                                               fee=fee_amount,
-                                                                               related_setup=related_setup)
-                            pure_buy_amount = truncated_buy_amount_before_fee - fee_amount
-                            operation.step.purchased_amount = pure_buy_amount
+                                                                               size=size,
+                                                                               value=value,
+                                                                               cost=cost,
+                                                                               fee=fee,
+                                                                               related_setup=step)
+                            step = operation.step
+                            step.size = size
+                            step.purchased_value = value
+                            step.cost = cost
                         else:
-                            exchange_order = self._private_client.create_market_buy_order_in_quote(
+                            exchange_order = self._private_client.create_market_buy_order(
                                 symbol=symbol,
-                                amount_in_quote=operation.order.amount_in_quote)
+                                leverage=position.leverage,
+                                size=size)
+
                             exchange_order_data = FuturesBot.ExchangeOrderData(side='buy',
                                                                                symbol=symbol,
+                                                                               size=exchange_order['size'],
+                                                                               value=exchange_order['value'],
                                                                                cost=exchange_order['cost'],
-                                                                               amount=exchange_order['amount'],
                                                                                fee=exchange_order['fee']['cost'],
                                                                                related_setup=related_setup)
 
                             pure_buy_amount = exchange_order['amount'] - exchange_order['fee']['cost']
                             operation.step.purchased_amount = pure_buy_amount
-                        operation.step.save()
+                        step.save()
 
-                    elif operation.order.side == 'sell':
-                        related_setup = operation.stoploss if operation.type == 'stoploss_triggered' else operation.target
-                        if test:
+                elif operation.order.side == 'sell':
+                    related_setup = operation.stoploss if operation.type == 'stoploss_triggered' else operation.target
+                    if test:
 
-                            sell_amount = operation.order.amount
-                            sell_price = symbol_prices[symbol]
-                            truncated_sell_amount_before_fee = truncate(sell_amount, amount_precision)
-                            sell_amount_in_quote = truncated_sell_amount_before_fee * (sell_price * (1 - deviation))
-                            fee_amount_in_quote = sell_amount_in_quote * fee
-                            exchange_order_data = FuturesBot.ExchangeOrderData(side='sell',
-                                                                               symbol=symbol,
-                                                                               cost=sell_amount_in_quote,
-                                                                               fee=fee_amount_in_quote,
-                                                                               amount=truncated_sell_amount_before_fee,
-                                                                               related_setup=related_setup)
+                        sell_amount = operation.order.amount
+                        sell_price = symbol_prices[symbol]
+                        truncated_sell_amount_before_fee = truncate(sell_amount, amount_precision)
+                        sell_amount_in_quote = truncated_sell_amount_before_fee * (sell_price * (1 - deviation))
+                        fee_amount_in_quote = sell_amount_in_quote * fee
+                        exchange_order_data = FuturesBot.ExchangeOrderData(side='sell',
+                                                                           symbol=symbol,
+                                                                           cost=sell_amount_in_quote,
+                                                                           fee=fee_amount_in_quote,
+                                                                           amount=truncated_sell_amount_before_fee,
+                                                                           related_setup=related_setup)
 
-                            pure_sell_amount_in_quote = sell_amount_in_quote - fee_amount_in_quote
-                            related_setup.released_amount_in_quote = pure_sell_amount_in_quote
+                        pure_sell_amount_in_quote = sell_amount_in_quote - fee_amount_in_quote
+                        related_setup.released_amount_in_quote = pure_sell_amount_in_quote
 
-                        else:
-                            exchange_order = self._private_client.create_market_sell_order(
-                                symbol=symbol,
-                                amount=operation.order.amount)
-                            exchange_order_data = FuturesBot.ExchangeOrderData(side='sell',
-                                                                               symbol=symbol,
-                                                                               cost=exchange_order['cost'],
-                                                                               fee=exchange_order['fee']['cost'],
-                                                                               amount=exchange_order['amount'],
-                                                                               related_setup=related_setup)
-                            pure_sell_amount_in_quote = exchange_order['cost'] - exchange_order['fee']['cost']
-                            related_setup.released_amount_in_quote = pure_sell_amount_in_quote
-                            related_setup.save()
+                    else:
+                        exchange_order = self._private_client.create_market_sell_order(
+                            symbol=symbol,
+                            amount=operation.order.amount)
+                        exchange_order_data = FuturesBot.ExchangeOrderData(side='sell',
+                                                                           symbol=symbol,
+                                                                           cost=exchange_order['cost'],
+                                                                           fee=exchange_order['fee']['cost'],
+                                                                           amount=exchange_order['amount'],
+                                                                           related_setup=related_setup)
+                        pure_sell_amount_in_quote = exchange_order['cost'] - exchange_order['fee']['cost']
+                        related_setup.released_amount_in_quote = pure_sell_amount_in_quote
+                        related_setup.save()
 
-            logger = my_get_logger()
-            logger.info('exchange_order: {}'.format(exchange_order_data))
-            exchange_orders_data.append(exchange_order_data)
+        logger = my_get_logger()
+        logger.info('exchange_order: {}'.format(exchange_order_data))
+        exchange_orders_data.append(exchange_order_data)
 
         return exchange_orders_data
 
-    def close_position(self):
-        pass
+
+def close_position(self):
+    pass
