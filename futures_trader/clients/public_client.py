@@ -1,4 +1,4 @@
-from trader.main.futures import ef
+from futures_trader.exchange import ef
 
 
 class PublicClient:
