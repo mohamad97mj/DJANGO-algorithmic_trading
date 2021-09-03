@@ -1,7 +1,6 @@
 import ccxt
 from ccxt.base.errors import NetworkError
-from global_utils import retry_on_timeout
-from trader.utils import apply2all_methods, slash2dash
+from global_utils import retry_on_timeout, apply2all_methods, slash2dash
 from .sdk_exchange import SdkExchange
 
 
@@ -17,6 +16,9 @@ class Exchange:
         self._exchange_id = exchange_id
         self._ccxt_exchange = ccxt_exchange
         self._sdk_exchange = sdk_exchange
+
+    def get_account_overview(self, currency):
+        return self._sdk_exchange.user_client.get_account_overview(currency=currency)
 
     def get_order(self, order_id):
         return self._sdk_exchange.trade_client.get_order_details(orderId=order_id)
@@ -36,18 +38,25 @@ class Exchange:
         return self.get_order(exchange_order['orderId'])
 
     def create_market_buy_order_in_cost(self, symbol, leverage, cost, price):
-        size = int((cost * int(leverage)) / price)
-        return self.create_market_buy_order(symbol=symbol, leverage=leverage, size=size)
+        size = int((cost * leverage) / price)
+        return self.create_market_buy_order(symbol=symbol, leverage=str(leverage), size=size)
 
     def create_market_sell_order_in_cost(self, symbol, leverage, cost, price):
-        size = int((cost * int(leverage)) / price)
-        return self.create_market_sell_order(symbol=symbol, leverage=leverage, size=size)
+        size = int((cost * leverage) / price)
+        return self.create_market_sell_order(symbol=symbol, leverage=str(leverage), size=size)
 
     def get_all_positions(self):
         return self._sdk_exchange.trade_client.get_all_position()
 
     def get_position(self, symbol):
         return self._sdk_exchange.trade_client.get_position_details(symbol=symbol)
+
+    def close_position(self, symbol):
+        exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
+                                                                             side='',
+                                                                             lever='',
+                                                                             closeOrder=True)
+        return self.get_order(exchange_order['orderId'])
 
     def fetch_ticker(self, symbol):
         return self._sdk_exchange.market_client.get_ticker(symbol)
