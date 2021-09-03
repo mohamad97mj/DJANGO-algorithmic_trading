@@ -19,5 +19,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('spot-api/', include('spot_trader.urls')),
-    # path('futures-api/', include('spot_trader.urls')),
+    path('futures-api/', include('futures_trader.urls')),
 ]
