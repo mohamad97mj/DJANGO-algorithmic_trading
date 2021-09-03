@@ -7,6 +7,9 @@ class PrivateClient:
         self._exchange = ef.create_exchange(exchange_id=exchange_id,
                                             credential_id=credential_id)
 
+    def get_account_overview(self, currency):
+        return self._exchange.get_account_overview(currency=currency)
+
     def get_order(self, order_id):
         return self._exchange.get_order(order_id=order_id)
 
@@ -27,3 +30,6 @@ class PrivateClient:
 
     def get_position(self, symbol):
         return self._exchange.get_position(symbol=symbol)
+
+    def close_position(self, symbol):
+        return self._exchange.close_position(symbol=symbol)
