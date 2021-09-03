@@ -10,7 +10,7 @@ CACHES = {
     'binance_price': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'bp',
-        'KEY_FUNCTION': "trader.utils.key_function.my_key_function",
+        'KEY_FUNCTION': "global_utils.my_key_function",
         'OPTIONS': {
             'MAX_ENTRIES': MEMORY_MAX_ENTRIES,
         },
@@ -19,7 +19,7 @@ CACHES = {
     'kucoin_price': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'kp',
-        'KEY_FUNCTION': "trader.utils.key_function.my_key_function",
+        'KEY_FUNCTION': "global_utils.my_key_function",
         'OPTIONS': {
             'MAX_ENTRIES': MEMORY_MAX_ENTRIES,
         },

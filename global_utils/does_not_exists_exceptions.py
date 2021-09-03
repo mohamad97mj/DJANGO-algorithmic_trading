@@ -1,4 +1,4 @@
-from trader.utils import CustomException
+from . import CustomException
 
 
 class DoesNotExistsException(CustomException):
