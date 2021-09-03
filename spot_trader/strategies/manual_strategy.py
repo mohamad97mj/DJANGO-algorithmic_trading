@@ -94,7 +94,6 @@ class ManualStrategyDeveloper:
     def reload_strategy_state_data(position):
         signal = position.signal
         all_steps_achieved = True
-        all_targets_achieved = True
         steps = signal.related_steps
         if steps[0].buy_price == -1:
             steps.append(steps.pop(0))
@@ -107,6 +106,7 @@ class ManualStrategyDeveloper:
                 amount_in_quote += step.amount_in_quote
                 all_steps_achieved = False
 
+        all_targets_achieved = False
         targets = signal.related_targets
         none_triggered_targets_share = 1.0
         amount = 0

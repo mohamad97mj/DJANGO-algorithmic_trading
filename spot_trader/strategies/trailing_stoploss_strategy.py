@@ -109,8 +109,8 @@ class TrailingStoplossStrategyDeveloper:
                     state_data.setup_data.upper_buy_limit_price,
                     state_data.setup_data.lower_buy_limit_price,
                     state_data.setup_data.stoploss_price,
-                    state_data.balance_data.amount,
-                    state_data.balance_data.amount_in_quote,
+                    state_data.balance_data.size,
+                    state_data.balance_data.available_margin,
                     state_data.balance_data.is_cash)
             )
 
@@ -122,7 +122,7 @@ class TrailingStoplossStrategyDeveloper:
                         symbol=symbol,
                         operation_type='buy_upper_limit',
                         price=price,
-                        amount_in_quote=state_data.balance_data.amount_in_quote,
+                        amount_in_quote=state_data.balance_data.available_margin,
                         position=position
                     )
                     state_data.balance_data.is_cash = False
@@ -130,7 +130,7 @@ class TrailingStoplossStrategyDeveloper:
                     logger.info(
                         'buy_upper_limit_operation: (symbol: {}, price: {}, amount_in_quote: {})'.format(symbol,
                                                                                                          price,
-                                                                                                         state_data.balance_data.amount_in_quote))
+                                                                                                         state_data.balance_data.available_margin))
 
                 state_data.setup_data = self._calculate_setup_data(
                     setup_price=price,
@@ -143,14 +143,14 @@ class TrailingStoplossStrategyDeveloper:
                         symbol=symbol,
                         operation_type='buy_lower_limit',
                         price=price,
-                        amount_in_quote=state_data.balance_data.amount_in_quote,
+                        amount_in_quote=state_data.balance_data.available_margin,
                         position=position
                     )
                     state_data.balance_data.is_cash = False
                     operations.append(buy_lower_limit_operation)
                     logger.info('buy_lower_limit_operation: (symbol: {}, price: {}, amount_in_quote: {})'.format(symbol,
                                                                                                                  price,
-                                                                                                                 state_data.balance_data.amount_in_quote))
+                                                                                                                 state_data.balance_data.available_margin))
 
                 state_data.setup_data = self._calculate_setup_data(
                     setup_price=price,
@@ -163,25 +163,25 @@ class TrailingStoplossStrategyDeveloper:
                         symbol=symbol,
                         operation_type='stoploss_triggered',
                         price=price,
-                        amount=state_data.balance_data.amount,
+                        amount=state_data.balance_data.size,
                         position=position
                     )
                     state_data.balance_data.is_cash = True
                     operations.append(stoploss_operation)
                     logger.info('stoploss_triggered_operation: (symbol: {}, price: {}, amount: {})'.format(symbol,
                                                                                                            price,
-                                                                                                           state_data.balance_data.amount))
+                                                                                                           state_data.balance_data.size))
 
         return operations
 
     def update_strategy_state_data(self, exchange_order, strategy_state_data):
         state_data = strategy_state_data.states_data[exchange_order['symbol']]
         if exchange_order['side'] == 'buy':
-            state_data.balance_data.amount_in_quote -= exchange_order['cost']
-            state_data.balance_data.amount += exchange_order['amount'] - exchange_order['fee']['cost']
+            state_data.balance_data.available_margin -= exchange_order['cost']
+            state_data.balance_data.size += exchange_order['amount'] - exchange_order['fee']['cost']
         elif exchange_order['side'] == 'sell':
-            state_data.balance_data.amount -= exchange_order['amount']
-            state_data.balance_data.amount_in_quote += exchange_order['cost'] - exchange_order['fee']['cost']
+            state_data.balance_data.size -= exchange_order['amount']
+            state_data.balance_data.available_margin += exchange_order['cost'] - exchange_order['fee']['cost']
 
     def _simulate_init_optimum_parameters(self):
         markets = self._public_client.get_markets()
@@ -271,7 +271,7 @@ class TrailingStoplossStrategyDeveloper:
         for symbol in intersection_symbols:
             avg_profit = 0
             for limit in main_ohlcvs_limits:
-                avg_profit += positive_results[limit][symbol].profit_rate
+                avg_profit += positive_results[limit][symbol].total_pnl_percentage
             avg_profit /= len(main_ohlcvs_limits)
             avg_profit = int(avg_profit) or 1
             symbol_avg_profit[symbol] = avg_profit
@@ -285,7 +285,7 @@ class TrailingStoplossStrategyDeveloper:
 
         spare_symbol_profit = {}
         for symbol in positive_results_symbols[120]:
-            profit = positive_results[120][symbol].profit_rate
+            profit = positive_results[120][symbol].total_pnl_percentage
             profit = int(profit) or 1
             spare_symbol_profit[symbol] = profit
 
@@ -363,8 +363,8 @@ class TrailingStoplossStrategyDeveloper:
         pure_buy_amount = truncated_buy_amount_before_fee * (1 - fee)
         real_buy_amount_in_quote = truncated_buy_amount_before_fee * buy_price
         balance_data.is_cash = False
-        balance_data.amount += pure_buy_amount
-        balance_data.amount_in_quote -= real_buy_amount_in_quote
+        balance_data.size += pure_buy_amount
+        balance_data.available_margin -= real_buy_amount_in_quote
 
     def _sell_simulate(self, balance_data, sell_amount, sell_price, amount_precision, fee):
         deviation = 0.0001
@@ -372,8 +372,8 @@ class TrailingStoplossStrategyDeveloper:
         sell_amount_in_quote = truncated_sell_amount_before_fee * (sell_price * (1 - deviation))
         pure_sell_amount_in_quote = sell_amount_in_quote * (1 - fee)
         balance_data.is_cash = True
-        balance_data.amount_in_quote += pure_sell_amount_in_quote
-        balance_data.amount -= truncated_sell_amount_before_fee
+        balance_data.available_margin += pure_sell_amount_in_quote
+        balance_data.size -= truncated_sell_amount_before_fee
 
     def _calculate_setup_data(self, setup_price, price_precision, ratio_data):
         stoploss_price = round(setup_price * (1 - ratio_data.limit_step_ratio * ratio_data.stoploss2limit_ratio),
@@ -488,7 +488,7 @@ class TrailingStoplossStrategyDeveloper:
                                                     ratio_data=ratio_data,
                                                     result_data=result_data1)
 
-        amount_in_quote1 = balance_data1.amount_in_quote + balance_data1.amount * shlc_data.closing_price
+        amount_in_quote1 = balance_data1.available_margin + balance_data1.size * shlc_data.closing_price
 
         balance_data2 = deepcopy(balance_data)
         setup_data2 = deepcopy(setup_data)
@@ -514,7 +514,7 @@ class TrailingStoplossStrategyDeveloper:
                                                    ratio_data=ratio_data,
                                                    result_data=result_data2)
 
-        amount_in_quote2 = balance_data2.amount_in_quote + balance_data2.amount * shlc_data.closing_price
+        amount_in_quote2 = balance_data2.available_margin + balance_data2.size * shlc_data.closing_price
 
         if amount_in_quote1 < amount_in_quote2:
             my_copy(balance_data1, balance_data)
@@ -587,7 +587,7 @@ class TrailingStoplossStrategyDeveloper:
                                                    ratio_data=ratio_data,
                                                    result_data=result_data)
 
-        amount_in_quote1 = balance_data1.amount_in_quote + balance_data1.amount * shlc_data.closing_price
+        amount_in_quote1 = balance_data1.available_margin + balance_data1.size * shlc_data.closing_price
 
         balance_data2 = deepcopy(balance_data)
         setup_data2 = deepcopy(setup_data)
@@ -612,7 +612,7 @@ class TrailingStoplossStrategyDeveloper:
                                                     ratio_data=ratio_data,
                                                     result_data=result_data)
 
-        amount_in_quote2 = balance_data2.amount_in_quote + balance_data2.amount * shlc_data.closing_price
+        amount_in_quote2 = balance_data2.available_margin + balance_data2.size * shlc_data.closing_price
 
         if amount_in_quote1 < amount_in_quote2:
             my_copy(balance_data1, balance_data)
@@ -626,7 +626,7 @@ class TrailingStoplossStrategyDeveloper:
         if setup_data.upper_buy_limit_price < highest_price:
             if balance_data.is_cash:
                 self._buy_simulate(balance_data=balance_data,
-                                   buy_amount_in_quote=balance_data.amount_in_quote,
+                                   buy_amount_in_quote=balance_data.available_margin,
                                    buy_price=setup_data.upper_buy_limit_price,
                                    amount_precision=symbol_market_data.amount_precision,
                                    fee=symbol_market_data.fee)
@@ -643,7 +643,7 @@ class TrailingStoplossStrategyDeveloper:
         if lowest_price < setup_data.stoploss_price:
             if not balance_data.is_cash:
                 self._sell_simulate(balance_data=balance_data,
-                                    sell_amount=balance_data.amount,
+                                    sell_amount=balance_data.size,
                                     sell_price=setup_data.stoploss_price,
                                     amount_precision=symbol_market_data.amount_precision,
                                     fee=symbol_market_data.fee)
@@ -651,7 +651,7 @@ class TrailingStoplossStrategyDeveloper:
 
             if lowest_price < setup_data.lower_buy_limit_price:
                 self._buy_simulate(balance_data=balance_data,
-                                   buy_amount_in_quote=balance_data.amount_in_quote,
+                                   buy_amount_in_quote=balance_data.available_margin,
                                    buy_price=setup_data.lower_buy_limit_price,
                                    amount_precision=symbol_market_data.amount_precision,
                                    fee=symbol_market_data.fee)

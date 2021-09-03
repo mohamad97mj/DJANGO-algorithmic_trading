@@ -13,5 +13,5 @@ from .log import log
 from .math import floor, round_down
 from .symbol_converter import with2without_slash, without2with_slash, slash2dash
 from .truncate import truncate
-from .does_not_exists_exceptions import BotDoesNotExistsException
+from .does_not_exists_exceptions import BotDoesNotExistsException, CredentialIdDoesNotExistsException
 

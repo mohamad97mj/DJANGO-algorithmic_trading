@@ -5,7 +5,7 @@ from global_utils import catch_all_exceptions
 from django.core.cache import caches
 
 
-class PriceMonitorView(APIView):
+class SpotPriceMonitorView(APIView):
 
     @catch_all_exceptions(log_level='error', reraise=True)
     def get(self, request, cache_name, location, format=None):

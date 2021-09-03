@@ -1,7 +1,7 @@
 import time
 import asyncio
 import websockets
-from typing import List
+from typing import List, Union
 from django.db.models import Q
 from global_utils import async_retry_on_timeout, my_get_logger
 from spot_trader.models import SpotPosition, SpotBot
@@ -22,7 +22,7 @@ from kucoin.ws_client import KucoinWsClient
 @dataclass
 class PriceTicker:
     thread: Thread
-    client: AsyncClient = None
+    client: Union[AsyncClient, KucoinWsClient] = None
 
 
 class SpotBotHandler:
@@ -203,10 +203,10 @@ class SpotBotHandler:
 
         for symbol in symbols:
             if not (symbol in symbol_prices and symbol_prices[symbol]):
-                if symbol not in self._price_tickers or self._price_tickers[symbol].trade_client:
+                if symbol not in self._price_tickers or self._price_tickers[symbol].client:
                     if symbol in self._price_tickers:
                         if exchange_id == 'binance':
-                            asyncio.run(self._price_tickers[symbol].trade_client.close_connection())
+                            asyncio.run(self._price_tickers[symbol].client.close_connection())
                         elif exchange_id == 'kucoin':
                             logger = my_get_logger()
                             logger.warning('Error in price ticker was occurred!')
@@ -224,7 +224,7 @@ class SpotBotHandler:
             client = await async_retry_on_timeout(
                 self._public_clients[exchange_id],
                 timeout_errors=(ClientConnectorError, TimeoutError))(self._get_async_client)()
-            self._price_tickers[symbol].trade_client = client
+            self._price_tickers[symbol].client = client
 
             bm = BinanceSocketManager(client)
             ts = bm.symbol_ticker_socket(with2without_slash(symbol))
@@ -247,7 +247,7 @@ class SpotBotHandler:
 
             client = WsToken()
             ws_client = await KucoinWsClient.create(loop, client, deal_msg, private=False)
-            self._price_tickers[symbol].trade_client = ws_client
+            self._price_tickers[symbol].client = ws_client
             await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
             while True:
                 await asyncio.sleep(60, loop=loop)
