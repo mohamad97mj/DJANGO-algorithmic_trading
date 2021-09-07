@@ -5,10 +5,11 @@ from ..models import FuturesOrder, FuturesOperation, FuturesStep, FuturesTarget,
 def create_market_buy_operation(symbol,
                                 operation_type,
                                 price,
-                                size,
+                                margin,
                                 leverage,
                                 position: FuturesPosition,
-                                step: FuturesStep = None):
+                                step: FuturesStep):
+    size = int((margin * leverage) / price)
     buy_market_order = FuturesOrder(symbol=symbol,
                                     type='market',
                                     side='buy',
@@ -23,8 +24,8 @@ def create_market_buy_operation(symbol,
         action='create',
         status='in_progress')
     buy_market_operation.save()
-    if step:
-        step.operation = buy_market_operation
+    step.size = size
+    step.operation = buy_market_operation
     return buy_market_operation
 
 
