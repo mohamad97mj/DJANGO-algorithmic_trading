@@ -7,5 +7,4 @@ class FuturesPositionSerializer(serializers.Serializer):
     size = serializers.FloatField(required=False, allow_null=True)
     margin = serializers.FloatField()
     leverage = serializers.FloatField()
-    cost = serializers.FloatField(required=False, allow_null=True)
     keep_open = serializers.BooleanField(required=False, allow_null=True)
