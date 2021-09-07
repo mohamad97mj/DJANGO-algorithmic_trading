@@ -1,7 +1,7 @@
 from threading import Thread
-from spot_trader.services import SpotBotTrader
+from futures_trader.services import FuturesBotTrader
 
 
 def trade():
-    t1 = Thread(target=SpotBotTrader.start_trading)
+    t1 = Thread(target=FuturesBotTrader.start_trading)
     t1.start()
