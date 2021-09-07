@@ -29,12 +29,12 @@ class FuturesBotsView(APIView):
         data = request.data
         bot_serializer = FuturesBotSerializer(data=data)
 
-        test_data = None
+        bot_data = None
         if bot_serializer.is_valid():
             bot_instance = FuturesBotTrader.create_bot(bot_serializer.validated_data)
-            test_data = FuturesBotSerializer(instance=bot_instance).data
+            bot_data = FuturesBotSerializer(instance=bot_instance).data
 
-        return Response(test_data)
+        return Response(bot_data)
 
 
 class FuturesBotDetailView(APIView):

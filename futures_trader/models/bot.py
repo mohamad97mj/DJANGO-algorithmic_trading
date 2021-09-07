@@ -29,16 +29,6 @@ class FuturesBot(models.Model):
         STOPPED_AFTER_FULL_TARGET = 'stopped_after_full_target'
         STOPPED_MANUALY = 'stopped_manualy'
 
-    @dataclass
-    class ExchangeOrderData:
-        side: str
-        symbol: str
-        size: float
-        value: float
-        cost: float
-        fee: float
-        related_setup: Union[FuturesStep, FuturesTarget, FuturesStoploss]  # could be step_id, target_id or stoploss_id
-
     objects = FuturesBotManager()
 
     # bot_id = models.CharField(max_length=100, unique=True)
@@ -46,8 +36,8 @@ class FuturesBot(models.Model):
     credential_id = models.CharField(max_length=100)
     strategy = models.CharField(max_length=100)
     position = models.OneToOneField('FuturesPosition', related_name='bot', on_delete=models.CASCADE)
-    total_pnl = models.FloatField(default=0)
-    total_pnl_percentage = models.FloatField(default=0)
+    final_pnl = models.FloatField(null=True, blank=True)
+    final_pnl_percentage = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
     status = models.CharField(default=Status.RUNNING.value,
@@ -106,9 +96,11 @@ class FuturesBot(models.Model):
                         strategy_state_data.size += size
                         strategy_state_data.available_margin -= cost
 
-                        step.size -= size
+                        step.size = size
                         step.cost = cost
                         step.save()
+
+                        position.size += size
 
                         stoploss = signal.stoploss
                         if stoploss:
@@ -135,7 +127,8 @@ class FuturesBot(models.Model):
 
                         stoploss.released_margin = cost
                         stoploss.save()
-            operations.status = 'executed'
+            position.save()
+            operation.status = 'executed'
             operation.save()
 
     def close_position(self):
