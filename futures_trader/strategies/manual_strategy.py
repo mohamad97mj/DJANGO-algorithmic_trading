@@ -59,7 +59,7 @@ class ManualStrategyDeveloper:
                 step.save()
             last_step = steps[len(steps) - 1]
             last_step.share = round(1 - (len(steps) - 1) * auto_step_share, 2)
-            last_step.margin = position.margin - last_step.share
+            last_step.margin = position.margin * last_step.share
             last_step.save()
 
         strategy_state_data = StrategyStateData(symbol=signal.symbol,
@@ -115,13 +115,14 @@ class ManualStrategyDeveloper:
         stoploss = signal.stoploss
         price = symbol_prices[symbol]
 
-        strategy_state_data.unrealized_margin = strategy_state_data.size * price
+        strategy_state_data.unrealized_margin = strategy_state_data.size * price / position.leverage
         strategy_state_data.total_pnl = \
             round_down(
                 strategy_state_data.unrealized_margin + strategy_state_data.available_margin - position.margin)
         strategy_state_data.total_pnl_percentage = round_down((strategy_state_data.total_pnl / position.margin) * 100)
 
-        if bot.status == FuturesBot.Status.RUNNING.value and stoploss and not stoploss.is_triggered and price < stoploss.trigger_price:
+        if bot.status == FuturesBot.Status.RUNNING.value and stoploss \
+                and not stoploss.is_triggered and price < stoploss.trigger_price:
             stoploss_operation = create_market_sell_operation(
                 symbol=symbol,
                 operation_type='stoploss_triggered',
@@ -141,6 +142,8 @@ class ManualStrategyDeveloper:
             else:
                 status = FuturesBot.Status.STOPPED_BY_STOPLOSS.value
 
+            bot.final_pnl = strategy_state_data.total_pnl
+            bot.final_pnl_percentage = strategy_state_data.total_pnl_percentage
             bot.status = status
             bot.save()
 
@@ -356,28 +359,28 @@ class ManualStrategyDeveloper:
         return position
 
     @staticmethod
-    def edit_size(position: FuturesPosition, strategy_state_data: StrategyStateData, new_size):
-        edit_is_required = ManualStrategyDeveloper._has_size_changed(position, new_size)
+    def edit_margin(position: FuturesPosition, strategy_state_data: StrategyStateData, new_margin):
+        edit_is_required = ManualStrategyDeveloper._has_margin_changed(position, new_margin)
         signal = position.signal
         steps = signal.related_steps
         if edit_is_required:
             if steps[len(steps) - 1].is_triggered:
-                raise CustomException('Editing steps is not possible because one step has been triggered!')
+                raise CustomException('Editing margin is not possible because one step has been triggered!')
 
             for step in steps:
-                step.size = step.share * new_size
+                step.margin = step.share * new_margin
                 step.save()
 
-            strategy_state_data.available_margin = new_size
-            position.size = new_size
+            strategy_state_data.available_margin = new_margin
+            position.margin = new_margin
             position.save()
 
             return True
         return False
 
     @staticmethod
-    def _has_size_changed(position, new_size):
-        return position.size != new_size
+    def _has_margin_changed(position, new_margin):
+        return position.margin != new_margin
 
     @staticmethod
     def edit_stoploss(position: FuturesPosition, strategy_state_data: StrategyStateData, new_stoploss_data):
