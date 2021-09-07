@@ -4,7 +4,7 @@ import websockets
 from typing import List
 from django.db.models import Q
 from global_utils import my_get_logger
-from futures_trader.models import FuturesPosition, FuturesBot
+from futures_trader.models import FuturesPosition, FuturesBot, FuturesStoploss
 from futures_trader.clients import PublicClient, PrivateClient
 from threading import Thread
 from dataclasses import dataclass
@@ -39,6 +39,13 @@ class FuturesBotHandler:
         if signal_data:
             signal = FuturesSignal(**{key: signal_data.get(key) for key in
                                       ['symbol']})
+
+            stoploss_data = signal_data.get('stoploss')
+            if stoploss_data:
+                stoploss = FuturesStoploss(trigger_price=stoploss_data['trigger_price'])
+                stoploss.save()
+                signal.stoploss = stoploss
+
             step_share_set_mode = signal_data.get('step_share_set_mode', 'auto')
 
             signal.step_share_set_mode = step_share_set_mode
@@ -73,7 +80,7 @@ class FuturesBotHandler:
             signal.related_targets = targets
 
         position = FuturesPosition(signal=signal,
-                                   **{k: position_data[k] for k in ['size']})
+                                   **{k: position_data[k] for k in ['margin']})
 
         position.leverage = position_data.get('leverage', '1')
         position.keep_open = position_data.get('keep_open', 'false') == 'true'
@@ -144,17 +151,16 @@ class FuturesBotHandler:
                                                                    strategy_state_data=bot.strategy_state_data,
                                                                    symbol_prices=symbol_prices)
 
-                    exchange_orders = bot.execute_operations(operations, symbol_prices=symbol_prices, test=True)
-                    for exchange_order in exchange_orders:
-                        strategy_developer.apply_operation(
-                            exchange_order_data=exchange_order,
-                            position=bot.position,
-                            strategy_state_data=bot.strategy_state_data)
+                    bot.execute_operations(operations,
+                                           bot.strategy_state_data,
+                                           symbol_prices=symbol_prices,
+                                           test=True)
+
                     if not bot.is_active:
                         self._bots[bot.credential_id].pop(str(bot.id))
                 except Exception as e:
                     logger = my_get_logger()
-                    logger.error(e)
+                    logger.exception(e)
             time.sleep(1)
 
     def _get_prices_if_available(self, exchange_id, symbols: List):
@@ -249,8 +255,8 @@ class FuturesBotHandler:
         bot = self.get_active_bot(credential_id, bot_id)
         if not bot:
             bot = FuturesBot.objects.filter(Q(id=bot_id) & Q(credential_id=credential_id)).first()
-            if bot:
-                return bot
+        if bot:
+            return bot
         raise CustomException('No bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
 
     def get_bots(self, credential_id, is_active):
@@ -308,16 +314,16 @@ class FuturesBotHandler:
                 if stoploss_was_edited:
                     edited_data.append('stoploss')
 
-        new_size = new_position_data.get('size')
-        if new_size:
-            size_was_edited = self._run_strategy_developer_command(
+        new_margin = new_position_data.get('margin')
+        if new_margin:
+            margin_was_edited = self._run_strategy_developer_command(
                 bot,
                 strategy_developer,
-                'edit_size',
-                new_size
+                'edit_margin',
+                new_margin
             )
-            if size_was_edited:
-                edited_data.append('size')
+            if margin_was_edited:
+                edited_data.append('margin')
 
         return bot.position, edited_data
 
