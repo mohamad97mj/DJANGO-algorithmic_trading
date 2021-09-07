@@ -9,6 +9,8 @@ class FuturesBotSerializer(serializers.Serializer):
     strategy = serializers.CharField(max_length=100)
     is_active = serializers.BooleanField(required=False)
     status = serializers.CharField(max_length=100, required=False)
+    final_pnl = serializers.FloatField(allow_null=True, required=True)
+    final_pnl_percentage = serializers.FloatField(allow_null=True, required=True)
     position = FuturesPositionSerializer()
 
     def to_representation(self, instance):
