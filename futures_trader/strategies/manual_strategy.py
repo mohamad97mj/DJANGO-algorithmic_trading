@@ -13,9 +13,9 @@ class StrategyStateData(JsonSerializable):
     none_triggered_steps_share: float = 1.0
     all_steps_achieved: bool = False
     all_targets_achieved: bool = False
-    unrealized_amount_in_quote: float = 0
-    total_pnl: float = None  # unrealized_amount_in_quote + amount_in_quote - position.size
-    total_pnl_percentage: float = None  # profit_in_quote / position.size
+    unrealized_margin: float = 0
+    total_pnl: float = None  # unrealized_margin + available_margin - position.margin
+    total_pnl_percentage: float = None  # total_pnl / position.margin
 
 
 class ManualStrategyDeveloper:
@@ -47,21 +47,19 @@ class ManualStrategyDeveloper:
         steps = signal.related_steps
         if signal.step_share_set_mode == 'manual':
             for step in steps:
-                step.size = int(position.size * step.share)
+                step.margin = int(position.margin * step.share)
                 step.save()
 
         elif signal.step_share_set_mode == 'auto':
-            total_size = 0
             auto_step_share = round_down(1 / len(steps))
             for i in range(len(steps) - 1):
                 step = steps[i]
-                step.size = int(position.size * auto_step_share)
-                step.share = step.size / position.size
-                total_size += step.size
+                step.share = auto_step_share
+                step.margin = int(position.margin * step.share)
                 step.save()
             last_step = steps[len(steps) - 1]
-            last_step.size = position.size - total_size
-            last_step.share = round(last_step.size / position.size, 2)
+            last_step.share = round(1 - (len(steps) - 1) * auto_step_share, 2)
+            last_step.margin = position.margin - last_step.share
             last_step.save()
 
         strategy_state_data = StrategyStateData(symbol=signal.symbol,
@@ -117,11 +115,11 @@ class ManualStrategyDeveloper:
         stoploss = signal.stoploss
         price = symbol_prices[symbol]
 
-        strategy_state_data.unrealized_amount_in_quote = strategy_state_data.size * price
-        strategy_state_data.profit_in_quote = \
+        strategy_state_data.unrealized_margin = strategy_state_data.size * price
+        strategy_state_data.total_pnl = \
             round_down(
-                strategy_state_data.unrealized_amount_in_quote + strategy_state_data.available_margin - position.size)
-        strategy_state_data.profit_rate = round_down((strategy_state_data.profit_in_quote / position.size) * 100)
+                strategy_state_data.unrealized_margin + strategy_state_data.available_margin - position.margin)
+        strategy_state_data.total_pnl_percentage = round_down((strategy_state_data.total_pnl / position.margin) * 100)
 
         if bot.status == FuturesBot.Status.RUNNING.value and stoploss and not stoploss.is_triggered and price < stoploss.trigger_price:
             stoploss_operation = create_market_sell_operation(
@@ -171,7 +169,7 @@ class ManualStrategyDeveloper:
                         symbol=symbol,
                         operation_type='buy_step',
                         price=price,
-                        size=step.size,
+                        margin=step.margin,
                         leverage=position.leverage,
                         position=position,
                         step=step,
@@ -199,9 +197,6 @@ class ManualStrategyDeveloper:
                             bot.status = FuturesBot.Status.STOPPED_AFTER_FULL_TARGET.value
                             bot.save()
 
-                    strategy_state_data.none_triggered_targets_share = \
-                        strategy_state_data.none_triggered_targets_share - target.share
-
                     target.is_triggered = True
                     stoploss_is_created = False
                     if i == 0:
@@ -220,30 +215,6 @@ class ManualStrategyDeveloper:
                         signal.save()
                 target.save()
         return operations
-
-    @staticmethod
-    def apply_operation(exchange_order_data, position: FuturesPosition, strategy_state_data: StrategyStateData):
-        if exchange_order_data.side == 'buy':
-            strategy_state_data.size += exchange_order_data.size
-            strategy_state_data.available_margin -= exchange_order_data.cost
-            signal = position.signal
-            stoploss = signal.stoploss
-            if stoploss:
-                stoploss.size += exchange_order_data.size
-                stoploss.save()
-            related_setup = exchange_order_data.related_setup
-            related_setup.size -= exchange_order_data.size
-            related_setup.cost = exchange_order_data.cost
-            related_setup.purchased_value = exchange_order_data.value
-            related_setup.save()
-
-        elif exchange_order_data.side == 'sell':
-            strategy_state_data.size -= exchange_order_data.size
-            strategy_state_data.available_margin += exchange_order_data.cost
-            related_setup = exchange_order_data.related_setup
-            related_setup.size -= exchange_order_data.size
-            related_setup.released_margin = exchange_order_data.cost
-            related_setup.save()
 
     @staticmethod
     def edit_steps(position, strategy_state_data, new_steps_data, step_share_set_mode='auto'):
