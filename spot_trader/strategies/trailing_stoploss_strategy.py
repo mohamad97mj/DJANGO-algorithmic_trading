@@ -271,7 +271,7 @@ class TrailingStoplossStrategyDeveloper:
         for symbol in intersection_symbols:
             avg_profit = 0
             for limit in main_ohlcvs_limits:
-                avg_profit += positive_results[limit][symbol].total_pnl_percentage
+                avg_profit += positive_results[limit][symbol].final_pnl_percentage
             avg_profit /= len(main_ohlcvs_limits)
             avg_profit = int(avg_profit) or 1
             symbol_avg_profit[symbol] = avg_profit
@@ -285,7 +285,7 @@ class TrailingStoplossStrategyDeveloper:
 
         spare_symbol_profit = {}
         for symbol in positive_results_symbols[120]:
-            profit = positive_results[120][symbol].total_pnl_percentage
+            profit = positive_results[120][symbol].final_pnl_percentage
             profit = int(profit) or 1
             spare_symbol_profit[symbol] = profit
 

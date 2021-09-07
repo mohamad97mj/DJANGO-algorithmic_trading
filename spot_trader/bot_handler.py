@@ -4,7 +4,7 @@ import websockets
 from typing import List, Union
 from django.db.models import Q
 from global_utils import async_retry_on_timeout, my_get_logger
-from spot_trader.models import SpotPosition, SpotBot
+from spot_trader.models import SpotPosition, SpotBot, SpotStoploss
 from spot_trader.clients import PublicClient, PrivateClient
 from global_utils import with2without_slash, CacheUtils, CustomException, round_down, slash2dash
 from binance import AsyncClient, BinanceSocketManager
@@ -40,8 +40,16 @@ class SpotBotHandler:
         signal = None
         signal_data = position_data.get('signal')
         if signal_data:
+
             signal = SpotSignal(**{key: signal_data.get(key) for key in
                                    ['symbol']})
+
+            stoploss_data = signal_data.get('stoploss')
+            if stoploss_data:
+                stoploss = SpotStoploss(trigger_price=stoploss_data['trigger_price'])
+                stoploss.save()
+                signal.stoploss = stoploss
+
             step_share_set_mode = signal_data.get('step_share_set_mode', 'auto')
             target_share_set_mode = signal_data.get('target_share_set_mode', 'auto')
 
