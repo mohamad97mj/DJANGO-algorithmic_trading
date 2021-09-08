@@ -1,14 +1,13 @@
-from global_utils import my_get_logger
-from typing import List, Union
+import time
+import pytz
+from typing import List
 from django.utils import timezone
 from django.db import models
 from futures_trader.clients import PrivateClient, PublicClient
-from global_utils import BotDoesNotExistsException, truncate
+from global_utils import BotDoesNotExistsException
 from .operation import FuturesOperation
-from dataclasses import dataclass
-from .step import FuturesStep
-from .target import FuturesTarget
-from .stoploss import FuturesStoploss
+from datetime import datetime
+from django.conf import settings
 
 
 class FuturesBotManager(models.Manager):
@@ -67,69 +66,77 @@ class FuturesBot(models.Model):
     def execute_operations(self,
                            operations: List[FuturesOperation],
                            strategy_state_data,
-                           symbol_prices=None,
                            test=True):
 
         for operation in operations:
             position = operation.position
-            signal = position.signal
             order = operation.order
             symbol = order.symbol
-            price = symbol_prices[symbol]
+            price = order.price
+            size = order.size
             if operation.action == 'create':
-                if order.type == 'market':
-                    if order.side == 'buy':
-                        step = operation.step
-                        size = int((step.margin * position.leverage) / price)
-                        if test:
-                            value = size * price
-                            cost = value / order.leverage
+                if order.side == 'buy':
+                    step = operation.step
+                    if test:
+                        exchange_order_id = None
+                        value = size * price
+                        filled_value = value
+                        timestamp = time.time()
 
-                        else:
-                            exchange_order = self._private_client.create_market_buy_order(
-                                symbol=symbol,
-                                leverage=position.leverage,
-                                size=size)
+                    else:
+                        exchange_order = self._private_client.create_market_buy_order(
+                            symbol=symbol,
+                            leverage=position.leverage,
+                            size=size)
+                        exchange_order_id = exchange_order['id']
+                        value = exchange_order['value']
+                        filled_value = exchange_order['filledValue']
+                        timestamp = exchange_order['created_at']
 
-                            cost = exchange_order['cost']
+                    strategy_state_data.size += size
+                    cost = value / order.leverage
+                    strategy_state_data.available_margin -= cost
 
-                        strategy_state_data.size += size
-                        strategy_state_data.available_margin -= cost
+                    step.cost = cost
+                    step.save()
 
-                        step.size = size
-                        step.cost = cost
-                        step.save()
+                    position.size += size
 
-                        position.size += size
+                else:
+                    if test:
+                        exchange_order_id = None
+                        value = size * price
+                        filled_value = value
+                        timestamp = time.time()
 
-                        stoploss = signal.stoploss
-                        if stoploss:
-                            stoploss.size += size
-                            stoploss.save()
+                    else:
+                        exchange_order = self._private_client.create_market_sell_order(
+                            symbol=symbol,
+                            leverage=order.leverage,
+                            size=order.size,
+                        )
+                        exchange_order_id = exchange_order['id']
+                        value = exchange_order['value']
+                        filled_value = exchange_order['filledValue']
+                        timestamp = exchange_order['created_at']
 
-                    elif order.side == 'sell':
-                        size = order.size
-                        stoploss = operation.stoploss
-                        if test:
-                            value = size * price
-                            cost = value / order.leverage
+                    strategy_state_data.size -= size
+                    cost = value / order.leverage
+                    strategy_state_data.available_margin += cost
 
-                        else:
-                            exchange_order = self._private_client.create_market_sell_order(
-                                symbol=symbol,
-                                leverage=order.leverage,
-                                size=order.size,
-                            )
-                            cost = exchange_order['cost']
+                    position.released_margin = cost
 
-                        strategy_state_data.size -= size
-                        strategy_state_data.available_margin += cost
+                order.exchange_order_id = exchange_order_id
+                order.status = 'done'
+                order.value = value
+                order.filled_value = filled_value
+                order.timestamp = timestamp
+                order.created_at = datetime.fromtimestamp(time.time(), tz=pytz.timezone(settings.TIME_ZONE))
+                order.save()
 
-                        stoploss.released_margin = cost
-                        stoploss.save()
-            position.save()
             operation.status = 'executed'
             operation.save()
+            position.save()
 
     def close_position(self):
         pass
