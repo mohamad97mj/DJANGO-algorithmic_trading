@@ -122,13 +122,12 @@ class ManualStrategyDeveloper:
         strategy_state_data.total_pnl_percentage = round_down((strategy_state_data.total_pnl / position.margin) * 100)
 
         if bot.status == FuturesBot.Status.RUNNING.value and stoploss \
-                and not stoploss.is_triggered and price < stoploss.trigger_price:
+                and not stoploss.is_triggered and position.size and price < stoploss.trigger_price:
             stoploss_operation = create_market_sell_operation(
                 symbol=symbol,
                 operation_type='stoploss_triggered',
                 price=price,
-                size=stoploss.size,
-                leverage=position.leverage,
+                size=position.size,
                 position=position,
                 stoploss=stoploss
             )
@@ -151,7 +150,7 @@ class ManualStrategyDeveloper:
                 'stoploss_triggered_operation: (symbol: {}, price: {}, size: {})'.format(
                     symbol,
                     price,
-                    stoploss.size))
+                    position.size))
 
             operations.append(stoploss_operation)
 
@@ -173,7 +172,6 @@ class ManualStrategyDeveloper:
                         operation_type='buy_step',
                         price=price,
                         margin=step.margin,
-                        leverage=position.leverage,
                         position=position,
                         step=step,
                     )
@@ -196,6 +194,17 @@ class ManualStrategyDeveloper:
                     if i == len(targets) - 1:
                         strategy_state_data.all_targets_achieved = True
                         if not position.keep_open:
+                            full_target_operation = create_market_sell_operation(
+                                symbol=symbol,
+                                operation_type='full_target',
+                                price=price,
+                                size=position.size,
+                                position=position,
+                            )
+                            operations.append(full_target_operation)
+
+                            bot.final_pnl = strategy_state_data.total_pnl
+                            bot.final_pnl_percentage = strategy_state_data.total_pnl_percentage
                             bot.is_active = False
                             bot.status = FuturesBot.Status.STOPPED_AFTER_FULL_TARGET.value
                             bot.save()
