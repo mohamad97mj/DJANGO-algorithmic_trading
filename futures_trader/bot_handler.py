@@ -153,7 +153,6 @@ class FuturesBotHandler:
 
                     bot.execute_operations(operations,
                                            bot.strategy_state_data,
-                                           symbol_prices=symbol_prices,
                                            test=True)
 
                     if not bot.is_active:
@@ -204,10 +203,10 @@ class FuturesBotHandler:
 
         for symbol in symbols:
             if not (symbol in symbol_prices and symbol_prices[symbol]):
-                if symbol not in self._price_tickers or self._price_tickers[symbol].trade_client:
+                if symbol not in self._price_tickers or self._price_tickers[symbol].client:
                     if symbol in self._price_tickers:
                         if exchange_id == 'binance':
-                            asyncio.run(self._price_tickers[symbol].trade_client.close_connection())
+                            asyncio.run(self._price_tickers[symbol].client.close_connection())
                         elif exchange_id == 'kucoin':
                             logger = my_get_logger()
                             logger.warning('Error in price ticker was occurred!')
@@ -230,7 +229,7 @@ class FuturesBotHandler:
 
             client = WsToken()
             ws_client = await KucoinFuturesWsClient.create(loop, client, deal_msg, private=False)
-            self._price_tickers[symbol].trade_client = ws_client
+            self._price_tickers[symbol].client = ws_client
             await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
             while True:
                 await asyncio.sleep(60, loop=loop)
