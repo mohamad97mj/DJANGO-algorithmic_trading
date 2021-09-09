@@ -137,7 +137,7 @@ class FuturesBotHandler:
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
-    def run_bots(self, test=True):
+    def run_bots(self, test=False):
         while True:
             credentials = list(self._bots.keys())
             running_bots = []
@@ -169,7 +169,7 @@ class FuturesBotHandler:
 
                     bot.execute_operations(operations,
                                            bot.strategy_state_data,
-                                           test=True)
+                                           test=False)
                     if not bot.is_active:
                         self._bots[bot.credential_id].pop(str(bot.id))
 
