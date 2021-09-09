@@ -121,6 +121,9 @@ class ManualStrategyDeveloper:
                 strategy_state_data.unrealized_margin + strategy_state_data.available_margin - position.margin)
         strategy_state_data.total_pnl_percentage = round_down((strategy_state_data.total_pnl / position.margin) * 100)
 
+        bot.final_pnl = strategy_state_data.total_pnl
+        bot.final_pnl_percentage = strategy_state_data.total_pnl_percentage
+
         if bot.status == FuturesBot.Status.RUNNING.value and stoploss \
                 and not stoploss.is_triggered and position.size and price < stoploss.trigger_price:
             stoploss_operation = create_market_sell_operation(
@@ -141,8 +144,6 @@ class ManualStrategyDeveloper:
             else:
                 status = FuturesBot.Status.STOPPED_BY_STOPLOSS.value
 
-            bot.final_pnl = strategy_state_data.total_pnl
-            bot.final_pnl_percentage = strategy_state_data.total_pnl_percentage
             bot.status = status
             bot.save()
 
@@ -210,8 +211,6 @@ class ManualStrategyDeveloper:
 
                             operations.append(full_target_operation)
 
-                            bot.final_pnl = strategy_state_data.total_pnl
-                            bot.final_pnl_percentage = strategy_state_data.total_pnl_percentage
                             bot.is_active = False
                             bot.status = FuturesBot.Status.STOPPED_AFTER_FULL_TARGET.value
                             bot.save()
