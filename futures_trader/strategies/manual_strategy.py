@@ -178,7 +178,7 @@ class ManualStrategyDeveloper:
 
                     logger.info(
                         'buy_step_operation: (symbol: {}, price: {}, size: {})'.format(
-                            strategy_state_data.symbol,
+                            symbol,
                             price,
                             step.size))
 
@@ -201,6 +201,13 @@ class ManualStrategyDeveloper:
                                 size=position.size,
                                 position=position,
                             )
+
+                            logger.info(
+                                'full_target_operation: (symbol: {}, price: {}, size: {})'.format(
+                                    symbol,
+                                    price,
+                                    position.size))
+
                             operations.append(full_target_operation)
 
                             bot.final_pnl = strategy_state_data.total_pnl

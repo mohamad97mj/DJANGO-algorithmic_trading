@@ -1,13 +1,13 @@
 import time
 import asyncio
 import websockets
-from typing import List
+from typing import List, Set
 from django.db.models import Q
 from global_utils import my_get_logger
 from futures_trader.models import FuturesPosition, FuturesBot, FuturesStoploss
 from futures_trader.clients import PublicClient, PrivateClient
 from threading import Thread
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from .strategies.strategy_center import FuturesStrategyCenter
 from .models import FuturesSignal, FuturesStep, FuturesTarget
 from global_utils import CustomException, CacheUtils, round_down, slash2dash
@@ -20,6 +20,18 @@ from kucoin_futures.ws_client import KucoinFuturesWsClient
 class PriceTicker:
     thread: Thread
     client: KucoinFuturesWsClient = None
+    subscribers: Set = field(default_factory=lambda: set())
+
+    def stop(self):
+        pass
+
+    def unsubscribe_bot(self, bot_id):
+        if bot_id in self.subscribers:
+            self.subscribers.remove(bot_id)
+
+    def stop_if_no_subscribers(self):
+        if not self.subscribers:
+            self.stop()
 
 
 class FuturesBotHandler:
@@ -125,12 +137,13 @@ class FuturesBotHandler:
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
-    def run_bots(self, test=True):
+    def run_bots(self, test=False):
         while True:
             credentials = list(self._bots.keys())
             running_bots = []
             for credential in credentials:
-                running_bots += [bot for bot in list(self._bots[credential].values()) if bot.is_active]
+                running_bots += [bot for bot in list(self._bots[credential].values()) if
+                                 bot.status == FuturesBot.Status.RUNNING.value]
             for bot in running_bots:
                 try:
                     strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
@@ -141,11 +154,14 @@ class FuturesBotHandler:
                             self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
                         else:
                             self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
-                        time.sleep(5)
+                        time.sleep(10)
                         symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
 
                     logger = my_get_logger()
                     logger.info('symbol_prices: {}'.format(symbol_prices))
+
+                    for symbol in price_required_symbols:
+                        self._price_tickers[symbol].subscribers.add(bot.id)
 
                     operations = strategy_developer.get_operations(position=bot.position,
                                                                    strategy_state_data=bot.strategy_state_data,
@@ -154,9 +170,14 @@ class FuturesBotHandler:
                     bot.execute_operations(operations,
                                            bot.strategy_state_data,
                                            test=True)
-
                     if not bot.is_active:
                         self._bots[bot.credential_id].pop(str(bot.id))
+
+                    if not bot.status == FuturesBot.Status.RUNNING.value:
+                        price_ticker = self._price_tickers[bot.position.signal.symbol]
+                        price_ticker.unsubscribe_bot(bot.id)
+                        price_ticker.stop_if_no_subscribers()
+
                 except Exception as e:
                     logger = my_get_logger()
                     logger.exception(e)
@@ -205,9 +226,8 @@ class FuturesBotHandler:
             if not (symbol in symbol_prices and symbol_prices[symbol]):
                 if symbol not in self._price_tickers or self._price_tickers[symbol].client:
                     if symbol in self._price_tickers:
-                        if exchange_id == 'binance':
-                            asyncio.run(self._price_tickers[symbol].client.close_connection())
-                        elif exchange_id == 'kucoin':
+                        if exchange_id == 'kucoin':
+                            self._price_tickers[symbol].stop()
                             logger = my_get_logger()
                             logger.warning('Error in price ticker was occurred!')
 
@@ -229,7 +249,11 @@ class FuturesBotHandler:
 
             client = WsToken()
             ws_client = await KucoinFuturesWsClient.create(loop, client, deal_msg, private=False)
-            self._price_tickers[symbol].client = ws_client
+            price_ticker = self._price_tickers[symbol]
+            price_ticker.client = ws_client
+            price_ticker.stop = lambda: asyncio.run(
+                ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+
             await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
             while True:
                 await asyncio.sleep(60, loop=loop)
@@ -336,6 +360,10 @@ class FuturesBotHandler:
             raise CustomException('bot with id {} is already paused!'.format(bot_id))
 
         if bot.status == FuturesBot.Status.RUNNING.value:
+            price_ticker = self._price_tickers[bot.position.signal.symbol]
+            price_ticker.unsubscribe_bot(bot.id)
+            price_ticker.stop_if_no_subscribers()
+
             bot.status = FuturesBot.Status.PAUSED.value
             bot.save()
             return bot
