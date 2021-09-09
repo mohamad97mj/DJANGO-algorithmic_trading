@@ -137,7 +137,7 @@ class FuturesBotHandler:
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
-    def run_bots(self, test=False):
+    def run_bots(self, test=True):
         while True:
             credentials = list(self._bots.keys())
             running_bots = []
@@ -169,7 +169,7 @@ class FuturesBotHandler:
 
                     bot.execute_operations(operations,
                                            bot.strategy_state_data,
-                                           test=True)
+                                           test=False)
                     if not bot.is_active:
                         self._bots[bot.credential_id].pop(str(bot.id))
 
@@ -197,14 +197,19 @@ class FuturesBotHandler:
         for symbol in symbols:
             if not (symbol in symbol_prices and symbol_prices[symbol]):
                 t = Thread(target=asyncio.run, args=(self._start_muck_symbol_price_ticker(exchange_id, symbol),))
+                self._price_tickers[symbol] = PriceTicker(t)
                 t.start()
 
     async def _start_muck_symbol_price_ticker(self, exchange_id, symbol):
         uri = "ws://localhost:9001"
         cache_name = '{}_price'.format(exchange_id)
+
         while True:
             try:
                 async with websockets.connect(uri) as websocket:
+                    price_ticker = self._price_tickers[symbol]
+                    price_ticker.client = websocket
+                    price_ticker.stop = None
                     await websocket.send(symbol)
                     while True:
                         try:
@@ -350,7 +355,7 @@ class FuturesBotHandler:
 
         return bot.position, edited_data
 
-    def pause_bot(self, credential_id, bot_id):
+    def pause_bot(self, credential_id, bot_id, test=True):
         bot = self.get_active_bot(credential_id, bot_id)
         if not bot:
             raise CustomException(
