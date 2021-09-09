@@ -1,6 +1,6 @@
 import ccxt
 from ccxt.base.errors import NetworkError
-from global_utils import retry_on_timeout, apply2all_methods, slash2dash
+from global_utils import retry_on_timeout, apply2all_methods, with2without_slash_f
 from .sdk_exchange import SdkExchange
 
 
@@ -24,6 +24,9 @@ class Exchange:
         return self._sdk_exchange.trade_client.get_order_details(orderId=order_id)
 
     def create_market_buy_order(self, symbol, leverage, size):
+        if self._exchange_id == 'kucoin':
+            symbol = with2without_slash_f(symbol)
+
         exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
                                                                              side='buy',
                                                                              lever=leverage,
@@ -31,6 +34,9 @@ class Exchange:
         return self.get_order(exchange_order['orderId'])
 
     def create_market_sell_order(self, symbol, leverage, size):
+        if self._exchange_id == 'kucoin':
+            symbol = with2without_slash_f(symbol)
+
         exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
                                                                              side='sell',
                                                                              lever=leverage,
@@ -49,9 +55,15 @@ class Exchange:
         return self._sdk_exchange.trade_client.get_all_position()
 
     def get_position(self, symbol):
+        if self._exchange_id == 'kucoin':
+            symbol = with2without_slash_f(symbol)
+
         return self._sdk_exchange.trade_client.get_position_details(symbol=symbol)
 
     def close_position(self, symbol):
+        if self._exchange_id == 'kucoin':
+            symbol = with2without_slash_f(symbol)
+
         exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
                                                                              side='',
                                                                              lever='',
@@ -59,12 +71,18 @@ class Exchange:
         return self.get_order(exchange_order['orderId'])
 
     def fetch_ticker(self, symbol):
+        if self._exchange_id == 'kucoin':
+            symbol = with2without_slash_f(symbol)
+
         return self._sdk_exchange.market_client.get_ticker(symbol)
 
     def get_contracts(self):
         return self._sdk_exchange.market_client.get_contracts_list()
 
     def get_contract(self, symbol):
+        if self._exchange_id == 'kucoin':
+            symbol = with2without_slash_f(symbol)
+
         return self._sdk_exchange.market_client.get_contract_detail(symbol=symbol)
 
     def fetch_status(self):
