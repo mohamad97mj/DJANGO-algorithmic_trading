@@ -139,4 +139,4 @@ class FuturesBot(models.Model):
             position.save()
 
     def close_position(self):
-        pass
+        self._private_client.close_position(self.position.signal.symbol)
