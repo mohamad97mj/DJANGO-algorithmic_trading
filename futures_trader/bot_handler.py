@@ -137,7 +137,7 @@ class FuturesBotHandler:
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
-    def run_bots(self, test=True):
+    def run_bots(self, test=False):
         while True:
             credentials = list(self._bots.keys())
             running_bots = []
@@ -355,7 +355,7 @@ class FuturesBotHandler:
 
         return bot.position, edited_data
 
-    def pause_bot(self, credential_id, bot_id, test=True):
+    def pause_bot(self, credential_id, bot_id):
         bot = self.get_active_bot(credential_id, bot_id)
         if not bot:
             raise CustomException(

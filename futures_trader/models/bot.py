@@ -89,9 +89,9 @@ class FuturesBot(models.Model):
                             leverage=position.leverage,
                             size=size)
                         exchange_order_id = exchange_order['id']
-                        value = exchange_order['value']
-                        filled_value = exchange_order['filledValue']
-                        timestamp = exchange_order['created_at']
+                        value = float(exchange_order['value'])
+                        filled_value = float(exchange_order['filledValue'])
+                        timestamp = exchange_order['createdAt']
 
                     strategy_state_data.size += size
                     cost = value / order.leverage
@@ -116,9 +116,9 @@ class FuturesBot(models.Model):
                             size=order.size,
                         )
                         exchange_order_id = exchange_order['id']
-                        value = exchange_order['value']
-                        filled_value = exchange_order['filledValue']
-                        timestamp = exchange_order['created_at']
+                        value = float(exchange_order['value'])
+                        filled_value = float(exchange_order['filledValue'])
+                        timestamp = exchange_order['createdAt']
 
                     strategy_state_data.size -= size
                     cost = value / order.leverage

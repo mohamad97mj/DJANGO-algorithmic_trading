@@ -24,9 +24,11 @@ class Exchange:
         return self._sdk_exchange.trade_client.get_order_details(orderId=order_id)
 
     def create_market_buy_order(self, symbol, leverage, size):
+        multiplier = self.get_contract(symbol)['multiplier']
         if self._exchange_id == 'kucoin':
             symbol = with2without_slash_f(symbol)
 
+        size = int(size / multiplier)
         exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
                                                                              side='buy',
                                                                              lever=leverage,
@@ -34,8 +36,11 @@ class Exchange:
         return self.get_order(exchange_order['orderId'])
 
     def create_market_sell_order(self, symbol, leverage, size):
+        multiplier = self.get_contract(symbol)['multiplier']
         if self._exchange_id == 'kucoin':
             symbol = with2without_slash_f(symbol)
+
+        size = int(size / multiplier)
 
         exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
                                                                              side='sell',
@@ -44,11 +49,11 @@ class Exchange:
         return self.get_order(exchange_order['orderId'])
 
     def create_market_buy_order_in_cost(self, symbol, leverage, cost, price):
-        size = int((cost * leverage) / price)
+        size = (cost * leverage) / price
         return self.create_market_buy_order(symbol=symbol, leverage=str(leverage), size=size)
 
     def create_market_sell_order_in_cost(self, symbol, leverage, cost, price):
-        size = int((cost * leverage) / price)
+        size = (cost * leverage) / price
         return self.create_market_sell_order(symbol=symbol, leverage=str(leverage), size=size)
 
     def get_all_positions(self):
