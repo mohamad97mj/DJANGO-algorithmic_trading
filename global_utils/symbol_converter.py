@@ -13,3 +13,11 @@ def without2with_slash(symbol, market):
 
 def slash2dash(symbol: str):
     return symbol.replace('/', '-')
+
+
+def with2without_slash_f(symbol: str):
+    splitted_symbol = symbol.split('/')
+    base = splitted_symbol[0]
+    quote = splitted_symbol[1] + 'M'
+    return '{}{}'.format(base, quote)
+

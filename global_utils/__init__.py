@@ -11,7 +11,7 @@ from .key_function import my_key_function
 from .list import union, intersection
 from .log import log
 from .math import floor, round_down
-from .symbol_converter import with2without_slash, without2with_slash, slash2dash
+from .symbol_converter import with2without_slash, without2with_slash, slash2dash, with2without_slash_f
 from .truncate import truncate
 from .does_not_exists_exceptions import BotDoesNotExistsException, CredentialIdDoesNotExistsException
 
