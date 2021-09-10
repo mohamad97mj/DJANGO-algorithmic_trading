@@ -5,6 +5,7 @@ from django.db import models
 class FuturesSignal(models.Model):
     # signal_id = models.CharField(max_length=100, unique=True)
     symbol = models.CharField(max_length=50)
+    side = models.CharField(max_length=10)
     stoploss = models.OneToOneField('FuturesStoploss', related_name='signal', null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     step_share_set_mode = models.CharField(max_length=50)
