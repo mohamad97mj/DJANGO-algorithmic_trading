@@ -1,11 +1,11 @@
 import os
-from .main import STATIC_ROOT, DEBUG
+from .main import STATIC_PATH, DEBUG
 import logging.config
 
 
 LOGGING_CONFIG = None
 
-LOG_DIR = os.path.join(STATIC_ROOT, 'logs')
+LOG_DIR = os.path.join(STATIC_PATH, 'logs')
 
 PYTHON_LOGGING_FORMAT = '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
 DJANGO_LOGGING_FORMAT = '{levelname} {asctime} {module} {process:d} {thread:d} {message}'
