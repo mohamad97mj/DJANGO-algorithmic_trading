@@ -95,7 +95,7 @@ class ManualStrategyDeveloper:
         signal = position.signal
         all_steps_achieved = True
         steps = signal.related_steps
-        if steps[0].buy_price == -1:
+        if steps[0].entry_price == -1:
             steps.append(steps.pop(0))
         none_triggered_steps_share = 1.0
         amount_in_quote = 0
@@ -180,9 +180,9 @@ class ManualStrategyDeveloper:
             n = 0
             for step in steps:
                 if bot.status == SpotBot.Status.RUNNING.value and not step.is_triggered and (
-                        price < step.buy_price or step.buy_price == -1):
-                    if step.buy_price == -1:
-                        step.buy_price = price
+                        price < step.entry_price or step.entry_price == -1):
+                    if step.entry_price == -1:
+                        step.entry_price = price
                     if n == 0:
                         strategy_state_data.all_steps_achieved = True
                     strategy_state_data.none_triggered_steps_share = \
@@ -288,7 +288,7 @@ class ManualStrategyDeveloper:
         current_steps = [step for step in signal.related_steps if not step.is_triggered]
         current_steps_data = [
             {
-                'buy_price': s.buy_price,
+                'buy_price': s.entry_price,
                 'share': s.share,
             } for s in current_steps
         ]
