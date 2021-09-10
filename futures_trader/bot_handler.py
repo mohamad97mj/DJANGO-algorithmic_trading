@@ -50,7 +50,7 @@ class FuturesBotHandler:
         signal_data = position_data.get('signal')
         if signal_data:
             signal = FuturesSignal(**{key: signal_data.get(key) for key in
-                                      ['symbol']})
+                                      ['symbol', 'side']})
 
             stoploss_data = signal_data.get('stoploss')
             if stoploss_data:
@@ -64,13 +64,14 @@ class FuturesBotHandler:
             signal.save()
 
             steps = []
-            sorted_steps_data = sorted(signal_data['steps'], key=lambda s: s['buy_price'])
-            if sorted_steps_data[0]['buy_price'] == -1:
+            is_reversed = signal.side == 'sell'
+            sorted_steps_data = sorted(signal_data['steps'], reverse=is_reversed, key=lambda s: s['entry_price'])
+            if sorted_steps_data[0]['entry_price'] == -1:
                 sorted_steps_data.append(sorted_steps_data.pop(0))
 
             for step_data in sorted_steps_data:
                 step = FuturesStep(signal=signal,
-                                   buy_price=step_data.get('buy_price'),
+                                   entry_price=step_data.get('entry_price'),
                                    share=round_down(step_data.get('share')))
                 step.save()
                 steps.append(step)
@@ -81,7 +82,8 @@ class FuturesBotHandler:
             targets = []
             targets_data = signal_data.get('targets')
             if targets_data:
-                sorted_targets_data = sorted(targets_data, key=lambda t: t['tp_price'])
+                is_reversed = signal.side == 'sell'
+                sorted_targets_data = sorted(targets_data, reverse=is_reversed, key=lambda t: t['tp_price'])
                 for target_data in sorted_targets_data:
                     target = FuturesTarget(signal=signal,
                                            tp_price=target_data.get('tp_price'))
@@ -137,7 +139,7 @@ class FuturesBotHandler:
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
-    def run_bots(self, test=False):
+    def run_bots(self, test=True):
         while True:
             credentials = list(self._bots.keys())
             running_bots = []
@@ -169,7 +171,7 @@ class FuturesBotHandler:
 
                     bot.execute_operations(operations,
                                            bot.strategy_state_data,
-                                           test=False)
+                                           test=True)
                     if not bot.is_active:
                         self._bots[bot.credential_id].pop(str(bot.id))
 
@@ -209,7 +211,6 @@ class FuturesBotHandler:
                 async with websockets.connect(uri) as websocket:
                     price_ticker = self._price_tickers[symbol]
                     price_ticker.client = websocket
-                    price_ticker.stop = None
                     await websocket.send(symbol)
                     while True:
                         try:
