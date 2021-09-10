@@ -168,7 +168,6 @@ class FuturesBotHandler:
                     operations = strategy_developer.get_operations(position=bot.position,
                                                                    strategy_state_data=bot.strategy_state_data,
                                                                    symbol_prices=symbol_prices)
-                    logger.debug('operations are {}'.format(operations))
                     bot.execute_operations(operations,
                                            bot.strategy_state_data,
                                            test=False)

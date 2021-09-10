@@ -68,12 +68,7 @@ class FuturesBot(models.Model):
                            strategy_state_data,
                            test=True):
 
-        from global_utils.my_logging import my_get_logger
-        logger = my_get_logger()
-        logger.debug('execute_operations'.format(operations))
-
         for operation in operations:
-            logger.debug('execute_operation'.format(operation))
 
             position = operation.position
             order = operation.order
@@ -81,9 +76,7 @@ class FuturesBot(models.Model):
             price = order.price
             size = order.size
             if operation.action == 'create':
-                logger.debug('execute_operation in if create', operation)
                 if operation.type in ('buy_step', 'sell_step'):
-                    logger.debug('execute_operation in if type', operation)
                     step = operation.step
                     if test:
                         exchange_order_id = None
