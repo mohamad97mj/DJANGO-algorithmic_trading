@@ -7,7 +7,7 @@ class SpotTraderConfig(AppConfig):
     name = 'spot_trader'
 
     def ready(self):
-        if 'runserver' in sys.argv:
+        if not any(c in sys.argv for c in ['makemigrations', 'migrate', 'startapp', 'collectstatic']):
             from global_utils import my_get_logger
             logger = my_get_logger()
             logger.info("spot_trader app started!")

@@ -7,7 +7,7 @@ class FuturesTraderConfig(AppConfig):
     name = 'futures_trader'
 
     def ready(self):
-        if 'runserver' in sys.argv:
+        if not any(c in sys.argv for c in ['makemigrations', 'migrate', 'startapp', 'collectstatic']):
             from global_utils import my_get_logger
             logger = my_get_logger()
             logger.info("futures_trader app started!")
