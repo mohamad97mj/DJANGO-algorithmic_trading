@@ -75,7 +75,7 @@ class FuturesBot(models.Model):
             price = order.price
             size = order.size
             if operation.action == 'create':
-                if order.side == 'buy':
+                if operation.type in ('buy_step', 'sell_step'):
                     step = operation.step
                     if test:
                         exchange_order_id = None
