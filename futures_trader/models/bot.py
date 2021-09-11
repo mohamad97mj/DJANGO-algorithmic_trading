@@ -139,7 +139,7 @@ class FuturesBot(models.Model):
             operation.save()
             position.save()
 
-    def close_position(self, test=True):
+    def close_position(self, test=False):
         if not test:
             self._private_client.close_position(self.position.signal.symbol)
 
