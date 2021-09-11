@@ -144,33 +144,33 @@ class FuturesBotHandler:
             credentials = list(self._bots.keys())
             running_bots = []
             for credential in credentials:
-                running_bots += [bot for bot in list(self._bots[credential].values()) if
-                                 bot.status == FuturesBot.Status.RUNNING.value]
+                running_bots += [bot for bot in list(self._bots[credential].values())]
             for bot in running_bots:
                 try:
-                    strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
-                    price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
-                    symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
-                    while not symbol_prices:
-                        if test:
-                            self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
-                        else:
-                            self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
-                        time.sleep(15)
+                    if bot.status == FuturesBot.Status.RUNNING.value:
+                        strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
+                        price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
                         symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
+                        while not symbol_prices:
+                            if test:
+                                self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
+                            else:
+                                self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
+                            time.sleep(15)
+                            symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
 
-                    logger = my_get_logger()
-                    logger.info('symbol_prices: {}'.format(symbol_prices))
+                        logger = my_get_logger()
+                        logger.info('symbol_prices: {}'.format(symbol_prices))
 
-                    for symbol in price_required_symbols:
-                        self._price_tickers[symbol].subscribers.add(bot.id)
+                        for symbol in price_required_symbols:
+                            self._price_tickers[symbol].subscribers.add(bot.id)
 
-                    operations = strategy_developer.get_operations(position=bot.position,
-                                                                   strategy_state_data=bot.strategy_state_data,
-                                                                   symbol_prices=symbol_prices)
-                    bot.execute_operations(operations,
-                                           bot.strategy_state_data,
-                                           test=False)
+                        operations = strategy_developer.get_operations(position=bot.position,
+                                                                       strategy_state_data=bot.strategy_state_data,
+                                                                       symbol_prices=symbol_prices)
+                        bot.execute_operations(operations,
+                                               bot.strategy_state_data,
+                                               test=True)
                     if not bot.is_active:
                         self._bots[bot.credential_id].pop(str(bot.id))
 
