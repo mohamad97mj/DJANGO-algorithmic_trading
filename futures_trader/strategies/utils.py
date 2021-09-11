@@ -9,7 +9,7 @@ def create_market_operation_in_cost(symbol,
                                     margin,
                                     position: FuturesPosition,
                                     step: FuturesStep):
-    size = int((margin * position.leverage) / price)
+    size = (margin * position.leverage) / price
     market_order = FuturesOrder(symbol=symbol,
                                 type='market',
                                 side=side,
