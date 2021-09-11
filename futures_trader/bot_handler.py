@@ -170,7 +170,7 @@ class FuturesBotHandler:
                                                                        symbol_prices=symbol_prices)
                         bot.execute_operations(operations,
                                                bot.strategy_state_data,
-                                               test=True)
+                                               test=False)
                     if not bot.is_active:
                         self._bots[bot.credential_id].pop(str(bot.id))
 
