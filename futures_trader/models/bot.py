@@ -35,8 +35,8 @@ class FuturesBot(models.Model):
     credential_id = models.CharField(max_length=100)
     strategy = models.CharField(max_length=100)
     position = models.OneToOneField('FuturesPosition', related_name='bot', on_delete=models.CASCADE)
-    final_pnl = models.FloatField(null=True, blank=True)
-    final_pnl_percentage = models.FloatField(null=True, blank=True)
+    total_pnl = models.FloatField(null=True, blank=True)
+    total_pnl_percentage = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
     status = models.CharField(default=Status.RUNNING.value,
@@ -56,12 +56,10 @@ class FuturesBot(models.Model):
         self.strategy_state_data = strategy_state_data
 
     def ready(self):
-        if not self.strategy == 'manual':
-            self.close_position()
+        pass
 
     def reset(self):
-        if not self.strategy == 'manual':
-            self.close_position()
+        pass
 
     def execute_operations(self,
                            operations: List[FuturesOperation],
@@ -74,12 +72,12 @@ class FuturesBot(models.Model):
             order = operation.order
             symbol = order.symbol
             price = order.price
-            size = order.size
             if operation.action == 'create':
                 if operation.type in ('buy_step', 'sell_step'):
                     step = operation.step
                     if test:
                         exchange_order_id = None
+                        size = int(order.size)
                         value = size * price
                         filled_value = value
                         timestamp = time.time()
@@ -88,24 +86,25 @@ class FuturesBot(models.Model):
                         exchange_order = self._private_client.create_market_buy_order(
                             symbol=symbol,
                             leverage=position.leverage,
-                            size=size)
+                            size=order.size)
                         exchange_order_id = exchange_order['id']
+                        size = int(exchange_order['size'])
                         value = float(exchange_order['value'])
                         filled_value = float(exchange_order['filledValue'])
                         timestamp = exchange_order['createdAt']
 
-                    strategy_state_data.size += size
                     cost = value / order.leverage
                     strategy_state_data.available_margin -= cost
 
                     step.cost = cost
                     step.save()
 
-                    position.size += size
+                    position.holding_size += size
 
                 else:
                     if test:
                         exchange_order_id = None
+                        size = int(order.size)
                         value = size * price
                         filled_value = value
                         timestamp = time.time()
@@ -117,17 +116,19 @@ class FuturesBot(models.Model):
                             size=order.size,
                         )
                         exchange_order_id = exchange_order['id']
+                        size = int(exchange_order['size'])
                         value = float(exchange_order['value'])
                         filled_value = float(exchange_order['filledValue'])
                         timestamp = exchange_order['createdAt']
 
-                    strategy_state_data.size -= size
                     cost = value / order.leverage
                     strategy_state_data.available_margin += cost
 
+                    position.holding_size -= size
                     position.released_margin = cost
 
                 order.exchange_order_id = exchange_order_id
+                order.size = size
                 order.status = 'done'
                 order.value = value
                 order.filled_value = filled_value
@@ -139,7 +140,6 @@ class FuturesBot(models.Model):
             operation.save()
             position.save()
 
-    def close_position(self, test=False):
+    def close_position(self, test):
         if not test:
             self._private_client.close_position(self.position.signal.symbol)
-
