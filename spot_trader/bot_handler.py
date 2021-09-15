@@ -426,6 +426,6 @@ class SpotBotHandler:
 
         bot.status = SpotBot.Status.STOPPED_MANUALY.value
         bot.is_active = False
-        bot.close_position()
+        bot.close_position(test=is_test)
         bot.save()
         return bot

@@ -8,13 +8,12 @@ from global_utils import my_get_logger, CustomException, JsonSerializable, round
 @dataclass
 class StrategyStateData(JsonSerializable):
     symbol: str
+    available_amount_in_quote: float
     none_triggered_steps_share: float = 1.0
     none_triggered_targets_share: float = 1.0
     all_steps_achieved: bool = False
     all_targets_achieved: bool = False
     unrealized_amount_in_quote: float = 0
-    total_pnl: float = None  # unrealized_amount_in_quote + amount_in_quote - position.amount_in_quote
-    total_pnl_percentage: float = None  # profit_in_quote / position.amount_in_quote
 
 
 class ManualStrategyDeveloper:
@@ -84,7 +83,8 @@ class ManualStrategyDeveloper:
                 last_target.share = round(1 - (len(targets) - 1) * auto_target_share, 2)
                 last_target.save()
 
-        strategy_state_data = StrategyStateData(symbol=signal.symbol)
+        strategy_state_data = StrategyStateData(symbol=signal.symbol,
+                                                available_amount_in_quote=position.amount_in_quote)
         return strategy_state_data
 
     @staticmethod
@@ -95,12 +95,12 @@ class ManualStrategyDeveloper:
         if steps[0].buy_price == -1:
             steps.append(steps.pop(0))
         none_triggered_steps_share = 1.0
-        amount_in_quote = 0
+        available_amount_in_quote = 0
         for step in steps:
             if step.is_triggered:
                 none_triggered_steps_share = round(none_triggered_steps_share - step.share, 2)
             else:
-                amount_in_quote += step.amount_in_quote
+                available_amount_in_quote += step.amount_in_quote
                 all_steps_achieved = False
 
         all_targets_achieved = False
@@ -111,7 +111,6 @@ class ManualStrategyDeveloper:
         if targets:
             for target in targets:
                 if target.is_triggered:
-                    amount_in_quote += target.released_amount_in_quote
                     none_triggered_targets_share = round(none_triggered_targets_share - target.share, 2)
                 else:
                     all_targets_achieved = False
@@ -125,7 +124,7 @@ class ManualStrategyDeveloper:
             none_triggered_targets_share=round_down(none_triggered_targets_share),
             all_steps_achieved=all_steps_achieved,
             all_targets_achieved=all_targets_achieved,
-
+            available_amount_in_quote=available_amount_in_quote
         )
         return strategy_state_data
 
@@ -142,7 +141,11 @@ class ManualStrategyDeveloper:
         strategy_state_data.unrealized_amount_in_quote = position.holding_amount * price
         bot.total_pnl = \
             round_down(
-                strategy_state_data.unrealized_amount_in_quote + position.released_amount_in_quote - position.amount_in_quote)
+                strategy_state_data.unrealized_amount_in_quote +
+                strategy_state_data.available_amount_in_quote +
+                position.released_amount_in_quote -
+                position.amount_in_quote)
+
         bot.total_pnl_percentage = round_down(100 * bot.total_pnl / position.amount_in_quote)
 
         if bot.status == SpotBot.Status.RUNNING.value and stoploss and not stoploss.is_triggered and price < stoploss.trigger_price:

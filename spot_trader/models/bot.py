@@ -109,7 +109,7 @@ class SpotBot(models.Model):
                         exchange_order = self._private_client.create_market_buy_order_in_quote(
                             symbol=symbol,
                             amount_in_quote=order.amount_in_quote)
-                        timestamp = exchange_order['createdAt']
+                        timestamp = exchange_order['timestamp']
                         cost = exchange_order['cost']
                         amount = exchange_order['filled']
                         price = exchange_order['price']
@@ -142,7 +142,7 @@ class SpotBot(models.Model):
                             amount=order.amount)
 
                         amount = exchange_order['filled']
-                        timestamp = exchange_order['createdAt']
+                        timestamp = exchange_order['timestamp']
                         pure_sell_amount_in_quote = exchange_order['cost'] - exchange_order['fee']['cost']
                         price = exchange_order['price']
                         exchange_order_id = exchange_order['id']
@@ -161,10 +161,14 @@ class SpotBot(models.Model):
                 order.price = price
                 order.save()
 
+            operation.status = 'executed'
+            operation.save()
             position.save()
-            # order.
 
     def close_position(self, test):
         if not test:
-            pass
-            # self.sell_all_assets()
+            exchange_order = self._private_client.create_market_sell_order(symbol=self.position.signal.symbol,
+                                                                           amount=self.position.holding_amount)
+            self.position.released_amount_in_quote += exchange_order['cost'] - exchange_order['fee']['cost']
+            self.position.holding_amount -= exchange_order['filled']
+            self.position.save()

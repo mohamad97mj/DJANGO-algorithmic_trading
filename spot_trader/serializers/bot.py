@@ -9,6 +9,8 @@ class SpotBotSerializer(serializers.Serializer):
     strategy = serializers.CharField(max_length=100)
     is_active = serializers.BooleanField(required=False)
     status = serializers.CharField(max_length=100, required=False)
+    total_pnl = serializers.FloatField(allow_null=True, required=False)
+    total_pnl_percentage = serializers.FloatField(allow_null=True, required=False)
     position = SpotPositionSerializer()
 
     def to_representation(self, instance):
