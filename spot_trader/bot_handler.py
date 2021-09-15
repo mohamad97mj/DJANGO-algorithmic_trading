@@ -1,7 +1,7 @@
 import time
 import asyncio
 import websockets
-from typing import List, Union
+from typing import List, Union, Set
 from django.db.models import Q
 from global_utils import async_retry_on_timeout, my_get_logger
 from spot_trader.models import SpotPosition, SpotBot, SpotStoploss
@@ -10,19 +10,32 @@ from global_utils import with2without_slash, CacheUtils, CustomException, round_
 from binance import AsyncClient, BinanceSocketManager
 from threading import Thread
 from aiohttp.client_exceptions import ClientConnectorError
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from concurrent.futures._base import TimeoutError
 from spot_trader.strategies import SpotStrategyCenter
 from spot_trader.models import SpotSignal, SpotStep, SpotTarget
 from websockets.exceptions import ConnectionClosedError
 from kucoin.client import WsToken
 from kucoin.ws_client import KucoinWsClient
+from spot_trader.utils import is_test
 
 
 @dataclass
 class PriceTicker:
     thread: Thread
     client: Union[AsyncClient, KucoinWsClient] = None
+    subscribers: Set = field(default_factory=lambda: set())
+
+    def stop(self):
+        pass
+
+    def unsubscribe_bot(self, bot_id):
+        if bot_id in self.subscribers:
+            self.subscribers.remove(bot_id)
+
+    def stop_if_no_subscribers(self):
+        if not self.subscribers:
+            self.stop()
 
 
 class SpotBotHandler:
@@ -87,7 +100,7 @@ class SpotBotHandler:
             signal.related_targets = targets
 
         position = SpotPosition(signal=signal,
-                                **{k: position_data[k] for k in ['size']})
+                                **{k: position_data[k] for k in ['amount_in_quote']})
 
         position.keep_open = position_data.get('keep_open', 'false') == 'true'
         position.save()
@@ -131,43 +144,49 @@ class SpotBotHandler:
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
-    def run_bots(self, test=True):
+    def run_bots(self):
         while True:
             credentials = list(self._bots.keys())
             running_bots = []
             for credential in credentials:
-                running_bots += [bot for bot in list(self._bots[credential].values()) if bot.is_active]
+                running_bots += [bot for bot in list(self._bots[credential].values())]
             for bot in running_bots:
                 try:
-                    strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
-                    price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
-                    symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
-                    while not symbol_prices:
-                        if test:
-                            self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
-                        else:
-                            self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
-                        time.sleep(5)
+                    if bot.status == SpotBot.Status.RUNNING.value:
+                        strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
+                        price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
                         symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
+                        while not symbol_prices:
+                            if is_test:
+                                self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
+                            else:
+                                self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
+                            time.sleep(15)
+                            symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
 
-                    logger = my_get_logger()
-                    logger.info('symbol_prices: {}'.format(symbol_prices))
+                        logger = my_get_logger()
+                        logger.debug('symbol_prices: {}'.format(symbol_prices))
 
-                    operations = strategy_developer.get_operations(position=bot.position,
-                                                                   strategy_state_data=bot.strategy_state_data,
-                                                                   symbol_prices=symbol_prices)
+                        for symbol in price_required_symbols:
+                            self._price_tickers[symbol].subscribers.add(bot.id)
 
-                    exchange_orders = bot.execute_operations(operations, symbol_prices=symbol_prices, test=True)
-                    for exchange_order in exchange_orders:
-                        strategy_developer.apply_operation(
-                            exchange_order_data=exchange_order,
-                            position=bot.position,
-                            strategy_state_data=bot.strategy_state_data)
+                        operations = strategy_developer.get_operations(position=bot.position,
+                                                                       strategy_state_data=bot.strategy_state_data,
+                                                                       symbol_prices=symbol_prices)
+
+                        bot.execute_operations(operations, test=is_test)
+
                     if not bot.is_active:
                         self._bots[bot.credential_id].pop(str(bot.id))
+
+                    if not bot.status == SpotBot.Status.RUNNING.value:
+                        price_ticker = self._price_tickers[bot.position.signal.symbol]
+                        price_ticker.unsubscribe_bot(bot.id)
+                        price_ticker.stop_if_no_subscribers()
+
                 except Exception as e:
                     logger = my_get_logger()
-                    logger.error(e)
+                    logger.exception(e)
             time.sleep(1)
 
     def _get_prices_if_available(self, exchange_id, symbols: List):
@@ -184,6 +203,7 @@ class SpotBotHandler:
         for symbol in symbols:
             if not (symbol in symbol_prices and symbol_prices[symbol]):
                 t = Thread(target=asyncio.run, args=(self._start_muck_symbol_price_ticker(exchange_id, symbol),))
+                self._price_tickers[symbol] = PriceTicker(t)
                 t.start()
 
     async def _start_muck_symbol_price_ticker(self, exchange_id, symbol):
@@ -192,6 +212,8 @@ class SpotBotHandler:
         while True:
             try:
                 async with websockets.connect(uri) as websocket:
+                    price_ticker = self._price_tickers[symbol]
+                    price_ticker.client = websocket
                     await websocket.send(symbol)
                     while True:
                         try:
@@ -255,7 +277,11 @@ class SpotBotHandler:
 
             client = WsToken()
             ws_client = await KucoinWsClient.create(loop, client, deal_msg, private=False)
-            self._price_tickers[symbol].client = ws_client
+            price_ticker = self._price_tickers[symbol]
+            price_ticker.client = ws_client
+            price_ticker.stop = lambda: asyncio.run(
+                ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+
             await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
             while True:
                 await asyncio.sleep(60, loop=loop)
@@ -347,16 +373,16 @@ class SpotBotHandler:
                 if stoploss_was_edited:
                     edited_data.append('stoploss')
 
-        new_size = new_position_data.get('size')
-        if new_size:
-            size_was_edited = self._run_strategy_developer_command(
+        new_amount_in_quote = new_position_data.get('amount_in_quote')
+        if new_amount_in_quote:
+            amount_in_quote_was_edited = self._run_strategy_developer_command(
                 bot,
                 strategy_developer,
-                'edit_size',
-                new_size
+                'edit_amount_in_quote',
+                new_amount_in_quote
             )
-            if size_was_edited:
-                edited_data.append('size')
+            if amount_in_quote_was_edited:
+                edited_data.append('amount_in_quote')
 
         return bot.position, edited_data
 
@@ -370,6 +396,10 @@ class SpotBotHandler:
             raise CustomException('bot with id {} is already paused!'.format(bot_id))
 
         if bot.status == SpotBot.Status.RUNNING.value:
+            price_ticker = self._price_tickers[bot.position.signal.symbol]
+            price_ticker.unsubscribe_bot(bot.id)
+            price_ticker.stop_if_no_subscribers()
+
             bot.status = SpotBot.Status.PAUSED.value
             bot.save()
             return bot
