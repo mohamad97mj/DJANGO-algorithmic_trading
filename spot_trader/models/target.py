@@ -7,7 +7,7 @@ class SpotTarget(models.Model):
     tp_price = models.FloatField()
     share = models.FloatField(null=True, blank=True)
     is_triggered = models.BooleanField(default=False)
-    amount = models.FloatField(default=0)
+    holding_amount = models.FloatField(default=0)
     released_amount_in_quote = models.FloatField(default=0)
     operation = models.OneToOneField('SpotOperation', related_name='target', on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
