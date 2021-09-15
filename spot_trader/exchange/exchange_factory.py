@@ -16,7 +16,7 @@ class ExchangeFactory:
                         exchange_id: str,
                         credential_id: str = None,
                         enable_rate_limit: bool = True,
-                        verbose: bool = True) -> Exchange:
+                        verbose: bool = False) -> Exchange:
 
         api_key = secret = password = is_sandbox = None
         if credential_id:
