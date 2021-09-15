@@ -11,7 +11,7 @@ class FuturesPosition(models.Model):
 
     # position_id = models.CharField(max_length=100, unique=True)
     signal = models.ForeignKey('FuturesSignal', related_name='positions', on_delete=models.CASCADE, null=True, blank=True)
-    size = models.FloatField(default=0)
+    holding_size = models.FloatField(default=0)
     margin = models.FloatField()
     leverage = models.IntegerField()
     keep_open = models.BooleanField(default=False)
