@@ -11,7 +11,9 @@ def create_market_buy_in_quote_operation(symbol,
                                  type='market',
                                  side='buy',
                                  price=price,
-                                 amount_in_quote=amount_in_quote)
+                                 amount_in_quote=amount_in_quote,
+                                 status='created'
+                                 )
     buy_market_order.save()
     buy_market_operation = SpotOperation(
         type=operation_type,
@@ -36,7 +38,9 @@ def create_market_sell_operation(symbol,
                                   type='market',
                                   side='sell',
                                   price=price,
-                                  amount=amount)
+                                  amount=amount,
+                                  status='created'
+                                  )
     sell_market_order.save()
     sell_market_operation = SpotOperation(
         type=operation_type,
