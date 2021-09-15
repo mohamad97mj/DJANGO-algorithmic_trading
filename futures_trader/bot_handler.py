@@ -14,6 +14,7 @@ from global_utils import CustomException, CacheUtils, round_down, slash2dash
 from websockets.exceptions import ConnectionClosedError
 from kucoin_futures.client import WsToken
 from kucoin_futures.ws_client import KucoinFuturesWsClient
+from futures_trader.utils import is_test
 
 
 @dataclass
@@ -139,7 +140,7 @@ class FuturesBotHandler:
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
-    def run_bots(self, test=False):
+    def run_bots(self):
         while True:
             credentials = list(self._bots.keys())
             running_bots = []
@@ -152,7 +153,7 @@ class FuturesBotHandler:
                         price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
                         symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
                         while not symbol_prices:
-                            if test:
+                            if is_test:
                                 self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
                             else:
                                 self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
@@ -160,7 +161,7 @@ class FuturesBotHandler:
                             symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
 
                         logger = my_get_logger()
-                        logger.info('symbol_prices: {}'.format(symbol_prices))
+                        logger.debug('symbol_prices: {}'.format(symbol_prices))
 
                         for symbol in price_required_symbols:
                             self._price_tickers[symbol].subscribers.add(bot.id)
@@ -170,7 +171,7 @@ class FuturesBotHandler:
                                                                        symbol_prices=symbol_prices)
                         bot.execute_operations(operations,
                                                bot.strategy_state_data,
-                                               test=False)
+                                               test=is_test)
                     if not bot.is_active:
                         self._bots[bot.credential_id].pop(str(bot.id))
 
@@ -289,7 +290,10 @@ class FuturesBotHandler:
 
     def get_bots(self, credential_id, is_active):
         if is_active is True:
-            bots = list(self._bots[credential_id].values())
+            bots_dict: dict = self._bots.get(credential_id)
+            if not bots_dict:
+                raise CustomException('Not active bot was found for credential_id {}'.format(credential_id))
+            bots = list(bots_dict.values())
         else:
             bots = FuturesBot.objects.filter(Q(credential_id=credential_id))
         for bot in bots:
@@ -395,6 +399,6 @@ class FuturesBotHandler:
 
         bot.status = FuturesBot.Status.STOPPED_MANUALY.value
         bot.is_active = False
-        bot.close_position()
+        bot.close_position(test=is_test)
         bot.save()
         return bot
