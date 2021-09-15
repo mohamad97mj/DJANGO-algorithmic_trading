@@ -9,13 +9,10 @@ from global_utils import my_get_logger, CustomException, JsonSerializable, round
 class StrategyStateData(JsonSerializable):
     symbol: str
     available_margin: float
-    size: float = 0
     none_triggered_steps_share: float = 1.0
     all_steps_achieved: bool = False
     all_targets_achieved: bool = False
     unrealized_margin: float = 0
-    total_pnl: float = None  # unrealized_margin + available_margin - position.margin
-    total_pnl_percentage: float = None  # total_pnl / position.margin
 
 
 class ManualStrategyDeveloper:
@@ -75,11 +72,9 @@ class ManualStrategyDeveloper:
             steps.append(steps.pop(0))
         none_triggered_steps_share = 1.0
         available_margin = position.margin
-        size = 0
         for step in steps:
             if step.is_triggered:
                 none_triggered_steps_share = round(none_triggered_steps_share - step.share, 2)
-                size += step.size
                 available_margin -= step.cost
             else:
                 all_steps_achieved = False
@@ -98,7 +93,6 @@ class ManualStrategyDeveloper:
         strategy_state_data = StrategyStateData(
             symbol=signal.symbol,
             available_margin=available_margin,
-            size=size,
             none_triggered_steps_share=round_down(none_triggered_steps_share),
             all_steps_achieved=all_steps_achieved,
             all_targets_achieved=all_targets_achieved,
@@ -115,18 +109,16 @@ class ManualStrategyDeveloper:
         stoploss = signal.stoploss
         price = symbol_prices[symbol]
 
-        strategy_state_data.unrealized_margin = strategy_state_data.size * price / position.leverage
+        strategy_state_data.unrealized_margin = position.holding_size * price / position.leverage
         sign = 1 if signal.side == 'buy' else -1
-        strategy_state_data.total_pnl = \
+        bot.total_pnl = \
             round_down(
-                strategy_state_data.available_margin + sign * (strategy_state_data.unrealized_margin - position.margin))
-        strategy_state_data.total_pnl_percentage = round_down((strategy_state_data.total_pnl / position.margin) * 100)
-
-        bot.final_pnl = strategy_state_data.total_pnl
-        bot.final_pnl_percentage = strategy_state_data.total_pnl_percentage
+                sign * (strategy_state_data.unrealized_margin -
+                        (position.margin - strategy_state_data.available_margin)))
+        bot.total_pnl_percentage = round_down((bot.total_pnl / position.margin) * 100)
 
         if bot.status == FuturesBot.Status.RUNNING.value and stoploss \
-                and not stoploss.is_triggered and position.size and \
+                and not stoploss.is_triggered and position.holding_size and \
                 ((signal.side == 'buy' and price < stoploss.trigger_price) or
                  (signal.side == 'sell' and price > stoploss.trigger_price)):
 
@@ -135,7 +127,7 @@ class ManualStrategyDeveloper:
                 operation_type='stoploss_triggered',
                 side='sell' if signal.side == 'buy' else 'buy',
                 price=price,
-                size=position.size,
+                size=position.holding_size,
                 position=position,
                 stoploss=stoploss
             )
@@ -156,7 +148,7 @@ class ManualStrategyDeveloper:
                 'stoploss_triggered_operation: (symbol: {}, price: {}, size: {})'.format(
                     symbol,
                     price,
-                    position.size))
+                    position.holding_size))
 
             operations.append(stoploss_operation)
 
@@ -190,7 +182,7 @@ class ManualStrategyDeveloper:
                         'step_operation: (symbol: {}, price: {}, size: {})'.format(
                             symbol,
                             price,
-                            step.size))
+                            step.purchased_size))
 
                     step.is_triggered = True
                     step.save()
@@ -210,7 +202,7 @@ class ManualStrategyDeveloper:
                                 symbol=symbol,
                                 operation_type='full_target',
                                 side='sell' if signal.side == 'buy' else 'buy',
-                                size=position.size,
+                                size=position.holding_size,
                                 price=price,
                                 position=position,
                             )
@@ -219,7 +211,7 @@ class ManualStrategyDeveloper:
                                 'full_target_operation: (symbol: {}, price: {}, size: {})'.format(
                                     symbol,
                                     price,
-                                    position.size))
+                                    position.holding_size))
 
                             operations.append(full_target_operation)
 
@@ -236,7 +228,7 @@ class ManualStrategyDeveloper:
                     if stoploss:
                         stoploss.trigger_price = new_trigger_price
                     else:
-                        stoploss = FuturesStoploss(trigger_price=new_trigger_price, amount=strategy_state_data.size)
+                        stoploss = FuturesStoploss(trigger_price=new_trigger_price, amount=position.holding_size)
                         stoploss_is_created = True
                     stoploss.is_trailed = True
                     stoploss.save()
@@ -323,7 +315,7 @@ class ManualStrategyDeveloper:
                     entry_price=step_data['entry_price'],
                     share=step_data['share'],
                     is_triggered=False,
-                    amount_in_quote=position.size * step_data['share']
+                    amount_in_quote=position.holding_size * step_data['share']
                 )
                 step.save()
                 new_steps.append(step)
@@ -420,8 +412,7 @@ class ManualStrategyDeveloper:
             if stoploss:
                 stoploss.trigger_price = new_stoploss_data['trigger_price']
             else:
-                stoploss = FuturesStoploss(trigger_price=new_stoploss_data['trigger_price'],
-                                           amount=strategy_state_data.size)
+                stoploss = FuturesStoploss(trigger_price=new_stoploss_data['trigger_price'])
                 signal.stoploss = stoploss
             stoploss.save()
             signal.save()
