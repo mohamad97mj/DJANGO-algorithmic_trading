@@ -1,5 +1,4 @@
-from typing import Union
-from ..models import FuturesOrder, FuturesOperation, FuturesStep, FuturesTarget, FuturesPosition, FuturesStoploss
+from ..models import FuturesOrder, FuturesOperation, FuturesStep, FuturesPosition, FuturesStoploss
 
 
 def create_market_operation_in_cost(symbol,
@@ -26,7 +25,7 @@ def create_market_operation_in_cost(symbol,
         action='create',
         status='in_progress')
     market_operation.save()
-    step.size = size
+    step.purchased_size = int(size)
     step.operation = market_operation
     return market_operation
 
