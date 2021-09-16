@@ -289,7 +289,7 @@ class FuturesBotHandler:
         raise CustomException('No bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
 
     def get_bots(self, credential_id, is_active):
-        if is_active is True:
+        if is_active:
             bots_dict: dict = self._bots.get(credential_id)
             if not bots_dict:
                 raise CustomException('Not active bot was found for credential_id {}'.format(credential_id))

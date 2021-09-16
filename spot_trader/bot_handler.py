@@ -129,6 +129,8 @@ class SpotBotHandler:
                 self._bots[bot.credential_id][str(bot.id)] = bot
             else:
                 self._bots[bot.credential_id] = {str(bot.id): bot}
+        logger = my_get_logger()
+        logger.info('in reload bots: {}'.format(self._bots))
 
     def set_bot_strategy_state_data(self, bot):
         strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
@@ -146,6 +148,8 @@ class SpotBotHandler:
 
     def run_bots(self):
         while True:
+            logger = my_get_logger()
+            logger.info('in run bots: {}'.format(self._bots))
             credentials = list(self._bots.keys())
             running_bots = []
             for credential in credentials:
@@ -314,7 +318,7 @@ class SpotBotHandler:
         raise CustomException('No bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
 
     def get_bots(self, credential_id, is_active):
-        if is_active is True:
+        if is_active:
             bots_dict: dict = self._bots.get(credential_id)
             if not bots_dict:
                 raise CustomException('Not active bot was found for credential_id {}'.format(credential_id))

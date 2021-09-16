@@ -42,6 +42,7 @@ def load_file_handlers(logger):
         if handler.name.startswith(handler_name_prefix):
             break
     else:
+        logger.handlers = [logger.handlers[0], ]
         for symbol, level in symbol2level.items():
             level_name = logging.getLevelName(level).lower()
             parent_dir_name = level_name
