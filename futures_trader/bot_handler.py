@@ -121,7 +121,7 @@ class FuturesBotHandler:
         for bot in bots:
             self.init_bot_requirements(bot)
             self.set_bot_strategy_state_data(bot)
-            if bot.credential_id in bots:
+            if bot.credential_id in self._bots:
                 self._bots[bot.credential_id][str(bot.id)] = bot
             else:
                 self._bots[bot.credential_id] = {str(bot.id): bot}

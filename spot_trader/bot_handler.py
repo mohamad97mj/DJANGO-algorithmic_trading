@@ -125,12 +125,10 @@ class SpotBotHandler:
         for bot in bots:
             self.init_bot_requirements(bot)
             self.set_bot_strategy_state_data(bot)
-            if bot.credential_id in bots:
+            if bot.credential_id in self._bots:
                 self._bots[bot.credential_id][str(bot.id)] = bot
             else:
                 self._bots[bot.credential_id] = {str(bot.id): bot}
-        logger = my_get_logger()
-        logger.info('in reload bots: {}'.format(self._bots))
 
     def set_bot_strategy_state_data(self, bot):
         strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
