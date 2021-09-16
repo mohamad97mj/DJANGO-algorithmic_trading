@@ -87,7 +87,7 @@ DATABASES = {
         'NAME': 'trader',
         'USER': 'intellichange',
         'PASSWORD': 'mJ604998',
-        'HOST': '138.201.147.105',
+        'HOST': 'localhost',
         'PORT': 6000,
     }
 }

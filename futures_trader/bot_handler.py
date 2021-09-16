@@ -204,7 +204,7 @@ class FuturesBotHandler:
 
     async def _start_muck_symbol_price_ticker(self, exchange_id, symbol):
         uri = "ws://localhost:9001"
-        cache_name = '{}_price'.format(exchange_id)
+        cache_name = '{}_futures_price'.format(exchange_id)
 
         while True:
             try:
@@ -245,7 +245,7 @@ class FuturesBotHandler:
         t.start()
 
     async def _start_symbol_price_ticker(self, exchange_id, symbol):
-        cache_name = '{}_price'.format(exchange_id)
+        cache_name = '{}_futures_price'.format(exchange_id)
         if exchange_id == 'kucoin':
             loop = asyncio.get_event_loop()
 
@@ -265,7 +265,7 @@ class FuturesBotHandler:
                 await asyncio.sleep(60, loop=loop)
 
     def _read_prices(self, exchange_id, symbols):
-        cache_name = '{}_price'.format(exchange_id)
+        cache_name = '{}_futures_price'.format(exchange_id)
         return {
             symbol: CacheUtils.read_from_cache(symbol, cache_name) for symbol in symbols
         }

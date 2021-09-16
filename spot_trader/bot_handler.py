@@ -147,7 +147,6 @@ class SpotBotHandler:
     def run_bots(self):
         while True:
             logger = my_get_logger()
-            logger.info('in run bots: {}'.format(self._bots))
             credentials = list(self._bots.keys())
             running_bots = []
             for credential in credentials:
@@ -210,7 +209,7 @@ class SpotBotHandler:
 
     async def _start_muck_symbol_price_ticker(self, exchange_id, symbol):
         uri = "ws://localhost:9001"
-        cache_name = '{}_price'.format(exchange_id)
+        cache_name = '{}_spot_price'.format(exchange_id)
         while True:
             try:
                 async with websockets.connect(uri) as websocket:
@@ -240,6 +239,7 @@ class SpotBotHandler:
                         if exchange_id == 'binance':
                             asyncio.run(self._price_tickers[symbol].client.close_connection())
                         elif exchange_id == 'kucoin':
+                            self._price_tickers[symbol].stop()
                             logger = my_get_logger()
                             logger.warning('Error in price ticker was occurred!')
 
@@ -251,7 +251,7 @@ class SpotBotHandler:
         t.start()
 
     async def _start_symbol_price_ticker(self, exchange_id, symbol):
-        cache_name = '{}_price'.format(exchange_id)
+        cache_name = '{}_spot_price'.format(exchange_id)
         if exchange_id == 'binance':
             client = await async_retry_on_timeout(
                 self._public_clients[exchange_id],
@@ -292,7 +292,7 @@ class SpotBotHandler:
         return await AsyncClient.create()
 
     def _read_prices(self, exchange_id, symbols):
-        cache_name = '{}_price'.format(exchange_id)
+        cache_name = '{}_spot_price'.format(exchange_id)
         return {
             symbol: CacheUtils.read_from_cache(symbol, cache_name) for symbol in symbols
         }
