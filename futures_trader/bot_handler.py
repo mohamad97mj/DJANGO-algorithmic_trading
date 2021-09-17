@@ -14,7 +14,7 @@ from global_utils import CustomException, CacheUtils, round_down, slash2dash
 from websockets.exceptions import ConnectionClosedError
 from kucoin_futures.client import WsToken
 from kucoin_futures.ws_client import KucoinFuturesWsClient
-from futures_trader.utils import is_test
+from futures_trader.utils.app_vars import is_test
 
 
 @dataclass

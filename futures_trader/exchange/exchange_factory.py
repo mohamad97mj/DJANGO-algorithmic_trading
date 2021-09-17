@@ -2,7 +2,7 @@ import ccxt
 from typing import List
 from .exchange import Exchange
 from .sdk_exchange import SdkExchange
-from futures_trader.utils import obtain_credential
+from futures_trader.utils.obtain_credential import obtain_credential
 
 
 class ExchangeFactory:

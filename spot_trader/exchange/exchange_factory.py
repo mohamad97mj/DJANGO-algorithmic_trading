@@ -2,7 +2,7 @@ from typing import List
 import ccxt
 from binance.client import Client as PythonBinanceExchange
 from global_utils import retry_on_timeout
-from spot_trader.utils import obtain_credential
+from spot_trader.utils.obtain_credential import obtain_credential
 from .exchange import Exchange
 from .sdk_exchange import SdkExchange
 
