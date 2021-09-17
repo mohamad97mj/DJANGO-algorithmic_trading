@@ -25,7 +25,6 @@ def create_market_operation_in_cost(symbol,
         action='create',
         status='in_progress')
     market_operation.save()
-    step.purchased_size = int(size)
     step.operation = market_operation
     return market_operation
 

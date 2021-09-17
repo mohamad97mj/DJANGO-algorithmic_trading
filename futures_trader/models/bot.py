@@ -98,6 +98,7 @@ class FuturesBot(models.Model):
                     cost = value / order.leverage
                     strategy_state_data.available_margin -= cost
 
+                    step.purchased_size = size
                     step.cost = cost
                     step.save()
 
