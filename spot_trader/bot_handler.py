@@ -16,14 +16,14 @@ from spot_trader.strategies import SpotStrategyCenter
 from spot_trader.models import SpotSignal, SpotStep, SpotTarget
 from websockets.exceptions import ConnectionClosedError
 from kucoin.client import WsToken
-from kucoin.ws_client import KucoinWsClient
-from spot_trader.utils import is_test
+from spot_trader.utils.kucoin_ws import MyKucoinWsClient
+from spot_trader.utils.app_vars import is_test
 
 
 @dataclass
 class PriceTicker:
     thread: Thread
-    client: Union[AsyncClient, KucoinWsClient] = None
+    client: Union[AsyncClient, MyKucoinWsClient] = None
     subscribers: Set = field(default_factory=lambda: set())
 
     def stop(self):
@@ -146,7 +146,6 @@ class SpotBotHandler:
 
     def run_bots(self):
         while True:
-            logger = my_get_logger()
             credentials = list(self._bots.keys())
             running_bots = []
             for credential in credentials:
@@ -158,7 +157,7 @@ class SpotBotHandler:
                         price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
                         symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
                         while not symbol_prices:
-                            if is_test:
+                            if False:
                                 self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
                             else:
                                 self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
@@ -278,11 +277,19 @@ class SpotBotHandler:
                     CacheUtils.write_to_cache(symbol, float(msg['data']['price']), cache_name)
 
             client = WsToken()
-            ws_client = await KucoinWsClient.create(loop, client, deal_msg, private=False)
+            ws_client = await MyKucoinWsClient.create(loop, client, deal_msg, private=False)
+
             price_ticker = self._price_tickers[symbol]
             price_ticker.client = ws_client
-            price_ticker.stop = lambda: asyncio.run(
-                ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+
+            def kucoin_stop_ws():
+                async def wrapper():
+                    await ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol)))
+                    ws_client.close_connection()
+
+                asyncio.run(wrapper())
+
+            price_ticker.stop = kucoin_stop_ws
 
             await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
             while True:
