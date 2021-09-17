@@ -157,7 +157,7 @@ class SpotBotHandler:
                         price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
                         symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
                         while not symbol_prices:
-                            if False:
+                            if is_test:
                                 self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
                             else:
                                 self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
@@ -282,14 +282,11 @@ class SpotBotHandler:
             price_ticker = self._price_tickers[symbol]
             price_ticker.client = ws_client
 
-            def kucoin_stop_ws():
-                async def wrapper():
-                    await ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol)))
-                    ws_client.close_connection()
+            def close_ws():
+                asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+                ws_client.close_connection()
 
-                asyncio.run(wrapper())
-
-            price_ticker.stop = kucoin_stop_ws
+            price_ticker.stop = close_ws
 
             await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
             while True:

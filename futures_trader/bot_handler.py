@@ -13,14 +13,14 @@ from .models import FuturesSignal, FuturesStep, FuturesTarget
 from global_utils import CustomException, CacheUtils, round_down, slash2dash
 from websockets.exceptions import ConnectionClosedError
 from kucoin_futures.client import WsToken
-from kucoin_futures.ws_client import KucoinFuturesWsClient
+from futures_trader.utils.kucoin_ws import MyKucoinFuturesWsClient
 from futures_trader.utils.app_vars import is_test
 
 
 @dataclass
 class PriceTicker:
     thread: Thread
-    client: KucoinFuturesWsClient = None
+    client: MyKucoinFuturesWsClient = None
     subscribers: Set = field(default_factory=lambda: set())
 
     def stop(self):
@@ -254,11 +254,15 @@ class FuturesBotHandler:
                     CacheUtils.write_to_cache(symbol, float(msg['data']['price']), cache_name)
 
             client = WsToken()
-            ws_client = await KucoinFuturesWsClient.create(loop, client, deal_msg, private=False)
+            ws_client = await MyKucoinFuturesWsClient.create(loop, client, deal_msg, private=False)
             price_ticker = self._price_tickers[symbol]
             price_ticker.client = ws_client
-            price_ticker.stop = lambda: asyncio.run(
-                ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+
+            def close_ws():
+                asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+                ws_client.close_connection()
+
+            price_ticker.stop = close_ws
 
             await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
             while True:
