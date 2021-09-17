@@ -182,7 +182,7 @@ class ManualStrategyDeveloper:
                         'step_operation: (symbol: {}, price: {}, size: {})'.format(
                             symbol,
                             price,
-                            step.purchased_size))
+                            step.holding_size))
 
                     step.is_triggered = True
                     step.save()
