@@ -12,8 +12,8 @@ class FuturesPositionView(APIView):
 
     @catch_all_exceptions(reraise=True)
     def put(self, request, bot_id, format=None):
-        credential_id = request.query_params.get('credential_id', 'kucoin_test')
         data = json.loads(request.body)
+        credential_id = data.get('credential_id', 'kucoin_test')
         new_position_data = data['position']
         new_position, edited_data = FuturesBotTrader.edit_position(credential_id, bot_id, new_position_data, )
 
