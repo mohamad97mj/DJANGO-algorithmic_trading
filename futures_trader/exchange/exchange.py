@@ -23,8 +23,7 @@ class Exchange:
     def get_order(self, order_id):
         return self._sdk_exchange.trade_client.get_order_details(orderId=order_id)
 
-    def create_market_buy_order(self, symbol, leverage, size):
-        multiplier = self.get_contract(symbol)['multiplier']
+    def create_market_buy_order(self, symbol, leverage, size, multiplier):
         if self._exchange_id == 'kucoin':
             symbol = with2without_slash_f(symbol)
 
@@ -35,8 +34,7 @@ class Exchange:
                                                                              size=size)
         return self.get_order(exchange_order['orderId'])
 
-    def create_market_sell_order(self, symbol, leverage, size):
-        multiplier = self.get_contract(symbol)['multiplier']
+    def create_market_sell_order(self, symbol, leverage, size, multiplier):
         if self._exchange_id == 'kucoin':
             symbol = with2without_slash_f(symbol)
 
@@ -48,13 +46,13 @@ class Exchange:
                                                                              size=size)
         return self.get_order(exchange_order['orderId'])
 
-    def create_market_buy_order_in_cost(self, symbol, leverage, cost, price):
+    def create_market_buy_order_in_cost(self, symbol, leverage, cost, price, multiplier):
         size = (cost * leverage) / price
-        return self.create_market_buy_order(symbol=symbol, leverage=str(leverage), size=size)
+        return self.create_market_buy_order(symbol=symbol, leverage=str(leverage), size=size, multiplier=multiplier)
 
-    def create_market_sell_order_in_cost(self, symbol, leverage, cost, price):
+    def create_market_sell_order_in_cost(self, symbol, leverage, cost, price, multiplier):
         size = (cost * leverage) / price
-        return self.create_market_sell_order(symbol=symbol, leverage=str(leverage), size=size)
+        return self.create_market_sell_order(symbol=symbol, leverage=str(leverage), size=size, multiplier=multiplier)
 
     def get_all_positions(self):
         return self._sdk_exchange.trade_client.get_all_position()

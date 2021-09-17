@@ -72,12 +72,13 @@ class FuturesBot(models.Model):
             order = operation.order
             symbol = order.symbol
             price = order.price
+            multiplier = self._public_client.get_contract(symbol)['multiplier']
+            size = int(order.size / multiplier) * multiplier
             if operation.action == 'create':
                 if operation.type in ('buy_step', 'sell_step'):
                     step = operation.step
                     if test:
                         exchange_order_id = None
-                        size = int(order.size)
                         value = size * price
                         filled_value = value
                         timestamp = time.time()
@@ -86,9 +87,10 @@ class FuturesBot(models.Model):
                         exchange_order = self._private_client.create_market_buy_order(
                             symbol=symbol,
                             leverage=position.leverage,
-                            size=order.size)
+                            size=size,
+                            multiplier=multiplier,
+                        )
                         exchange_order_id = exchange_order['id']
-                        size = int(exchange_order['size'])
                         value = float(exchange_order['value'])
                         filled_value = float(exchange_order['filledValue'])
                         timestamp = exchange_order['createdAt']
@@ -104,7 +106,6 @@ class FuturesBot(models.Model):
                 else:
                     if test:
                         exchange_order_id = None
-                        size = int(order.size)
                         value = size * price
                         filled_value = value
                         timestamp = time.time()
@@ -113,10 +114,10 @@ class FuturesBot(models.Model):
                         exchange_order = self._private_client.create_market_sell_order(
                             symbol=symbol,
                             leverage=order.leverage,
-                            size=order.size,
+                            size=size,
+                            multiplier=multiplier,
                         )
                         exchange_order_id = exchange_order['id']
-                        size = int(exchange_order['size'])
                         value = float(exchange_order['value'])
                         filled_value = float(exchange_order['filledValue'])
                         timestamp = exchange_order['createdAt']
