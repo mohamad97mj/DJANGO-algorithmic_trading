@@ -21,11 +21,13 @@ class FuturesSignal(models.Model):
         self._init_related_targets()
 
     def _init_related_steps(self):
-        steps = self.steps.all()
+        steps = list(self.steps.order_by('entry_price'))
         if steps:
-            self.related_steps = list(steps)
+            if steps[0].entry_price == -1:
+                steps.append(steps.pop(0))
+            self.related_steps = steps
 
     def _init_related_targets(self):
-        targets = self.targets.all()
+        targets = list(self.targets.order_by('tp_price'))
         if targets:
-            self.related_targets = list(targets)
+            self.related_targets = targets
