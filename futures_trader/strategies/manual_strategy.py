@@ -179,10 +179,10 @@ class ManualStrategyDeveloper:
                     )
 
                     logger.info(
-                        'step_operation: (symbol: {}, price: {}, size: {})'.format(
+                        'step_operation: (symbol: {}, price: {}, margin: {})'.format(
                             symbol,
                             price,
-                            step.holding_size))
+                            step.margin))
 
                     step.is_triggered = True
                     step.save()
