@@ -283,7 +283,7 @@ class SpotBotHandler:
             price_ticker.client = ws_client
 
             def close_ws():
-                asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+                # asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
                 ws_client.close_connection()
 
             price_ticker.stop = close_ws
