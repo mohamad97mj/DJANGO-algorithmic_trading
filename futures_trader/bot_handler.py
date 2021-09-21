@@ -233,7 +233,8 @@ class FuturesBotHandler:
                 if symbol not in self._price_tickers or self._price_tickers[symbol].client:
                     if symbol in self._price_tickers:
                         if exchange_id == 'kucoin':
-                            self._price_tickers[symbol].stop()
+                            if not is_test:
+                                self._price_tickers[symbol].stop()
                             logger = my_get_logger()
                             logger.warning('Error in price ticker was occurred!')
 

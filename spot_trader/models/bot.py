@@ -1,5 +1,5 @@
 import time
-
+import decimal
 from global_utils import my_get_logger
 from typing import List, Union
 from django.utils import timezone
@@ -89,9 +89,10 @@ class SpotBot(models.Model):
             order = operation.order
             symbol = order.symbol
             price = order.price
-            markets = self._public_client.get_markets()
-            amount_precision = markets[symbol]['precision']['amount']
-            fee = markets[symbol]['maker']
+            market = self._public_client.get_markets()[symbol]
+            amount_precision = market['precision']['amount']
+            amount_in_quote_precision = abs(decimal.Decimal(market['info']['quoteIncrement']).as_tuple().exponent)
+            fee = market['maker']
             if operation.action == 'create':
                 if order.side == 'buy':
                     step = operation.step
@@ -108,7 +109,7 @@ class SpotBot(models.Model):
                     else:
                         exchange_order = self._private_client.create_market_buy_order_in_quote(
                             symbol=symbol,
-                            amount_in_quote=order.amount_in_quote)
+                            amount_in_quote=truncate(order.amount_in_quote, amount_in_quote_precision))
                         timestamp = exchange_order['timestamp']
                         cost = exchange_order['cost']
                         amount = exchange_order['filled']

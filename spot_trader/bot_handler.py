@@ -239,8 +239,9 @@ class SpotBotHandler:
                             asyncio.run(self._price_tickers[symbol].client.close_connection())
                         elif exchange_id == 'kucoin':
                             self._price_tickers[symbol].stop()
-                            logger = my_get_logger()
-                            logger.warning('Error in price ticker was occurred!')
+                            if not is_test:
+                                logger = my_get_logger()
+                                logger.warning('Error in price ticker was occurred!')
 
                     self._init_price_ticker(exchange_id, symbol)
 
