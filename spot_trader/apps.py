@@ -1,6 +1,6 @@
 import sys
 from django.apps import AppConfig
-from utils.app_vars import enable_spot
+from .utils.app_vars import enable_spot
 
 
 class SpotTraderConfig(AppConfig):
