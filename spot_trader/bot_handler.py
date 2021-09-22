@@ -241,7 +241,7 @@ class SpotBotHandler:
                             self._price_tickers[symbol].stop()
                             if not is_test:
                                 logger = my_get_logger()
-                                logger.warning('Error in price ticker was occurred!')
+                                logger.warning('Error in spot price ticker was occurred!')
 
                     self._init_price_ticker(exchange_id, symbol)
 
