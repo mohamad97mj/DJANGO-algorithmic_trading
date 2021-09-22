@@ -1,3 +1,4 @@
+import logging
 import time
 import asyncio
 import websockets
@@ -236,7 +237,7 @@ class FuturesBotHandler:
                             if not is_test:
                                 self._price_tickers[symbol].stop()
                             logger = my_get_logger()
-                            logger.warning('Error in price ticker was occurred!')
+                            logger.warning('Error in futures price ticker was occurred!')
 
                     self._init_price_ticker(exchange_id, symbol)
 
@@ -246,28 +247,32 @@ class FuturesBotHandler:
         t.start()
 
     async def _start_symbol_price_ticker(self, exchange_id, symbol):
-        cache_name = '{}_futures_price'.format(exchange_id)
-        if exchange_id == 'kucoin':
-            loop = asyncio.get_event_loop()
+        try:
+            cache_name = '{}_futures_price'.format(exchange_id)
+            if exchange_id == 'kucoin':
+                loop = asyncio.get_event_loop()
 
-            async def deal_msg(msg):
-                if msg['topic'] == '/market/ticker:{}'.format(slash2dash(symbol)):
-                    CacheUtils.write_to_cache(symbol, float(msg['data']['price']), cache_name)
+                async def deal_msg(msg):
+                    if msg['topic'] == '/market/ticker:{}'.format(slash2dash(symbol)):
+                        CacheUtils.write_to_cache(symbol, float(msg['data']['price']), cache_name)
 
-            client = WsToken()
-            ws_client = await MyKucoinFuturesWsClient.create(loop, client, deal_msg, private=False)
-            price_ticker = self._price_tickers[symbol]
-            price_ticker.client = ws_client
+                client = WsToken()
+                ws_client = await MyKucoinFuturesWsClient.create(loop, client, deal_msg, private=False)
+                price_ticker = self._price_tickers[symbol]
+                price_ticker.client = ws_client
 
-            def close_ws():
-                # asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
-                ws_client.close_connection()
+                def close_ws():
+                    # asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+                    ws_client.close_connection()
 
-            price_ticker.stop = close_ws
+                price_ticker.stop = close_ws
 
-            await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
-            while True:
-                await asyncio.sleep(60, loop=loop)
+                await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
+                while True:
+                    await asyncio.sleep(60, loop=loop)
+        except Exception as e:
+            logger = my_get_logger()
+            logger.error(e)
 
     def _read_prices(self, exchange_id, symbols):
         cache_name = '{}_futures_price'.format(exchange_id)
