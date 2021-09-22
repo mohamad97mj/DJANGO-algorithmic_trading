@@ -1,2 +1,2 @@
 is_test = False
-enable_spot = False
+enable_spot = True
