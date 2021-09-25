@@ -268,7 +268,7 @@ class FuturesBotHandler:
 
             async def deal_msg(msg):
                 logger = my_get_logger()
-                logger.debug('msg')
+                logger.debug(msg)
                 if msg['topic'] == '/market/ticker:{}'.format(slash2dash(symbol)):
                     CacheUtils.write_to_cache(symbol, float(msg['data']['price']), cache_name)
 
