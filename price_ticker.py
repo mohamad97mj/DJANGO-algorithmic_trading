@@ -21,8 +21,6 @@ async def main():
     await ws_client.subscribe('/contractMarket/level3:XBTUSDM')
     while True:
         await asyncio.sleep(10, loop=loop)
-        await ws_client.unsubscribe('/contractMarket/level2:XBTUSDM')
-        await ws_client.unsubscribe('/contractMarket/level3:XBTUSDM')
 
 
 
