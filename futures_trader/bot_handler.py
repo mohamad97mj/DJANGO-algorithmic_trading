@@ -169,11 +169,11 @@ class FuturesBotHandler:
                         price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
                         symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
                         while not symbol_prices:
-                            if is_test:
+                            if False:
                                 self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
                             else:
                                 self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
-                            time.sleep(10)
+                            time.sleep(45)
                             symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
 
                         logger = my_get_logger()
