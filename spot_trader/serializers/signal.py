@@ -6,9 +6,8 @@ from .stoploss import SpotStoplossSerializer
 
 class SpotSignalSerializer(serializers.Serializer):
     symbol = serializers.CharField(max_length=50)
-    step_share_set_mode = serializers.CharField(max_length=50, required=False, allow_null=True)
+    setup_mode = serializers.CharField(max_length=50, required=False, allow_null=True)
     steps = SpotStepSerializer(many=True)
-    target_share_set_mode = serializers.CharField(max_length=50, required=False, allow_null=True)
     targets = SpotTargetSerializer(many=True, required=False, allow_null=True)
     stoploss = SpotStoplossSerializer(required=False, allow_null=True)
 

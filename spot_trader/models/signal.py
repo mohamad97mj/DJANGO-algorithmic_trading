@@ -7,8 +7,7 @@ class SpotSignal(models.Model):
     symbol = models.CharField(max_length=50)
     stoploss = models.OneToOneField('SpotStoploss', related_name='signal', null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
-    step_share_set_mode = models.CharField(max_length=50)
-    target_share_set_mode = models.CharField(max_length=50, null=True, blank=True)
+    setup_mode = models.CharField(max_length=50)
 
     def __init__(self, *args, **kwargs):
         super(SpotSignal, self).__init__(*args, **kwargs)

@@ -6,14 +6,15 @@ def create_market_operation_in_cost(symbol,
                                     side,
                                     price,
                                     margin,
+                                    leverage,
                                     position: FuturesPosition,
                                     step: FuturesStep):
-    size = (margin * position.leverage) / price
+    size = (margin * leverage) / price
     market_order = FuturesOrder(symbol=symbol,
                                 type='market',
                                 side=side,
                                 price=price,
-                                leverage=position.leverage,
+                                leverage=leverage,
                                 size=size,
                                 status='created',
                                 )
@@ -34,13 +35,14 @@ def create_market_operation(symbol,
                             side,
                             price,
                             size,
+                            leverage,
                             position: FuturesPosition,
                             stoploss: FuturesStoploss = None):
     market_order = FuturesOrder(symbol=symbol,
                                 type='market',
                                 side=side,
                                 price=price,
-                                leverage=position.leverage,
+                                leverage=leverage,
                                 size=size,
                                 status='created')
     market_order.save()

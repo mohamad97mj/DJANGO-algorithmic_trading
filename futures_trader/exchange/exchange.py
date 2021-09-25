@@ -77,7 +77,7 @@ class Exchange:
         if self._exchange_id == 'kucoin':
             symbol = with2without_slash_f(symbol)
 
-        return self._sdk_exchange.market_client.get_ticker(symbol)
+        return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
 
     def get_contracts(self):
         return self._sdk_exchange.market_client.get_contracts_list()

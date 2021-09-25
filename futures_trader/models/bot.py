@@ -69,6 +69,7 @@ class FuturesBot(models.Model):
         for operation in operations:
 
             position = operation.position
+            signal = position.signal
             order = operation.order
             symbol = order.symbol
             price = order.price
@@ -103,6 +104,17 @@ class FuturesBot(models.Model):
                     step.save()
 
                     position.holding_size += size
+
+                    targets = signal.related_targets
+                    remaining_size = size
+                    for i in range(len(targets) - 1):
+                        target = targets[i]
+                        target.holding_size += int((size * target.share) / multiplier) * multiplier
+                        remaining_size -= target.holding_size
+                        target.save()
+                    last_target = targets[len(targets) - 1]
+                    last_target.holding_size = remaining_size
+                    last_target.save()
 
                 else:
                     if test:

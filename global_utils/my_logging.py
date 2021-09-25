@@ -42,7 +42,10 @@ def load_file_handlers(logger):
         if handler.name.startswith(handler_name_prefix):
             break
     else:
-        logger.handlers = [logger.handlers[0], ]
+        for _handler in logger.handlers.copy()[1:]:
+            _handler.close()
+            logger.removeHandler(_handler)
+
         for symbol, level in symbol2level.items():
             level_name = logging.getLevelName(level).lower()
             parent_dir_name = level_name
@@ -55,4 +58,5 @@ def load_file_handlers(logger):
             fh.addFilter(LevelFilter(level=level_name))
             formatter = logging.Formatter(settings.PYTHON_LOGGING_FORMAT)
             fh.setFormatter(formatter)
+            fh.close()
             logger.addHandler(fh)

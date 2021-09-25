@@ -59,21 +59,32 @@ class FuturesBotHandler:
                 stoploss.save()
                 signal.stoploss = stoploss
 
-            step_share_set_mode = signal_data.get('step_share_set_mode', 'auto')
+            setup_mode = signal_data.get('setup_mode', 'auto')
 
-            signal.step_share_set_mode = step_share_set_mode
+            signal.setup_mode = setup_mode
             signal.save()
 
             steps = []
+            first_step_is_market = False
             is_reversed = signal.side == 'sell'
             sorted_steps_data = sorted(signal_data['steps'], reverse=is_reversed, key=lambda s: s['entry_price'])
-            if sorted_steps_data[0]['entry_price'] == -1:
-                sorted_steps_data.append(sorted_steps_data.pop(0))
+            if signal.side == 'buy':
+                last_step_data = sorted_steps_data[0]
+                if last_step_data['entry_price'] == -1:
+                    sorted_steps_data.append(sorted_steps_data.pop(0))
+            first_step_data = sorted_steps_data[len(sorted_steps_data) - 1]
+            if first_step_data['entry_price'] == -1:
+                first_step_is_market = True
+                public_client = self.init_public_client(exchange_id=exchange_id)
+                first_step_data['entry_price'] = public_client.fetch_ticker(signal.symbol)
 
-            for step_data in sorted_steps_data:
+            for i in range(len(sorted_steps_data)):
+                step_data = sorted_steps_data[i]
                 step = FuturesStep(signal=signal,
                                    entry_price=step_data.get('entry_price'),
-                                   share=round_down(step_data.get('share')))
+                                   share=round_down(step_data.get('share')),
+                                   is_market=first_step_is_market if i == len(
+                                       sorted_steps_data) - 1 and first_step_is_market else False)
                 step.save()
                 steps.append(step)
 
@@ -85,7 +96,8 @@ class FuturesBotHandler:
             if targets_data:
                 is_reversed = signal.side == 'sell'
                 sorted_targets_data = sorted(targets_data, reverse=is_reversed, key=lambda t: t['tp_price'])
-                for target_data in sorted_targets_data:
+                for i in range(len(sorted_targets_data)):
+                    target_data = targets_data[i]
                     target = FuturesTarget(signal=signal,
                                            tp_price=target_data.get('tp_price'))
                     target.save()
@@ -108,7 +120,7 @@ class FuturesBotHandler:
 
         self.init_bot_requirements(bot=new_bot)
         strategy_developer = FuturesStrategyCenter.get_strategy_developer(new_bot.strategy)
-        new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(new_bot.position))
+        new_bot.set_strategy_state_data(strategy_developer.init_setup(new_bot.position))
         new_bot.save()
         if credential_id in self._bots:
             self._bots[credential_id][str(new_bot.id)] = new_bot
@@ -128,15 +140,19 @@ class FuturesBotHandler:
 
     def set_bot_strategy_state_data(self, bot):
         strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
-        bot.set_strategy_state_data(strategy_developer.reload_strategy_state_data(bot.position))
+        bot.set_strategy_state_data(strategy_developer.reload_setup(bot.position))
+
+    def init_public_client(self, exchange_id):
+        if exchange_id in self._public_clients:
+            public_client = self._public_clients[exchange_id]
+        else:
+            public_client = PublicClient(exchange_id=exchange_id)
+            self._public_clients[exchange_id] = public_client
+        return public_client
 
     def init_bot_requirements(self, bot):
         private_client = PrivateClient(exchange_id=bot.exchange_id, credential_id=bot.credential_id)
-        if bot.exchange_id in self._public_clients:
-            public_client = self._public_clients[bot.exchange_id]
-        else:
-            public_client = PublicClient(exchange_id=bot.exchange_id)
-            self._public_clients[bot.exchange_id] = public_client
+        public_client = self.init_public_client(exchange_id=bot.exchange_id)
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
@@ -157,7 +173,7 @@ class FuturesBotHandler:
                                 self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
                             else:
                                 self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
-                            time.sleep(60)
+                            time.sleep(10)
                             symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
 
                         logger = my_get_logger()

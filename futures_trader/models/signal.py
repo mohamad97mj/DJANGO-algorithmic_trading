@@ -8,7 +8,7 @@ class FuturesSignal(models.Model):
     side = models.CharField(max_length=10)
     stoploss = models.OneToOneField('FuturesStoploss', related_name='signal', null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
-    step_share_set_mode = models.CharField(max_length=50)
+    setup_mode = models.CharField(max_length=50)
 
     def __init__(self, *args, **kwargs):
         super(FuturesSignal, self).__init__(*args, **kwargs)

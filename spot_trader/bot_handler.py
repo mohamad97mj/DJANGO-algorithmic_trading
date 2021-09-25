@@ -64,10 +64,8 @@ class SpotBotHandler:
                 signal.stoploss = stoploss
 
             step_share_set_mode = signal_data.get('step_share_set_mode', 'auto')
-            target_share_set_mode = signal_data.get('target_share_set_mode', 'auto')
 
-            signal.step_share_set_mode = step_share_set_mode
-            signal.target_share_set_mode = target_share_set_mode
+            signal.setup_mode = step_share_set_mode
             signal.save()
 
             steps = []
@@ -112,7 +110,7 @@ class SpotBotHandler:
 
         self.init_bot_requirements(bot=new_bot)
         strategy_developer = SpotStrategyCenter.get_strategy_developer(new_bot.strategy)
-        new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(new_bot.position))
+        new_bot.set_strategy_state_data(strategy_developer.init_setup(new_bot.position))
         new_bot.save()
         if credential_id in self._bots:
             self._bots[credential_id][str(new_bot.id)] = new_bot
@@ -132,7 +130,7 @@ class SpotBotHandler:
 
     def set_bot_strategy_state_data(self, bot):
         strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
-        bot.set_strategy_state_data(strategy_developer.reload_strategy_state_data(bot.position))
+        bot.set_strategy_state_data(strategy_developer.reload_setup(bot.position))
 
     def init_bot_requirements(self, bot):
         private_client = PrivateClient(exchange_id=bot.exchange_id, credential_id=bot.credential_id)
@@ -161,7 +159,7 @@ class SpotBotHandler:
                                 self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
                             else:
                                 self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
-                            time.sleep(60)
+                            time.sleep(10)
                             symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
 
                         logger = my_get_logger()
@@ -364,7 +362,6 @@ class SpotBotHandler:
                     strategy_developer,
                     'edit_targets',
                     new_targets_data,
-                    new_signal_data.get('target_share_set_mode', 'auto')
                 )
                 if targets_was_edited:
                     edited_data.append('targets')
