@@ -267,6 +267,8 @@ class FuturesBotHandler:
             loop = asyncio.get_event_loop()
 
             async def deal_msg(msg):
+                logger = my_get_logger()
+                logger.debug('msg')
                 if msg['topic'] == '/market/ticker:{}'.format(slash2dash(symbol)):
                     CacheUtils.write_to_cache(symbol, float(msg['data']['price']), cache_name)
 
