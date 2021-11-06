@@ -671,3 +671,110 @@
 #                 )
 #
 #         return setup_data
+#
+#
+# def kijun_sen(data, where):
+#     for i in range(len(data)):
+#         try:
+#             data[i, where] = max(data[i - 26:i + 1, 1]) + min(data[i - 26:i + 1, 2])
+#
+#         except ValueError:
+#             pass
+#
+#     data[:, where] = data[:, where] / 2
+#
+#     return data
+#
+#
+# def tenkan_sen(data, where):
+#     for i in range(len(data)):
+#         try:
+#             data[i, where] = max(data[i - 26:i + 1, 1]) + min(data[i - 26:i + 1, 2])
+#
+#         except ValueError:
+#             pass
+#
+#     data[:, where] = data[:, where] / 2
+#
+#     return data
+#
+#
+# def chikou_span(data, where):
+#     for i in range(len(data)):
+#         try:
+#             data[i, where] = data[i + 26, 3]
+#         except IndexError:
+#             pass
+#
+#
+# def ichimoku(data, where):
+#     kijun_sen(data, where)
+#     tenkan_sen(data, where)
+#     chikou_span(data, where)
+#
+#     data[:, where + 1] = data[:, where + 1] / 2
+#
+#     # Senkou-span A
+#     senkou_span_a = (data[:, where] + data[:, where + 1]) / 2
+#     senkou_span_a = np.reshape(senkou_span_a, (-1, 1))
+#     # Senkou-span B
+#     for i in range(len(data)):
+#         try:
+#             data[i, where + 2] = max(data[i - 52:i + 1, 1]) + min(
+#                 data[i - 52:i + 1, 2])
+#
+#         except ValueError:
+#             pass
+#
+#     data[:, where + 2] = data[:, where + 2] / 2
+#     senkou_span_b = data[:, where + 2]
+#     senkou_span_b = np.reshape(senkou_span_b, (-1, 1))
+#     kumo = np.concatenate((senkou_span_a, senkou_span_b), axis=1)
+#
+#     # Creating the Cloud
+#     data = np.concatenate((data, kumo), axis=1)
+#     data = data[senkou_span_b_lookback:, ]
+#
+#     for i in range(1, 7):
+#         new_array = shift(data[:, 0], -26, cval=0)
+#         new_array = np.reshape(new_array, (-1, 1))
+#         data = np.concatenate((data, new_array), axis=1)
+#         data = deleter(data, 0, 1)
+#     kumo = data[:, 0:2]
+#     data = deleter(data, 0, 2)
+#     data = np.concatenate((data, kumo), axis=1)
+#
+#     return data
+#
+#
+# def signal(data):
+#
+#     closing_price_column_index = 0
+#     kijun_column_index = 1
+#     tenkan_column_index = 2
+#     chikou_span_column_index = 3
+#     senkou_span_a_column_index = 4
+#     senkou_span_b_column_index = 5
+#
+#     for i in range(len(data)):
+#         if \
+#                 data[i, closing_price_column_index] > data[i, kijun_column_index] and\
+#                 data[i, tenkan_column_index] > data[i, kijun_column_index] and\
+#                 data[i - 1, tenkan_column_index] < data[i - 1, kijun_column_index] and \
+#                 data[i - 26, chikou_span_column_index] > data[i - 26, closing_price_column_index] and \
+#                 data[i, closing_price_column_index] > data[i, senkou_span_b_column_index] and \
+#                 data[i, closing_price_column_index] > data[i, senkou_span_a_column_index]:
+#             return 1
+#
+#         if \
+#                 data[i, closing_price_column_index] < data[i, kijun_column_index] and\
+#                 data[i, tenkan_column_index] < data[i, kijun_column_index] and\
+#                 data[i - 1, tenkan_column_index] > data[i - 1, kijun_column_index] and \
+#                 data[i - 26, chikou_span_column_index] < data[i - 26, closing_price_column_index] and \
+#                 data[i, closing_price_column_index] < data[i, senkou_span_b_column_index] and \
+#                 data[i, closing_price_column_index] < data[i, senkou_span_a_column_index]:
+#             return -1
+#
+#     return 0
+#
+# # 1 -> buy, -1 -> sell, 0 -> do nothing

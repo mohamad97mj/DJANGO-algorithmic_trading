@@ -1,4 +1,4 @@
-from .manual_strategy import ManualStrategyDeveloper
+from .main import ManualStrategyDeveloper
 
 strategy_mapper = {
     'manual': ManualStrategyDeveloper,

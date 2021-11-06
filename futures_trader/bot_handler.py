@@ -10,15 +10,17 @@ from threading import Thread
 from dataclasses import dataclass, field
 from .strategies.strategy_center import FuturesStrategyCenter
 from .models import FuturesSignal, FuturesStep, FuturesTarget
-from global_utils import CustomException, CacheUtils, round_down, slash2dash
+from global_utils import CustomException, CacheUtils, round_down, slash2dash, async_retry_on_timeout
 from websockets.exceptions import ConnectionClosedError
 from kucoin_futures.client import WsToken
 from futures_trader.utils.kucoin_ws import MyKucoinFuturesWsClient
 from futures_trader.utils.app_vars import is_test
+from concurrent.futures._base import TimeoutError
 
 
 @dataclass
 class PriceTicker:
+    id: int
     thread: Thread
     client: MyKucoinFuturesWsClient = None
     subscribers: Set = field(default_factory=lambda: set())
@@ -41,6 +43,7 @@ class FuturesBotHandler:
         self._bots = {}
         self._public_clients = {}
         self._price_tickers = {}
+        self.number_of_tickers = 0
 
     def create_bot(self, exchange_id: str, credential_id: str, strategy: str, position_data: dict):
 
@@ -168,12 +171,17 @@ class FuturesBotHandler:
                         strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
                         price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
                         symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
+                        t1 = time.time()
+                        is_first_iteration = True
                         while not symbol_prices:
-                            if False:
-                                self._start_muck_symbols_price_ticker(bot.exchange_id, price_required_symbols)
-                            else:
+                            t2 = time.time()
+                            delta_t = t2 - t1
+                            if delta_t > 60 or is_first_iteration:
+                                if is_first_iteration:
+                                    is_first_iteration = False
+                                else:
+                                    t1 = time.time()
                                 self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
-                            time.sleep(45)
                             symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
 
                         logger = my_get_logger()
@@ -209,57 +217,64 @@ class FuturesBotHandler:
 
         return symbol_prices
 
-    def _start_muck_symbols_price_ticker(self, exchange_id, symbols: List):
-        symbol_prices = self._read_prices(exchange_id, symbols)
+    def _start_symbols_price_ticker(self, exchange_id, symbols: List):
 
+        symbol_prices = self._read_prices(exchange_id, symbols)
         for symbol in symbols:
             if not (symbol in symbol_prices and symbol_prices[symbol]):
-                t = Thread(target=asyncio.run, args=(self._start_muck_symbol_price_ticker(exchange_id, symbol),))
-                self._price_tickers[symbol] = PriceTicker(t)
-                t.start()
+                if symbol in self._price_tickers:
+                    price_ticker = self._price_tickers[symbol]
+                    price_ticker.stop()
+                    logger = my_get_logger()
+                    logger.warning(
+                        'Error in futures{} price ticker {} was occurred!'.format(
+                            ' muck' if is_test else '', price_ticker.id))
+                time.sleep(10)
+                self._init_price_ticker(exchange_id, symbol)
+
+    def _init_price_ticker(self, exchange_id, symbol):
+        logger = my_get_logger()
+        logger.info('price_ticker {} was started'.format(self.number_of_tickers))
+        if False:
+            args = self._start_muck_symbol_price_ticker(exchange_id, symbol)
+        else:
+            args = self._start_symbol_price_ticker(exchange_id, symbol)
+        t = Thread(target=asyncio.run, args=(args,))
+        self._price_tickers[symbol] = PriceTicker(self.number_of_tickers, t)
+        t.start()
+        self.number_of_tickers += 1
 
     async def _start_muck_symbol_price_ticker(self, exchange_id, symbol):
-        uri = "ws://localhost:9001"
+        uri = "ws://localhost:9002"
         cache_name = '{}_futures_price'.format(exchange_id)
 
         while True:
+            price_ticker = self._price_tickers[symbol]
             try:
                 async with websockets.connect(uri) as websocket:
-                    price_ticker = self._price_tickers[symbol]
+                    client = websocket
                     price_ticker.client = websocket
+                    loop = asyncio.get_event_loop()
+
+                    def close_ws():
+                        print('websocket {} was closed'.format(price_ticker.id))
+                        # asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+                        asyncio.ensure_future(client.close(), loop=loop)
+
+                    price_ticker.stop = close_ws
                     await websocket.send(symbol)
                     while True:
                         try:
                             price = await websocket.recv()
+                            print(price, price_ticker.id)
                             CacheUtils.write_to_cache(symbol, float(price), cache_name)
-                        except Exception as e:
+                        except (ConnectionClosedError,) as e:
                             logger = my_get_logger()
-                            logger.error(e)
+                            logger.warning(e)
                             break
-            except (OSError, ConnectionClosedError):
+            except (OSError, ConnectionClosedError, TimeoutError):
                 logger = my_get_logger()
-                logger.warning('Could not connect to muck price server!')
-
-    def _start_symbols_price_ticker(self, exchange_id, symbols: List):
-
-        symbol_prices = self._read_prices(exchange_id, symbols)
-
-        for symbol in symbols:
-            if not (symbol in symbol_prices and symbol_prices[symbol]):
-                if symbol not in self._price_tickers or self._price_tickers[symbol].client:
-                    if symbol in self._price_tickers:
-                        if exchange_id == 'kucoin':
-                            if not is_test:
-                                self._price_tickers[symbol].stop()
-                            logger = my_get_logger()
-                            logger.warning('Error in futures price ticker was occurred!')
-
-                    self._init_price_ticker(exchange_id, symbol)
-
-    def _init_price_ticker(self, exchange_id, symbol):
-        t = Thread(target=asyncio.run, args=(self._start_symbol_price_ticker(exchange_id, symbol),))
-        self._price_tickers[symbol] = PriceTicker(t)
-        t.start()
+                logger.warning('Could not connect to muck price server from price ticker {}!'.format(price_ticker.id))
 
     async def _start_symbol_price_ticker(self, exchange_id, symbol):
         cache_name = '{}_futures_price'.format(exchange_id)
@@ -273,11 +288,17 @@ class FuturesBotHandler:
                     CacheUtils.write_to_cache(symbol, float(msg['data']['price']), cache_name)
 
             client = WsToken()
-            ws_client = await MyKucoinFuturesWsClient.create(loop, client, deal_msg, private=False)
+
+            @async_retry_on_timeout(self._public_clients[exchange_id])
+            async def create_kucoin_futures_ws_client():
+                return await MyKucoinFuturesWsClient.create(loop, client, deal_msg, private=False)
+
+            ws_client = await create_kucoin_futures_ws_client()
             price_ticker = self._price_tickers[symbol]
             price_ticker.client = ws_client
 
             def close_ws():
+                print('websocket {} was closed'.format(price_ticker.id))
                 # asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
                 ws_client.close_connection()
 

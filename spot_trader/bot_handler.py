@@ -205,7 +205,7 @@ class SpotBotHandler:
                 t.start()
 
     async def _start_muck_symbol_price_ticker(self, exchange_id, symbol):
-        uri = "ws://localhost:9001"
+        uri = "ws://localhost:9000"
         cache_name = '{}_spot_price'.format(exchange_id)
         while True:
             try:
@@ -232,14 +232,10 @@ class SpotBotHandler:
         for symbol in symbols:
             if not (symbol in symbol_prices and symbol_prices[symbol]):
                 if symbol not in self._price_tickers or self._price_tickers[symbol].client:
-                    if symbol in self._price_tickers:
-                        if exchange_id == 'binance':
-                            asyncio.run(self._price_tickers[symbol].client.close_connection())
-                        elif exchange_id == 'kucoin':
-                            self._price_tickers[symbol].stop()
-                            if not is_test:
-                                logger = my_get_logger()
-                                logger.warning('Error in spot price ticker was occurred!')
+                    self._price_tickers[symbol].stop()
+                    if not is_test:
+                        logger = my_get_logger()
+                        logger.warning('Error in spot price ticker was occurred!')
 
                     self._init_price_ticker(exchange_id, symbol)
 

@@ -11,6 +11,7 @@ def retry_on_timeout(timeout_errors=None, attempts=None, delay=5):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             def caught_func():
+                _result, _error = None, True
                 try:
                     _result, _error = func(*args, **kwargs), False
                 except timeout_errors as e:
@@ -21,9 +22,7 @@ def retry_on_timeout(timeout_errors=None, attempts=None, delay=5):
                     #                                                                args,
                     #                                                                kwargs,
                     #                                                                e,
-                    #
                     #                                                                traceback.format_exc()))
-                    _result, _error = None, True
                     time.sleep(delay)
                 finally:
                     return _result, _error
