@@ -10,3 +10,5 @@ class FuturesTarget(models.Model):
     holding_size = models.FloatField(default=0)
     is_triggered = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
+    operation = models.OneToOneField('FuturesOperation', related_name='target', on_delete=models.SET_NULL, null=True)
+

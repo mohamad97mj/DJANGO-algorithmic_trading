@@ -1,10 +1,11 @@
 import ccxt
 from ccxt.base.errors import NetworkError
+from requests.exceptions import ConnectionError
 from global_utils import retry_on_timeout, apply2all_methods, with2without_slash_f
 from .sdk_exchange import SdkExchange
 
 
-@apply2all_methods(retry_on_timeout(timeout_errors=NetworkError))
+@apply2all_methods(retry_on_timeout(timeout_errors=(NetworkError, ConnectionError)))
 class Exchange:
     default_params = {
     }
@@ -23,25 +24,13 @@ class Exchange:
     def get_order(self, order_id):
         return self._sdk_exchange.trade_client.get_order_details(orderId=order_id)
 
-    def create_market_buy_order(self, symbol, leverage, size, multiplier):
+    def create_market_order(self, symbol, leverage, side, size, multiplier):
         if self._exchange_id == 'kucoin':
             symbol = with2without_slash_f(symbol)
 
         size = int(size / multiplier)
         exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
-                                                                             side='buy',
-                                                                             lever=leverage,
-                                                                             size=size)
-        return self.get_order(exchange_order['orderId'])
-
-    def create_market_sell_order(self, symbol, leverage, size, multiplier):
-        if self._exchange_id == 'kucoin':
-            symbol = with2without_slash_f(symbol)
-
-        size = int(size / multiplier)
-
-        exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
-                                                                             side='sell',
+                                                                             side=side,
                                                                              lever=leverage,
                                                                              size=size)
         return self.get_order(exchange_order['orderId'])

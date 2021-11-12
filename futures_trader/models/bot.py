@@ -76,37 +76,46 @@ class FuturesBot(models.Model):
             multiplier = self._public_client.get_contract(symbol)['multiplier']
             size = int(order.size / multiplier) * multiplier
             if operation.action == 'create':
-                if operation.type in ('buy_step', 'sell_step'):
-                    step = operation.step
-                    if test:
-                        exchange_order_id = None
-                        value = size * price
-                        filled_value = value
-                        timestamp = time.time()
+                if test:
+                    exchange_order_id = None
+                    value = size * price
+                    filled_value = value
+                    timestamp = time.time()
 
-                    else:
-                        exchange_order = self._private_client.create_market_buy_order(
-                            symbol=symbol,
-                            leverage=position.leverage,
-                            size=size,
-                            multiplier=multiplier,
-                        )
-                        exchange_order_id = exchange_order['id']
-                        value = float(exchange_order['value'])
-                        filled_value = float(exchange_order['filledValue'])
-                        timestamp = exchange_order['createdAt']
+                else:
+                    exchange_order = self._private_client.create_market_order(
+                        symbol=symbol,
+                        leverage=position.leverage,
+                        side=order.side,
+                        size=size,
+                        multiplier=multiplier,
+                    )
+                    exchange_order_id = exchange_order['id']
+                    value = float(exchange_order['value'])
+                    filled_value = float(exchange_order['filledValue'])
+                    timestamp = exchange_order['createdAt']
 
-                    cost = value / order.leverage
+                cost = value / order.leverage
+
+                if operation.type == 'step':
                     strategy_state_data.available_margin -= cost
-
+                    step = operation.step
                     step.purchased_size = size
                     step.cost = cost
                     step.save()
-
                     position.holding_size += size
+                    remaining_size = size
+
+                    avg_leverage = 0
+                    steps = signal.related_steps
+                    total_triggered_margin = 0
+                    for step in steps:
+                        if step.is_triggered:
+                            total_triggered_margin += step.margin
+                            avg_leverage += step.margin * step.leverage
+                    position.leverage = int(avg_leverage / total_triggered_margin)
 
                     targets = signal.related_targets
-                    remaining_size = size
                     for i in range(len(targets) - 1):
                         target = targets[i]
                         target.holding_size += int((size * target.share) / multiplier) * multiplier
@@ -115,29 +124,10 @@ class FuturesBot(models.Model):
                     last_target = targets[len(targets) - 1]
                     last_target.holding_size = remaining_size
                     last_target.save()
-
                 else:
-                    if test:
-                        exchange_order_id = None
-                        value = size * price
-                        filled_value = value
-                        timestamp = time.time()
-
-                    else:
-                        exchange_order = self._private_client.create_market_sell_order(
-                            symbol=symbol,
-                            leverage=order.leverage,
-                            size=size,
-                            multiplier=multiplier,
-                        )
-                        exchange_order_id = exchange_order['id']
-                        value = float(exchange_order['value'])
-                        filled_value = float(exchange_order['filledValue'])
-                        timestamp = exchange_order['createdAt']
-
-                    cost = value / order.leverage
-                    strategy_state_data.available_margin += cost
-
+                    target = operation.target
+                    target.holding_size -= size
+                    target.save()
                     position.holding_size -= size
                     position.released_margin = cost
 

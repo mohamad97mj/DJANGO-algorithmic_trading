@@ -32,8 +32,6 @@ class PriceTicker:
     def unsubscribe_bot(self, bot_id):
         if bot_id in self.subscribers:
             self.subscribers.remove(bot_id)
-
-    def stop_if_no_subscribers(self):
         if not self.subscribers:
             self.stop()
 
@@ -69,6 +67,7 @@ class SpotBotHandler:
             signal.save()
 
             steps = []
+            first_step_is_market = False
             sorted_steps_data = sorted(signal_data['steps'], key=lambda s: s['buy_price'])
             if sorted_steps_data[0]['buy_price'] == -1:
                 sorted_steps_data.append(sorted_steps_data.pop(0))
@@ -110,7 +109,7 @@ class SpotBotHandler:
 
         self.init_bot_requirements(bot=new_bot)
         strategy_developer = SpotStrategyCenter.get_strategy_developer(new_bot.strategy)
-        new_bot.set_strategy_state_data(strategy_developer.init_setup(new_bot.position))
+        new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(new_bot.position))
         new_bot.save()
         if credential_id in self._bots:
             self._bots[credential_id][str(new_bot.id)] = new_bot
@@ -132,13 +131,17 @@ class SpotBotHandler:
         strategy_developer = SpotStrategyCenter.get_strategy_developer(bot.strategy)
         bot.set_strategy_state_data(strategy_developer.reload_setup(bot.position))
 
+    def init_public_client(self, exchange_id):
+        if exchange_id in self._public_clients:
+            public_client = self._public_clients[exchange_id]
+        else:
+            public_client = PublicClient(exchange_id=exchange_id)
+            self._public_clients[exchange_id] = public_client
+        return public_client
+
     def init_bot_requirements(self, bot):
         private_client = PrivateClient(exchange_id=bot.exchange_id, credential_id=bot.credential_id)
-        if bot.exchange_id in self._public_clients:
-            public_client = self._public_clients[bot.exchange_id]
-        else:
-            public_client = PublicClient(exchange_id=bot.exchange_id)
-            self._public_clients[bot.exchange_id] = public_client
+        public_client = self.init_public_client(exchange_id=bot.exchange_id)
         bot.init_requirements(private_client=private_client, public_client=public_client)
         bot.ready()
 
@@ -180,7 +183,6 @@ class SpotBotHandler:
                     if not bot.status == SpotBot.Status.RUNNING.value:
                         price_ticker = self._price_tickers[bot.position.signal.symbol]
                         price_ticker.unsubscribe_bot(bot.id)
-                        price_ticker.stop_if_no_subscribers()
 
                 except Exception as e:
                     logger = my_get_logger()
@@ -398,7 +400,6 @@ class SpotBotHandler:
         if bot.status == SpotBot.Status.RUNNING.value:
             price_ticker = self._price_tickers[bot.position.signal.symbol]
             price_ticker.unsubscribe_bot(bot.id)
-            price_ticker.stop_if_no_subscribers()
 
             bot.status = SpotBot.Status.PAUSED.value
             bot.save()

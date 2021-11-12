@@ -23,14 +23,15 @@ class ManualStrategyDeveloper:
 
         signal_data = position_data.get('signal')
         steps_data = signal_data['steps']
-        step_share_set_mode = signal_data.get('step_share_set_mode')
+        setup_mode = signal_data.get('setup_mode')
 
-        if step_share_set_mode == 'manual':
+        if setup_mode == 'manual':
             total_share = 0
             for step_data in steps_data:
-                total_share += round_down(step_data['share'])
-                if not step_data['share']:
+                step_share = step_data.get('share')
+                if not step_share:
                     raise CustomException('Step share is required in manual mode')
+                total_share += round_down(step_share)
             if round_down(total_share) != 1:
                 raise CustomException('Total shares must be equal to 1')
 
@@ -39,55 +40,39 @@ class ManualStrategyDeveloper:
         return [position.signal.symbol, ]
 
     @staticmethod
-    def init_setup(position: FuturesPosition):
+    def init_strategy_state_data(position: FuturesPosition):
         signal = position.signal
 
-        steps = signal.related_steps
-        targets = signal.related_targets
-        if signal.setup_mode == 'manual':
-            for step in steps:
-                step.margin = position.margin * step.share
-                step.save()
-
-        elif signal.setup_mode == 'auto':
-
-            step1 = signal.related_steps[0]
-            step1.share = 0.2
-            step1.margin = 0.2 * position.margin
-            step1.leverage = 4
-
-            entry_price2 = step1.entry_price * 0.90 if signal.side == 'buy' else step1.entry_price * 1.1
-            step2 = FuturesStep(signal=signal,
-                                entry_price=entry_price2,
-                                share=0.3,
-                                margin=position.margin * 0.3,
-                                leverage=8)
-
-            entry_price3 = step1.entry_price * 0.80 if signal.side == 'buy' else step1.entry_price * 1.2
-            step3 = FuturesStep(signal=signal,
-                                entry_price=entry_price3,
-                                share=0.5,
-                                margin=position.margin * 0.5,
-                                leverage=12)
-
-            step1.save()
-            step2.save()
-            step3.save()
-
-            signal.related_steps.append(step2)
-            signal.related_steps.append(step3)
-
-            signal.steps.set(signal.related_steps)
-
-        if targets:
-            auto_target_share = round_down(1 / len(targets))
-            for i in range(len(targets)):
-                target = targets[i]
-                target.share = auto_target_share
-                target.save()
-            last_target = targets[len(targets) - 1]
-            last_target.share = round(1 - (len(targets) - 1) * auto_target_share, 2)
-            last_target.save()
+        # elif signal.setup_mode == 'auto':
+        #
+        #     step1 = signal.related_steps[0]
+        #     step1.share = 0.2
+        #     step1.margin = 0.2 * position.margin
+        #     step1.leverage = 4
+        #
+        #     entry_price2 = step1.entry_price * 0.90 if signal.side == 'buy' else step1.entry_price * 1.1
+        #     step2 = FuturesStep(signal=signal,
+        #                         entry_price=entry_price2,
+        #                         share=0.3,
+        #                         margin=position.margin * 0.3,
+        #                         leverage=8)
+        #
+        #     entry_price3 = step1.entry_price * 0.80 if signal.side == 'buy' else step1.entry_price * 1.2
+        #     step3 = FuturesStep(signal=signal,
+        #                         entry_price=entry_price3,
+        #                         share=0.5,
+        #                         margin=position.margin * 0.5,
+        #                         leverage=12)
+        #
+        #     step1.save()
+        #     step2.save()
+        #     step3.save()
+        #
+        #     position.leverage = step1.leverage * step1.share + step2.leverage * step2.share + step3.leverage * step3.share
+        #
+        #     signal.related_steps.append(step2)
+        #     signal.related_steps.append(step3)
+        #     signal.steps.set(signal.related_steps)
 
         strategy_state_data = StrategyStateData(symbol=signal.symbol,
                                                 available_margin=position.margin)
@@ -150,17 +135,6 @@ class ManualStrategyDeveloper:
                 ((signal.side == 'buy' and price < stoploss.trigger_price) or
                  (signal.side == 'sell' and price > stoploss.trigger_price)):
 
-            stoploss_operation = create_market_operation(
-                symbol=symbol,
-                operation_type='stoploss_triggered',
-                side='sell' if signal.side == 'buy' else 'buy',
-                price=price,
-                size=position.holding_size,
-                leverage=position.leverage,
-                position=position,
-                stoploss=stoploss
-            )
-
             bot.close_position(test=is_test)
 
             stoploss.is_triggered = True
@@ -176,39 +150,37 @@ class ManualStrategyDeveloper:
             bot.save()
 
             logger.info(
-                'stoploss_triggered_operation: (symbol: {}, price: {}, size: {})'.format(
+                'stoploss_triggered: (symbol: {}, price: {}, size: {})'.format(
                     symbol,
                     price,
                     position.holding_size))
 
-            operations.append(stoploss_operation)
-
         else:
             steps = signal.related_steps
-            n = 0
-            for step in steps:
+            for i in range(len(steps)):
+                step = steps[i]
                 if bot.status == FuturesBot.Status.RUNNING.value and not step.is_triggered and (
                         (signal.side == 'buy' and price < step.entry_price) or
                         (signal.side == 'sell' and price > step.entry_price) or
                         step.is_market):
 
-                    if n == 0:
-                        strategy_state_data.all_steps_achieved = True
-                    elif n == len(steps) - 1:
+                    if i == 0:
                         position.is_triggered = True
+                        position.save()
+                    elif i == len(steps) - 1:
+                        strategy_state_data.all_steps_achieved = True
 
                     strategy_state_data.none_triggered_steps_share = \
                         round(strategy_state_data.none_triggered_steps_share - step.share, 2)
 
                     step_operation = create_market_operation_in_cost(
                         symbol=symbol,
-                        operation_type='{}_step'.format(signal.side),
+                        operation_type='step',
                         side=signal.side,
                         price=price,
                         margin=step.margin,
                         leverage=step.leverage,
                         position=position,
-                        step=step,
                     )
 
                     logger.info(
@@ -217,24 +189,25 @@ class ManualStrategyDeveloper:
                             price,
                             step.margin))
 
+                    step.operation = step_operation
                     step.is_triggered = True
                     step.save()
                     operations.append(step_operation)
-                n += 1
+                i += 1
 
             if position.is_triggered:
                 targets = signal.related_targets
-                for i in range(len(targets)):
-                    target = targets[i]
+                for j in range(len(targets)):
+                    target = targets[j]
                     if bot.status == FuturesBot.Status.RUNNING.value and not target.is_triggered and \
                             ((signal.side == 'buy' and price > target.tp_price) or
                              (signal.side == 'sell' and price < target.tp_price)):
                         target.is_triggered = True
 
-                        if not (i == (len(targets) - 1) and position.keep_open):
+                        if not j == (len(targets) - 1):
                             tp_operation = create_market_operation(
                                 symbol=symbol,
-                                operation_type='tp_operation',
+                                operation_type='take_profit',
                                 side='sell' if signal.side == 'buy' else 'buy',
                                 size=target.holding_size,
                                 price=price,
@@ -243,40 +216,39 @@ class ManualStrategyDeveloper:
                             )
 
                             logger.info(
-                                'tp_operation: (symbol: {}, price: {}, size: {})'.format(
+                                'take_profit: (symbol: {}, price: {}, size: {})'.format(
                                     symbol,
                                     price,
                                     target.holding_size))
 
                             operations.append(tp_operation)
+                            target.operation = tp_operation
 
-                        if i == (len(targets) - 1):
+                            if j == 0:
+                                new_trigger_price = steps[0].entry_price
+                                stoploss_is_created = False
+                                if stoploss:
+                                    stoploss.trigger_price = new_trigger_price
+                                else:
+                                    stoploss = FuturesStoploss(trigger_price=new_trigger_price)
+                                    stoploss_is_created = True
+                                stoploss.is_trailed = True
+                                stoploss.save()
+                                if stoploss_is_created:
+                                    signal.stoploss = stoploss
+                                    signal.save()
+
+                        else:
                             strategy_state_data.all_targets_achieved = True
                             logger.info('position_full_target')
                             if not position.keep_open:
                                 bot.is_active = False
                                 bot.status = FuturesBot.Status.STOPPED_AFTER_FULL_TARGET.value
+                                bot.close_position(is_test)
                                 bot.save()
 
-                        if i % 2 == 0:
-                            if i == 0:
-                                new_trigger_price = steps[len(steps) - 1].entry_price
-                            else:
-                                new_trigger_price = targets[i - 2].tp_price
-
-                            stoploss_is_created = False
-                            if stoploss:
-                                stoploss.trigger_price = new_trigger_price
-                            else:
-                                stoploss = FuturesStoploss(trigger_price=new_trigger_price)
-                                stoploss_is_created = True
-                            stoploss.is_trailed = True
-                            stoploss.save()
-                            if stoploss_is_created:
-                                signal.stoploss = stoploss
-                                signal.save()
-
                     target.save()
+
         return operations
 
     @staticmethod
@@ -303,8 +275,8 @@ class ManualStrategyDeveloper:
                 'share': s.share,
             } for s in current_steps
         ]
-        is_reversed = signal.side == 'sell'
-        sorted_new_steps_data = sorted(new_steps_data, reverse=is_reversed, key=lambda step: step['entry_price'])
+        reverse = signal.side == 'buy'
+        sorted_new_steps_data = sorted(new_steps_data, reverse=reverse, key=lambda step: step['entry_price'])
         return current_steps_data != sorted_new_steps_data or (
                 current_setup_mode != 'semi_auto' and current_setup_mode != setup_mode)
 
@@ -329,7 +301,7 @@ class ManualStrategyDeveloper:
                     raise CustomException('Total shares must be equal to free share, free share is : {}'.format(
                         strategy_state_data.none_triggered_steps_share))
                 if signal.setup_mode == 'auto':
-                    if steps[len(steps) - 1].is_triggered:
+                    if steps[0].is_triggered:
                         signal.setup_mode = 'semi_auto'
                     else:
                         signal.setup_mode = 'manual'
@@ -387,8 +359,8 @@ class ManualStrategyDeveloper:
                 'tp_price': t.tp_price,
             } for t in current_targets
         ]
-        is_reversed = signal.side == 'sell'
-        sorted_new_targets_data = sorted(new_targets_data, reverse=is_reversed, key=lambda target: target['tp_price'])
+        reverse = signal.side == 'sell'
+        sorted_new_targets_data = sorted(new_targets_data, reverse=reverse, key=lambda target: target['tp_price'])
         return current_targets_data != sorted_new_targets_data
 
     @staticmethod
@@ -426,7 +398,7 @@ class ManualStrategyDeveloper:
         signal = position.signal
         steps = signal.related_steps
         if edit_is_required:
-            if steps[len(steps) - 1].is_triggered:
+            if steps[0].is_triggered:
                 raise CustomException('Editing margin is not possible because one step has been triggered!')
 
             for step in steps:
