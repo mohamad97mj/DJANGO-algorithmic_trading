@@ -241,7 +241,7 @@ class FuturesBotHandler:
     def _init_price_ticker(self, exchange_id, symbol):
         logger = my_get_logger()
         logger.info('price_ticker {} was started'.format(self.number_of_tickers))
-        if True:
+        if is_test:
             args = self._start_muck_symbol_price_ticker(exchange_id, symbol)
         else:
             args = self._start_symbol_price_ticker(exchange_id, symbol)
@@ -288,8 +288,6 @@ class FuturesBotHandler:
             loop = asyncio.get_event_loop()
 
             async def deal_msg(msg):
-                logger = my_get_logger()
-                logger.debug(msg)
                 if msg['topic'] == '/market/ticker:{}'.format(slash2dash(symbol)):
                     CacheUtils.write_to_cache(symbol, float(msg['data']['price']), cache_name)
 

@@ -42,38 +42,6 @@ class ManualStrategyDeveloper:
     @staticmethod
     def init_strategy_state_data(position: FuturesPosition):
         signal = position.signal
-
-        # elif signal.setup_mode == 'auto':
-        #
-        #     step1 = signal.related_steps[0]
-        #     step1.share = 0.2
-        #     step1.margin = 0.2 * position.margin
-        #     step1.leverage = 4
-        #
-        #     entry_price2 = step1.entry_price * 0.90 if signal.side == 'buy' else step1.entry_price * 1.1
-        #     step2 = FuturesStep(signal=signal,
-        #                         entry_price=entry_price2,
-        #                         share=0.3,
-        #                         margin=position.margin * 0.3,
-        #                         leverage=8)
-        #
-        #     entry_price3 = step1.entry_price * 0.80 if signal.side == 'buy' else step1.entry_price * 1.2
-        #     step3 = FuturesStep(signal=signal,
-        #                         entry_price=entry_price3,
-        #                         share=0.5,
-        #                         margin=position.margin * 0.5,
-        #                         leverage=12)
-        #
-        #     step1.save()
-        #     step2.save()
-        #     step3.save()
-        #
-        #     position.leverage = step1.leverage * step1.share + step2.leverage * step2.share + step3.leverage * step3.share
-        #
-        #     signal.related_steps.append(step2)
-        #     signal.related_steps.append(step3)
-        #     signal.steps.set(signal.related_steps)
-
         strategy_state_data = StrategyStateData(symbol=signal.symbol,
                                                 available_margin=position.margin)
         return strategy_state_data
@@ -124,13 +92,10 @@ class ManualStrategyDeveloper:
 
         strategy_state_data.unrealized_margin = position.holding_size * price / position.leverage
         sign = 1 if signal.side == 'buy' else -1
-        bot.total_pnl = \
-            round_down(
-                sign * (strategy_state_data.unrealized_margin -
-                        (position.margin - strategy_state_data.available_margin)))
+        bot.total_pnl = round_down(sign * (strategy_state_data.unrealized_margin + position.released_margin) -
+                                   (position.margin - strategy_state_data.available_margin))
         bot.total_pnl_percentage = round_down((bot.total_pnl / position.margin) * 100)
-
-        if bot.status == FuturesBot.Status.RUNNING.value and stoploss \
+        if position.is_triggered and bot.status == FuturesBot.Status.RUNNING.value and stoploss \
                 and not stoploss.is_triggered and position.holding_size and \
                 ((signal.side == 'buy' and price < stoploss.trigger_price) or
                  (signal.side == 'sell' and price > stoploss.trigger_price)):
@@ -147,7 +112,6 @@ class ManualStrategyDeveloper:
                 status = FuturesBot.Status.STOPPED_BY_STOPLOSS.value
 
             bot.status = status
-            bot.save()
 
             logger.info(
                 'stoploss_triggered: (symbol: {}, price: {}, size: {})'.format(
@@ -248,7 +212,7 @@ class ManualStrategyDeveloper:
                                 bot.save()
 
                     target.save()
-
+        bot.save()
         return operations
 
     @staticmethod

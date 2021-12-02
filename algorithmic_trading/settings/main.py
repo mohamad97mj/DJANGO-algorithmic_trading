@@ -27,7 +27,7 @@ DEBUG = True
 
 DEV = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '185.110.188.188']
 
 # Application definition
 

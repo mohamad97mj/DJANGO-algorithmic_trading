@@ -129,7 +129,7 @@ class FuturesBot(models.Model):
                     target.holding_size -= size
                     target.save()
                     position.holding_size -= size
-                    position.released_margin = cost
+                    position.released_margin += cost
 
                 order.exchange_order_id = exchange_order_id
                 order.size = size
