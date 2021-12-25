@@ -17,7 +17,6 @@ class FuturesPosition(models.Model):
                                blank=True)
     holding_size = models.FloatField(default=0)
     margin = models.FloatField()
-    leverage = models.IntegerField()
     keep_open = models.BooleanField(default=False)
     released_margin = models.FloatField(default=0)
     is_triggered = models.BooleanField(default=False)

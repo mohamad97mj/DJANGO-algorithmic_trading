@@ -85,7 +85,7 @@ class FuturesBot(models.Model):
                 else:
                     exchange_order = self._private_client.create_market_order(
                         symbol=symbol,
-                        leverage=position.leverage,
+                        leverage=signal.leverage,
                         side=order.side,
                         size=size,
                         multiplier=multiplier,
@@ -106,24 +106,13 @@ class FuturesBot(models.Model):
                     position.holding_size += size
                     remaining_size = size
 
-                    avg_leverage = 0
-                    steps = signal.related_steps
-                    total_triggered_margin = 0
-                    for step in steps:
-                        if step.is_triggered:
-                            total_triggered_margin += step.margin
-                            avg_leverage += step.margin * step.leverage
-                    position.leverage = int(avg_leverage / total_triggered_margin)
-
                     targets = signal.related_targets
-                    for i in range(len(targets) - 1):
+                    for i in range(len(targets)):
                         target = targets[i]
-                        target.holding_size += int((size * target.share) / multiplier) * multiplier
-                        remaining_size -= target.holding_size
+                        shared_size = size * target.share
+                        target.holding_size += remaining_size if i == len(targets) - 1 else shared_size
+                        remaining_size -= shared_size
                         target.save()
-                    last_target = targets[len(targets) - 1]
-                    last_target.holding_size = remaining_size
-                    last_target.save()
                 else:
                     target = operation.target
                     target.holding_size -= size
@@ -142,6 +131,7 @@ class FuturesBot(models.Model):
 
             operation.status = 'executed'
             operation.save()
+            signal.save()
             position.save()
 
     def close_position(self, test):

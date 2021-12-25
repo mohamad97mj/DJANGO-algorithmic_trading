@@ -7,6 +7,7 @@ from .stoploss import FuturesStoplossSerializer
 class FuturesSignalSerializer(serializers.Serializer):
     symbol = serializers.CharField(max_length=50)
     side = serializers.CharField(max_length=10)
+    leverage = serializers.FloatField(required=False, allow_null=True)
     setup_mode = serializers.CharField(max_length=50, required=False, allow_null=True)
     steps = FuturesStepSerializer(many=True)
     targets = FuturesTargetSerializer(many=True, required=False, allow_null=True)

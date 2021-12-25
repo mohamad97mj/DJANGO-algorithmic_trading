@@ -8,12 +8,12 @@ from futures_trader.models import FuturesPosition, FuturesBot, FuturesStoploss
 from futures_trader.clients import PublicClient, PrivateClient
 from threading import Thread
 from dataclasses import dataclass, field
-from .strategies.strategy_center import FuturesStrategyCenter
-from .models import FuturesSignal, FuturesStep, FuturesTarget
+from futures_trader.strategies.strategy_center import FuturesStrategyCenter
+from futures_trader.models import FuturesSignal, FuturesStep, FuturesTarget
 from global_utils import CustomException, CacheUtils, round_down, slash2dash, async_retry_on_timeout
 from websockets.exceptions import ConnectionClosedError
 from kucoin_futures.client import WsToken
-from futures_trader.utils.kucoin_ws import MyKucoinFuturesWsClient
+from futures_trader.services.utils.kucoin_ws import MyKucoinFuturesWsClient
 from futures_trader.utils.app_vars import is_test
 from concurrent.futures._base import TimeoutError
 
@@ -50,7 +50,7 @@ class FuturesBotHandler:
 
         signal_data = position_data.get('signal')
         signal = FuturesSignal(**{key: signal_data.get(key) for key in
-                                  ['symbol', 'side']})
+                                  ['symbol', 'side', 'leverage']})
 
         stoploss_data = signal_data.get('stoploss')
         if stoploss_data:
@@ -79,26 +79,26 @@ class FuturesBotHandler:
                 public_client = self.init_public_client(exchange_id=exchange_id)
                 last_sorted_data['entry_price'] = public_client.fetch_ticker(signal.symbol)
                 sorted_steps_data.insert(0, sorted_steps_data.pop())
-        for i in range(len(sorted_steps_data)):
+
+        sorted_steps_data_len = len(sorted_steps_data)
+        auto_step_share = round_down(1 / sorted_steps_data_len)
+        for i in range(sorted_steps_data_len):
             step_data = sorted_steps_data[i]
             if setup_mode == 'manual':
                 share = round_down(step_data.get('share'))
-                leverage = step_data.get('leverage', 1)
             else:
-                # TODO complete
-                pass
+                share = round(1 - (sorted_steps_data_len - 1) * auto_step_share, 2) \
+                    if i == sorted_steps_data_len - 1 else auto_step_share
             step = FuturesStep(signal=signal,
                                entry_price=step_data.get('entry_price'),
                                share=share,
                                margin=position.margin * share,
-                               leverage=leverage,
                                is_market=first_step_is_market if i == 0 and first_step_is_market else False)
             step.save()
             steps.append(step)
 
         signal.steps.set(steps)
         signal.related_steps = steps
-        position.leverage = steps[0].leverage
         position.save()
         targets = []
         targets_data = signal_data.get('targets')
@@ -106,19 +106,15 @@ class FuturesBotHandler:
             sort_targets_reverse = signal.side == 'sell'
             sorted_targets_data = sorted(targets_data, reverse=sort_targets_reverse, key=lambda t: t['tp_price'])
             auto_target_share = round_down(1 / len(sorted_targets_data))
-            for i in range(len(sorted_targets_data) - 1):
+            for i in range(len(sorted_targets_data)):
                 target_data = targets_data[i]
+                share = round(1 - (len(sorted_targets_data) - 1) * auto_target_share, 2) if i == len(
+                    sorted_targets_data) - 1 else auto_target_share
                 target = FuturesTarget(signal=signal,
                                        tp_price=target_data.get('tp_price'),
-                                       share=auto_target_share)
+                                       share=share)
                 target.save()
                 targets.append(target)
-            last_target_data = sorted_targets_data[len(sorted_targets_data) - 1]
-            last_target = FuturesTarget(signal=signal,
-                                        tp_price=last_target_data.get('tp_price'),
-                                        share=round(1 - (len(sorted_targets_data) - 1) * auto_target_share, 2))
-            last_target.save()
-            targets.append(last_target)
 
         signal.targets.set(targets)
         signal.related_targets = targets
@@ -241,7 +237,7 @@ class FuturesBotHandler:
     def _init_price_ticker(self, exchange_id, symbol):
         logger = my_get_logger()
         logger.info('price_ticker {} was started'.format(self.number_of_tickers))
-        if is_test:
+        if True:
             args = self._start_muck_symbol_price_ticker(exchange_id, symbol)
         else:
             args = self._start_symbol_price_ticker(exchange_id, symbol)
@@ -263,8 +259,8 @@ class FuturesBotHandler:
                     loop = asyncio.get_event_loop()
 
                     def close_ws():
-                        print('websocket {} was closed'.format(price_ticker.id))
-                        # asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+                        _logger = my_get_logger()
+                        _logger.warning('websocket {} was closed'.format(price_ticker.id))
                         asyncio.ensure_future(client.close(), loop=loop)
 
                     price_ticker.stop = close_ws
@@ -272,12 +268,12 @@ class FuturesBotHandler:
                     while True:
                         try:
                             price = await websocket.recv()
-                            print(price, price_ticker.id)
                             CacheUtils.write_to_cache(symbol, float(price), cache_name)
                         except (ConnectionClosedError,) as e:
                             logger = my_get_logger()
                             logger.warning(e)
                             break
+                    break
             except (OSError, ConnectionClosedError, TimeoutError):
                 logger = my_get_logger()
                 logger.warning('Could not connect to muck price server from price ticker {}!'.format(price_ticker.id))
@@ -302,8 +298,9 @@ class FuturesBotHandler:
             price_ticker.client = ws_client
 
             def close_ws():
-                print('websocket {} was closed'.format(price_ticker.id))
-                # asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+                _logger = my_get_logger()
+                _logger.warning('websocket {} was closed'.format(price_ticker.id))
+                asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
                 ws_client.close_connection()
 
             price_ticker.stop = close_ws

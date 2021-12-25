@@ -90,7 +90,7 @@ class ManualStrategyDeveloper:
         stoploss = signal.stoploss
         price = symbol_prices[symbol]
 
-        strategy_state_data.unrealized_margin = position.holding_size * price / position.leverage
+        strategy_state_data.unrealized_margin = position.holding_size * price / signal.leverage
         sign = 1 if signal.side == 'buy' else -1
         bot.total_pnl = round_down(sign * (strategy_state_data.unrealized_margin + position.released_margin) -
                                    (position.margin - strategy_state_data.available_margin))
@@ -116,7 +116,7 @@ class ManualStrategyDeveloper:
             logger.info(
                 'stoploss_triggered: (symbol: {}, price: {}, size: {})'.format(
                     symbol,
-                    price,
+                    stoploss.trigger_price,
                     position.holding_size))
 
         else:
@@ -143,14 +143,14 @@ class ManualStrategyDeveloper:
                         side=signal.side,
                         price=price,
                         margin=step.margin,
-                        leverage=step.leverage,
+                        leverage=signal.leverage,
                         position=position,
                     )
 
                     logger.info(
                         'step_operation: (symbol: {}, price: {}, margin: {})'.format(
                             symbol,
-                            price,
+                            step.entry_price,
                             step.margin))
 
                     step.operation = step_operation
@@ -169,21 +169,21 @@ class ManualStrategyDeveloper:
                         target.is_triggered = True
 
                         if not j == (len(targets) - 1):
+                            logger.info(
+                                'take_profit: (symbol: {}, tp_price: {}, size: {})'.format(
+                                    symbol,
+                                    target.tp_price,
+                                    target.holding_size))
+
                             tp_operation = create_market_operation(
                                 symbol=symbol,
                                 operation_type='take_profit',
                                 side='sell' if signal.side == 'buy' else 'buy',
                                 size=target.holding_size,
                                 price=price,
-                                leverage=position.leverage,
+                                leverage=signal.leverage,
                                 position=position,
                             )
-
-                            logger.info(
-                                'take_profit: (symbol: {}, price: {}, size: {})'.format(
-                                    symbol,
-                                    price,
-                                    target.holding_size))
 
                             operations.append(tp_operation)
                             target.operation = tp_operation
@@ -204,14 +204,20 @@ class ManualStrategyDeveloper:
 
                         else:
                             strategy_state_data.all_targets_achieved = True
-                            logger.info('position_full_target')
                             if not position.keep_open:
+                                logger.info(
+                                    'take_profit: (symbol: {}, tp_price: {}, size: {})'.format(
+                                        symbol,
+                                        target.tp_price,
+                                        target.holding_size))
+                                target.holding_size = 0
                                 bot.is_active = False
                                 bot.status = FuturesBot.Status.STOPPED_AFTER_FULL_TARGET.value
                                 bot.close_position(is_test)
                                 bot.save()
+                            logger.info('position_full_target')
 
-                    target.save()
+                        target.save()
         bot.save()
         return operations
 

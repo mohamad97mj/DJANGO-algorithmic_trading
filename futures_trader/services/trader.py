@@ -1,4 +1,4 @@
-from ..bot_handler import FuturesBotHandler
+from futures_trader.services.bot_handler import FuturesBotHandler
 
 bot_handler = FuturesBotHandler()
 
