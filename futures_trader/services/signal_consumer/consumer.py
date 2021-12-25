@@ -6,16 +6,16 @@ from telethon.errors import SessionPasswordNeededError
 from telethon.sync import TelegramClient, events
 from futures_trader.services.trader import FuturesBotTrader
 from .bnc_signal_extractor import extract_bnc_signal_data
+from .black_whale_signal_extractor import extract_black_whale_signal_data
+from .special_leverage_signal_extractor import extract_special_leverage_signal_data
+from .killer_rat_signal_extractor import extract_killer_rat_signal_data
+from .always_win_signal_extractor import extract_always_win_signal_data
+from global_utils.retry_on_timeout import retry_on_timeout
 
 signal_data_queue = queue.Queue()
 
 
-# from .black_whale_signal_extractor import black_whale_signal_extractor
-# from .special_leverage_signal_extractor import special_leverage_signal_extractor
-# from .killer_rat_signal_extractor import killer_rat_signal_extractor
-# from .always_win_signal_extractor import always_win_signal_extractor
-
-
+@retry_on_timeout(timeout_errors=(ConnectionError,))
 def create_client():
     api_id = 764667
     api_hash = 'ffb6562fd4311e1487c60f068f5b74ce'
@@ -38,10 +38,10 @@ def create_client():
 
 signal_data_extractor_mapping = {
     1502962832: extract_bnc_signal_data,  # BNC
-    # 1743103663: BlackWhaleSignalExtractor,  # BLACK WHALE
-    # 1734497122: SpecialLeverageSignalExtractor,  # SPECIAL LEVERAGE
-    # 1600174012: KillerRatSignalExtractor,  # KILLER RAT
-    # 1685166052: AlwaysWinSignalExtractor,  # ALWAYS WIN
+    1743103663: extract_black_whale_signal_data,  # BLACK WHALE
+    1734497122: extract_special_leverage_signal_data,  # SPECIAL LEVERAGE
+    1600174012: extract_killer_rat_signal_data,  # KILLER RAT
+    1685166052: extract_always_win_signal_data,  # ALWAYS WIN
 }
 
 
@@ -58,7 +58,8 @@ def start_signal_receiving():
     async def extract_signal(event):
         channel_id = event.chat.id
         signal_data = signal_data_extractor_mapping[channel_id](event.message.message)
-        signal_data_queue.put(signal_data)
+        if signal_data:
+            signal_data_queue.put(signal_data)
 
     myclient.run_until_disconnected()
 

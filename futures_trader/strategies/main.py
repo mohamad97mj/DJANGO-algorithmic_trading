@@ -13,7 +13,7 @@ class StrategyStateData(JsonSerializable):
     none_triggered_steps_share: float = 1.0
     all_steps_achieved: bool = False
     all_targets_achieved: bool = False
-    unrealized_margin: float = 0
+    unrealized_value: float = 0
 
 
 class ManualStrategyDeveloper:
@@ -90,11 +90,6 @@ class ManualStrategyDeveloper:
         stoploss = signal.stoploss
         price = symbol_prices[symbol]
 
-        strategy_state_data.unrealized_margin = position.holding_size * price / signal.leverage
-        sign = 1 if signal.side == 'buy' else -1
-        bot.total_pnl = round_down(sign * (strategy_state_data.unrealized_margin + position.released_margin) -
-                                   (position.margin - strategy_state_data.available_margin))
-        bot.total_pnl_percentage = round_down((bot.total_pnl / position.margin) * 100)
         if position.is_triggered and bot.status == FuturesBot.Status.RUNNING.value and stoploss \
                 and not stoploss.is_triggered and position.holding_size and \
                 ((signal.side == 'buy' and price < stoploss.trigger_price) or
@@ -211,6 +206,10 @@ class ManualStrategyDeveloper:
                                         target.tp_price,
                                         target.holding_size))
                                 target.holding_size = 0
+                                value = position.holding_size * price
+                                position.released_margin += value
+                                position.holding_size = 0
+                                position.save()
                                 bot.is_active = False
                                 bot.status = FuturesBot.Status.STOPPED_AFTER_FULL_TARGET.value
                                 bot.close_position(is_test)
@@ -218,7 +217,14 @@ class ManualStrategyDeveloper:
                             logger.info('position_full_target')
 
                         target.save()
+
+        strategy_state_data.unrealized_value = position.holding_size * price
+        sign = 1 if signal.side == 'buy' else -1
+        bot.total_pnl = round_down(
+            sign * ((position.released_margin + strategy_state_data.unrealized_value) - position.purchased_value))
+        bot.total_pnl_percentage = round_down((bot.total_pnl / position.margin) * 100)
         bot.save()
+
         return operations
 
     @staticmethod

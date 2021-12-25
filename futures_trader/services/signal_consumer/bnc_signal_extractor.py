@@ -5,7 +5,7 @@ def extract_bnc_signal_data(message):
         for line in lines:
             splitted_line = line.split(':')
             if len(splitted_line) == 2:
-                key = splitted_line[0]
+                key = splitted_line[0].strip()
                 value = splitted_line[1].strip()
                 if key in parameter_extractor_mapping:
                     parameter_extractor_mapping[key](signal_data, value)
@@ -34,14 +34,26 @@ def extract_leverage(signal_data, value):
 
 
 def extract_steps(signal_data, value):
-    entry_prices = value.replace(' ', '').split('-')
-    steps_data = [{'entry_price': float(entry_price)} for entry_price in entry_prices]
+    entry_prices = list(filter(lambda x: x, value.replace('-', ' ').split(' ')))
+    steps_data = []
+    for entry_price in entry_prices:
+        try:
+            steps_data.append({'entry_price': float(entry_price)})
+        except ValueError:
+            pass
+
     signal_data['steps'] = steps_data
 
 
 def extract_targets(signal_data, value):
-    tp_prices = value.replace(' ', '').split('-')
-    targets_data = [{'tp_price': float(tp_price)} for tp_price in tp_prices]
+    tp_prices = list(filter(lambda x: x, value.replace('-', ' ').split(' ')))
+    targets_data = []
+    for tp_price in tp_prices:
+        try:
+            targets_data.append({'tp_price': float(tp_price)})
+        except ValueError:
+            pass
+
     signal_data['targets'] = targets_data
 
 

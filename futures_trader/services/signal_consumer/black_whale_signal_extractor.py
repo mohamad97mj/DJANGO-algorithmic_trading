@@ -1,8 +1,2 @@
-class BlackWhaleSignalExtractor:
-
-    @staticmethod
-    def extract_signal():
-        pass
-
-
-black_whale_signal_extractor = BlackWhaleSignalExtractor()
+def extract_black_whale_signal_data(message):
+    pass

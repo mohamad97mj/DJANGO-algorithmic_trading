@@ -103,6 +103,7 @@ class FuturesBot(models.Model):
                     step.purchased_size = size
                     step.cost = cost
                     step.save()
+                    position.purchased_value += value
                     position.holding_size += size
                     remaining_size = size
 
@@ -118,7 +119,7 @@ class FuturesBot(models.Model):
                     target.holding_size -= size
                     target.save()
                     position.holding_size -= size
-                    position.released_margin += cost
+                    position.released_margin += value
 
                 order.exchange_order_id = exchange_order_id
                 order.size = size

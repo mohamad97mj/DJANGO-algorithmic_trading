@@ -18,6 +18,7 @@ class FuturesPosition(models.Model):
     holding_size = models.FloatField(default=0)
     margin = models.FloatField()
     keep_open = models.BooleanField(default=False)
+    purchased_value = models.FloatField(default=0)
     released_margin = models.FloatField(default=0)
     is_triggered = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
