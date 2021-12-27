@@ -15,9 +15,22 @@ def slash2dash(symbol: str):
     return symbol.replace('/', '-')
 
 
+def without2with_slash_f(symbol):
+    symbol = symbol[:-1].replace('XBT', 'BTC')
+    quotes = ['USD', 'USDT']
+    for q in quotes:
+        quote_index = symbol.find(q)
+        if quote_index != -1:
+            base = symbol[:quote_index]
+            quote = symbol[quote_index:]
+            return '{}/{}'.format(base, quote)
+
+
 def with2without_slash_f(symbol: str):
     splitted_symbol = symbol.replace('BTC', 'XBT').split('/')
     base = splitted_symbol[0]
     quote = splitted_symbol[1] + 'M'
     return '{}{}'.format(base, quote)
+
+
 

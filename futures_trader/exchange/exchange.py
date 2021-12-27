@@ -1,12 +1,14 @@
 import ccxt
 from ccxt.base.errors import NetworkError
 from requests.exceptions import ConnectionError
-from global_utils import retry_on_timeout, apply2all_methods, with2without_slash_f
+from global_utils import retry_on_timeout, apply2all_methods, with2without_slash_f, without2with_slash_f
 from .sdk_exchange import SdkExchange
 
 
 @apply2all_methods(retry_on_timeout(timeout_errors=(NetworkError, ConnectionError)))
 class Exchange:
+    symbols = None
+
     default_params = {
     }
 
@@ -81,7 +83,12 @@ class Exchange:
         return self._ccxt_exchange.fetch_status()
 
     def load_markets(self, reload):
-        return self._ccxt_exchange.load_markets(reload=reload)
+        if reload or not self.symbols:
+            markets = self.get_contracts()
+            symbols = list(filter(lambda x: x, [without2with_slash_f(market['symbol']) for market in markets]))
+            self.symbols = symbols
+
+        return self.symbols
 
     def get_markets(self):
         if not self._ccxt_exchange.markets:

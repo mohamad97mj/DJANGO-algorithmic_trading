@@ -140,4 +140,4 @@ class FuturesBot(models.Model):
             self._private_client.close_position(self.position.signal.symbol)
 
     def is_risky(self):
-        return not self.position.signal.stoploss.is_trailed
+        return not self.position.signal.stoploss.is_trailed if self.position.signal.stoploss else True
