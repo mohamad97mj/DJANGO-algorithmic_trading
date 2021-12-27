@@ -1,14 +1,15 @@
 def extract_bnc_signal_data(message):
     if is_signal(message):
         lines = list(filter(lambda x: x, message.upper().split('\n')))
-        signal_data = {}
+        signal_data = {'source': 'BNC'}
         for line in lines:
             splitted_line = line.split(':')
             if len(splitted_line) == 2:
                 key = splitted_line[0].strip()
                 value = splitted_line[1].strip()
                 if key in parameter_extractor_mapping:
-                    parameter_extractor_mapping[key](signal_data, value)
+                    for f in parameter_extractor_mapping[key]:
+                        f(signal_data, value)
         if is_valid(signal_data):
             return signal_data
 
@@ -20,7 +21,7 @@ def is_signal(message):
 
 
 def is_valid(signal_data):
-    return signal_data['side'] == 'buy'
+    return signal_data['side'] == 'buy' and signal_data['risk_level'] in ('medium', 'risky')
 
 
 def extract_symbol(signal_data, value):
@@ -31,6 +32,18 @@ def extract_symbol(signal_data, value):
 def extract_side(signal_data, value):
     side = 'buy' if 'LONG' in value else 'sell'
     signal_data['side'] = side
+
+
+def extract_risk_level(signal_data, value):
+    if 'RISKY' in value:
+        if 'HIGH' in value:
+            level = 'high_risky'
+        else:
+            level = 'risky'
+    else:
+        level = 'medium'
+
+    signal_data['risk_level'] = level
 
 
 def extract_leverage(signal_data, value):
@@ -69,10 +82,10 @@ def extract_stoploss(signal_data, value):
 
 
 parameter_extractor_mapping = {
-    'COIN': extract_symbol,
-    'DIRECTION': extract_side,
-    'LEVERAGE': extract_leverage,
-    'ENTRY': extract_steps,
-    'TARGETS': extract_targets,
-    'STOP LOSS': extract_stoploss,
+    'COIN': (extract_symbol,),
+    'DIRECTION': (extract_side, extract_risk_level),
+    'LEVERAGE': (extract_leverage,),
+    'ENTRY': (extract_steps,),
+    'TARGETS': (extract_targets,),
+    'STOP LOSS': (extract_stoploss,),
 }

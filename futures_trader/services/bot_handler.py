@@ -16,6 +16,7 @@ from kucoin_futures.client import WsToken
 from futures_trader.services.utils.kucoin_ws import MyKucoinFuturesWsClient
 from futures_trader.utils.app_vars import is_test
 from concurrent.futures._base import TimeoutError
+from futures_trader.config import max_number_of_risky_bots
 
 
 @dataclass
@@ -44,95 +45,97 @@ class FuturesBotHandler:
         self.number_of_tickers = 0
 
     def create_bot(self, exchange_id: str, credential_id: str, strategy: str, position_data: dict):
+        if self.creating_bot_is_allowed(credential_id):
+            strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy=strategy)
+            strategy_developer.validate_position_data(position_data=position_data)
 
-        strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy=strategy)
-        strategy_developer.validate_position_data(position_data=position_data)
+            signal_data = position_data.get('signal')
+            signal = FuturesSignal(**{key: signal_data.get(key) for key in
+                                      ['symbol', 'side', 'leverage']})
 
-        signal_data = position_data.get('signal')
-        signal = FuturesSignal(**{key: signal_data.get(key) for key in
-                                  ['symbol', 'side', 'leverage']})
+            stoploss_data = signal_data.get('stoploss')
+            if stoploss_data:
+                stoploss = FuturesStoploss(trigger_price=stoploss_data['trigger_price'])
+                stoploss.save()
+                signal.stoploss = stoploss
 
-        stoploss_data = signal_data.get('stoploss')
-        if stoploss_data:
-            stoploss = FuturesStoploss(trigger_price=stoploss_data['trigger_price'])
-            stoploss.save()
-            signal.stoploss = stoploss
+            setup_mode = signal_data.get('setup_mode', 'auto')
 
-        setup_mode = signal_data.get('setup_mode', 'auto')
+            signal.setup_mode = setup_mode
+            signal.save()
 
-        signal.setup_mode = setup_mode
-        signal.save()
+            position = FuturesPosition(signal=signal,
+                                       **{k: position_data[k] for k in ['margin']})
 
-        position = FuturesPosition(signal=signal,
-                                   **{k: position_data[k] for k in ['margin']})
+            position.keep_open = position_data.get('keep_open', 'false') == 'true'
 
-        position.keep_open = position_data.get('keep_open', 'false') == 'true'
+            steps = []
+            first_step_is_market = False
+            sort_steps_reverse = signal.side == 'buy'
+            sorted_steps_data = sorted(signal_data['steps'], reverse=sort_steps_reverse, key=lambda s: s['entry_price'])
+            if signal.side == 'buy':
+                last_sorted_data = sorted_steps_data[len(sorted_steps_data) - 1]
+                if last_sorted_data['entry_price'] == -1:
+                    first_step_is_market = True
+                    public_client = self.init_public_client(exchange_id=exchange_id)
+                    last_sorted_data['entry_price'] = public_client.fetch_ticker(signal.symbol)
+                    sorted_steps_data.insert(0, sorted_steps_data.pop())
 
-        steps = []
-        first_step_is_market = False
-        sort_steps_reverse = signal.side == 'buy'
-        sorted_steps_data = sorted(signal_data['steps'], reverse=sort_steps_reverse, key=lambda s: s['entry_price'])
-        if signal.side == 'buy':
-            last_sorted_data = sorted_steps_data[len(sorted_steps_data) - 1]
-            if last_sorted_data['entry_price'] == -1:
-                first_step_is_market = True
-                public_client = self.init_public_client(exchange_id=exchange_id)
-                last_sorted_data['entry_price'] = public_client.fetch_ticker(signal.symbol)
-                sorted_steps_data.insert(0, sorted_steps_data.pop())
+            sorted_steps_data_len = len(sorted_steps_data)
+            auto_step_share = round_down(1 / sorted_steps_data_len)
+            for i in range(sorted_steps_data_len):
+                step_data = sorted_steps_data[i]
+                if setup_mode == 'manual':
+                    share = round_down(step_data.get('share'))
+                else:
+                    share = round(1 - (sorted_steps_data_len - 1) * auto_step_share, 2) \
+                        if i == sorted_steps_data_len - 1 else auto_step_share
+                step = FuturesStep(signal=signal,
+                                   entry_price=step_data.get('entry_price'),
+                                   share=share,
+                                   margin=position.margin * share,
+                                   is_market=first_step_is_market if i == 0 and first_step_is_market else False)
+                step.save()
+                steps.append(step)
 
-        sorted_steps_data_len = len(sorted_steps_data)
-        auto_step_share = round_down(1 / sorted_steps_data_len)
-        for i in range(sorted_steps_data_len):
-            step_data = sorted_steps_data[i]
-            if setup_mode == 'manual':
-                share = round_down(step_data.get('share'))
+            signal.steps.set(steps)
+            signal.related_steps = steps
+            position.save()
+            targets = []
+            targets_data = signal_data.get('targets')
+            if targets_data:
+                sort_targets_reverse = signal.side == 'sell'
+                sorted_targets_data = sorted(targets_data, reverse=sort_targets_reverse, key=lambda t: t['tp_price'])
+                auto_target_share = round_down(1 / len(sorted_targets_data))
+                for i in range(len(sorted_targets_data)):
+                    target_data = targets_data[i]
+                    share = round(1 - (len(sorted_targets_data) - 1) * auto_target_share, 2) if i == len(
+                        sorted_targets_data) - 1 else auto_target_share
+                    target = FuturesTarget(signal=signal,
+                                           tp_price=target_data.get('tp_price'),
+                                           share=share)
+                    target.save()
+                    targets.append(target)
+
+            signal.targets.set(targets)
+            signal.related_targets = targets
+
+            new_bot = FuturesBot(exchange_id=exchange_id,
+                                 credential_id=credential_id,
+                                 strategy=strategy,
+                                 position=position)
+
+            self.init_bot_requirements(bot=new_bot)
+            strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy)
+            new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(position))
+            new_bot.save()
+            if credential_id in self._bots:
+                self._bots[credential_id][str(new_bot.id)] = new_bot
             else:
-                share = round(1 - (sorted_steps_data_len - 1) * auto_step_share, 2) \
-                    if i == sorted_steps_data_len - 1 else auto_step_share
-            step = FuturesStep(signal=signal,
-                               entry_price=step_data.get('entry_price'),
-                               share=share,
-                               margin=position.margin * share,
-                               is_market=first_step_is_market if i == 0 and first_step_is_market else False)
-            step.save()
-            steps.append(step)
-
-        signal.steps.set(steps)
-        signal.related_steps = steps
-        position.save()
-        targets = []
-        targets_data = signal_data.get('targets')
-        if targets_data:
-            sort_targets_reverse = signal.side == 'sell'
-            sorted_targets_data = sorted(targets_data, reverse=sort_targets_reverse, key=lambda t: t['tp_price'])
-            auto_target_share = round_down(1 / len(sorted_targets_data))
-            for i in range(len(sorted_targets_data)):
-                target_data = targets_data[i]
-                share = round(1 - (len(sorted_targets_data) - 1) * auto_target_share, 2) if i == len(
-                    sorted_targets_data) - 1 else auto_target_share
-                target = FuturesTarget(signal=signal,
-                                       tp_price=target_data.get('tp_price'),
-                                       share=share)
-                target.save()
-                targets.append(target)
-
-        signal.targets.set(targets)
-        signal.related_targets = targets
-
-        new_bot = FuturesBot(exchange_id=exchange_id,
-                             credential_id=credential_id,
-                             strategy=strategy,
-                             position=position)
-
-        self.init_bot_requirements(bot=new_bot)
-        strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy)
-        new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(position))
-        new_bot.save()
-        if credential_id in self._bots:
-            self._bots[credential_id][str(new_bot.id)] = new_bot
+                self._bots[credential_id] = {str(new_bot.id): new_bot}
+            return new_bot
         else:
-            self._bots[credential_id] = {str(new_bot.id): new_bot}
-        return new_bot
+            raise CustomException('Creating bots failed because of violating max number of risky bots!')
 
     def reload_bots(self):
         bots = list(FuturesBot.objects.filter(is_active=True))
@@ -335,9 +338,7 @@ class FuturesBotHandler:
 
     def get_bots(self, credential_id, is_active):
         if is_active:
-            bots_dict: dict = self._bots.get(credential_id)
-            if not bots_dict:
-                raise CustomException('Not active bot was found for credential_id {}'.format(credential_id))
+            bots_dict: dict = self._bots.get(credential_id, {})
             bots = list(bots_dict.values())
         else:
             bots = FuturesBot.objects.filter(Q(credential_id=credential_id))
@@ -450,3 +451,6 @@ class FuturesBotHandler:
     def get_number_of_risky_bots(self, credential_id):
         active_bots = self.get_bots(credential_id, is_active=True)
         return len([bot for bot in active_bots if bot.is_risky()])
+
+    def creating_bot_is_allowed(self, credential_id):
+        return self.get_number_of_risky_bots(credential_id) < max_number_of_risky_bots

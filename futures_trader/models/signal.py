@@ -7,7 +7,9 @@ from django.db import models
 class FuturesSignal(models.Model):
     # signal_id = models.CharField(max_length=100, unique=True)
     symbol = models.CharField(max_length=50)
+    source = models.CharField(max_length=30, default='manual')
     side = models.CharField(max_length=10)
+    risk_level = models.CharField(max_length=20, default='medium')
     leverage = models.IntegerField()
     stoploss = models.OneToOneField('FuturesStoploss', related_name='signal', null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
