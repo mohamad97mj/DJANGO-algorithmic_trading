@@ -23,7 +23,7 @@ def create_client():
     api_hash = 'ffb6562fd4311e1487c60f068f5b74ce'
     phone = '+989059242876'
 
-    client = TelegramClient(phone, api_id, api_hash)
+    client = TelegramClient('{}.session'.format(phone), api_id, api_hash)
 
     client.connect()
     if not client.is_user_authorized():
