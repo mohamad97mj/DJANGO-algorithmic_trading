@@ -446,3 +446,7 @@ class FuturesBotHandler:
         bot.close_position(test=is_test)
         bot.save()
         return bot
+
+    def get_number_of_risky_bots(self, credential_id):
+        active_bots = self.get_bots(credential_id, is_active=True)
+        return len([bot for bot in active_bots if bot.is_risky()])

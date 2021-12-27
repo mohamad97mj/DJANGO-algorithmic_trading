@@ -11,6 +11,8 @@ from .special_leverage_signal_extractor import extract_special_leverage_signal_d
 from .killer_rat_signal_extractor import extract_killer_rat_signal_data
 from .always_win_signal_extractor import extract_always_win_signal_data
 from global_utils.retry_on_timeout import retry_on_timeout
+from futures_trader.config import position_margin
+from threading import Thread
 
 signal_data_queue = queue.Queue()
 
@@ -68,7 +70,7 @@ def consume_signal(signal_data):
     signal_data['setup_mode'] = 'auto'
     position_data = {
         'signal': signal_data,
-        'margin': 150,
+        'margin': position_margin,
     }
     bot_data = {
         'exchange_id': 'kucoin',
@@ -86,3 +88,11 @@ def start_signal_consuming():
             consume_signal(signal_data)
 
         time.sleep(1)
+
+
+def start_auto_trading():
+    t1 = Thread(target=start_signal_receiving)
+    t1.start()
+
+    t2 = Thread(target=start_signal_consuming)
+    t2.start()

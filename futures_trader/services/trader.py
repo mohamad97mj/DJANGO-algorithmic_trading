@@ -19,6 +19,10 @@ class FuturesBotTrader:
         return bot_handler.get_bots(credential_id, is_active)
 
     @staticmethod
+    def get_number_of_risky_bots(credential_id):
+        return bot_handler.get_number_of_risky_bots(credential_id)
+
+    @staticmethod
     def create_bot(bot_data: dict):
         return bot_handler.create_bot(exchange_id=bot_data['exchange_id'],
                                       credential_id=bot_data['credential_id'],

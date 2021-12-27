@@ -19,8 +19,11 @@ urlpatterns = [
 
     path('price-monitor/<slug:cache_name>/<slug:location>/',
          views.FuturesPriceMonitorView.as_view(),
-         name='futures_price_monitor')
+         name='futures_price_monitor'),
+
+    path('risky-bots-monitor/',
+         views.FuturesRiskyBotsView.as_view(),
+         name='futures_risky_bots_monitor')
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'html'])
-

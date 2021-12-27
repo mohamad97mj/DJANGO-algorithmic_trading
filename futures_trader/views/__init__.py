@@ -1,3 +1,3 @@
 from .bot import FuturesBotsView, FuturesBotDetailView
 from .position import FuturesPositionView
-from .price_monitor import FuturesPriceMonitorView
+from .monitor import FuturesRiskyBotsView, FuturesPriceMonitorView

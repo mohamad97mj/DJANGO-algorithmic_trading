@@ -9,13 +9,18 @@ def extract_bnc_signal_data(message):
                 value = splitted_line[1].strip()
                 if key in parameter_extractor_mapping:
                     parameter_extractor_mapping[key](signal_data, value)
-        return signal_data
+        if is_valid(signal_data):
+            return signal_data
 
 
 def is_signal(message):
     lower_message = message.lower()
     if all(value in lower_message for value in ('coin', 'direction', 'leverage', 'entry', 'targets', 'stop loss')):
         return True
+
+
+def is_valid(signal_data):
+    return signal_data['side'] == 'buy'
 
 
 def extract_symbol(signal_data, value):

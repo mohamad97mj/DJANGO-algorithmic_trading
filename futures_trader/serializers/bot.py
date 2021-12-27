@@ -18,3 +18,4 @@ class FuturesBotSerializer(serializers.Serializer):
         if instance.strategy_state_data:
             ret['strategy_state_data'] = instance.strategy_state_data.to_json()
         return ret
+

@@ -1,3 +1,5 @@
+import signal
+
 from django.utils import timezone
 from django.db import models
 
@@ -22,13 +24,15 @@ class FuturesSignal(models.Model):
         self._init_related_targets()
 
     def _init_related_steps(self):
-        steps = list(self.steps.order_by('entry_price'))
+        order_by = '-entry_price' if self.side == 'buy' else 'entry_price'
+        steps = list(self.steps.order_by(order_by))
         if steps:
             if steps[0].entry_price == -1:
                 steps.append(steps.pop(0))
             self.related_steps = steps
 
     def _init_related_targets(self):
-        targets = list(self.targets.order_by('tp_price'))
+        order_buy = '-tp_price' if self.side == 'sell' else 'tp_price'
+        targets = list(self.targets.order_by(order_buy))
         if targets:
             self.related_targets = targets
