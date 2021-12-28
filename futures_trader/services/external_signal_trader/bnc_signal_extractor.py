@@ -1,3 +1,6 @@
+from global_utils import my_get_logger
+
+
 def extract_bnc_signal_data(message):
     if is_signal(message):
         lines = list(filter(lambda x: x, message.upper().split('\n')))
@@ -21,7 +24,9 @@ def is_signal(message):
 
 
 def is_valid(signal_data):
-    return signal_data['side'] == 'buy' and signal_data['risk_level'] in ('medium', 'risky')
+    return signal_data['side'] == 'buy' and \
+           signal_data['risk_level'] in ('medium', 'risky') and \
+           double_check_side(signal_data)
 
 
 def extract_symbol(signal_data, value):
@@ -79,6 +84,34 @@ def extract_stoploss(signal_data, value):
     trigger_price = float(value)
     stoploss_data = {'trigger_price': trigger_price}
     signal_data['stoploss'] = stoploss_data
+
+
+def double_check_side(signal_data):
+    if check_side_by_steps(signal_data) and check_side_by_targets(signal_data):
+        return True
+    return False
+
+
+def check_side_by_steps(signal_data):
+    steps = signal_data['steps']
+    if (steps[0]['entry_price'] <= steps[1]['entry_price'] and signal_data['side'] == 'buy') or \
+            (steps[0]['entry_price'] >= steps[1]['entry_price'] and signal_data['side'] == 'sell'):
+        return True
+    else:
+        logger = my_get_logger()
+        logger.error('signal side does not match steps!')
+        return False
+
+
+def check_side_by_targets(signal_data):
+    targets = signal_data['targets']
+    if (targets[0]['tp_price'] <= targets[1]['tp_price'] and signal_data['side'] == 'buy') or \
+            (targets[0]['tp_price'] >= targets[1]['tp_price'] and signal_data['side'] == 'sell'):
+        return True
+    else:
+        logger = my_get_logger()
+        logger.error('signal side does not match targets!')
+        return False
 
 
 parameter_extractor_mapping = {

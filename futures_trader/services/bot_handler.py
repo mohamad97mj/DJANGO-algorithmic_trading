@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from futures_trader.strategies.strategy_center import FuturesStrategyCenter
 from futures_trader.models import FuturesSignal, FuturesStep, FuturesTarget
 from global_utils import CustomException, CacheUtils, round_down, slash2dash, async_retry_on_timeout
-from websockets.exceptions import ConnectionClosedError
+from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 from kucoin_futures.client import WsToken
 from futures_trader.services.utils.kucoin_ws import MyKucoinFuturesWsClient
 from futures_trader.utils.app_vars import is_test
@@ -45,97 +45,96 @@ class FuturesBotHandler:
         self.number_of_tickers = 0
 
     def create_bot(self, exchange_id: str, credential_id: str, strategy: str, position_data: dict):
-        self.validate_contract_symbol(exchange_id, position_data['signal']['symbol'])
-        self.validate_risky_bots_limit(credential_id)
 
-        strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy=strategy)
-        strategy_developer.validate_position_data(position_data=position_data)
+        if self.validate_bot_data(exchange_id, credential_id, position_data['signal']['symbol']):
+            strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy=strategy)
+            strategy_developer.validate_position_data(position_data=position_data)
 
-        signal_data = position_data.get('signal')
-        signal = FuturesSignal(**{key: signal_data.get(key) for key in
-                                  ['symbol', 'side', 'leverage']})
+            signal_data = position_data.get('signal')
+            signal = FuturesSignal(**{key: signal_data.get(key) for key in
+                                      ['symbol', 'side', 'leverage']})
 
-        stoploss_data = signal_data.get('stoploss')
-        if stoploss_data:
-            stoploss = FuturesStoploss(trigger_price=stoploss_data['trigger_price'])
-            stoploss.save()
-            signal.stoploss = stoploss
+            stoploss_data = signal_data.get('stoploss')
+            if stoploss_data:
+                stoploss = FuturesStoploss(trigger_price=stoploss_data['trigger_price'])
+                stoploss.save()
+                signal.stoploss = stoploss
 
-        setup_mode = signal_data.get('setup_mode', 'auto')
+            setup_mode = signal_data.get('setup_mode', 'auto')
 
-        signal.setup_mode = setup_mode
-        signal.save()
+            signal.setup_mode = setup_mode
+            signal.save()
 
-        position = FuturesPosition(signal=signal,
-                                   **{k: position_data[k] for k in ['margin']})
+            position = FuturesPosition(signal=signal,
+                                       **{k: position_data[k] for k in ['margin']})
 
-        position.keep_open = position_data.get('keep_open', 'false') == 'true'
+            position.keep_open = position_data.get('keep_open', 'false') == 'true'
 
-        steps = []
-        first_step_is_market = False
-        sort_steps_reverse = signal.side == 'buy'
-        sorted_steps_data = sorted(signal_data['steps'], reverse=sort_steps_reverse, key=lambda s: s['entry_price'])
-        if signal.side == 'buy':
-            last_sorted_data = sorted_steps_data[len(sorted_steps_data) - 1]
-            if last_sorted_data['entry_price'] == -1:
-                first_step_is_market = True
-                public_client = self.get_public_client(exchange_id=exchange_id)
-                last_sorted_data['entry_price'] = public_client.fetch_ticker(signal.symbol)
-                sorted_steps_data.insert(0, sorted_steps_data.pop())
+            steps = []
+            first_step_is_market = False
+            sort_steps_reverse = signal.side == 'buy'
+            sorted_steps_data = sorted(signal_data['steps'], reverse=sort_steps_reverse, key=lambda s: s['entry_price'])
+            if signal.side == 'buy':
+                last_sorted_data = sorted_steps_data[len(sorted_steps_data) - 1]
+                if last_sorted_data['entry_price'] == -1:
+                    first_step_is_market = True
+                    public_client = self.get_public_client(exchange_id=exchange_id)
+                    last_sorted_data['entry_price'] = public_client.fetch_ticker(signal.symbol)
+                    sorted_steps_data.insert(0, sorted_steps_data.pop())
 
-        sorted_steps_data_len = len(sorted_steps_data)
-        auto_step_share = round_down(1 / sorted_steps_data_len)
-        for i in range(sorted_steps_data_len):
-            step_data = sorted_steps_data[i]
-            if setup_mode == 'manual':
-                share = round_down(step_data.get('share'))
+            sorted_steps_data_len = len(sorted_steps_data)
+            auto_step_share = round_down(1 / sorted_steps_data_len)
+            for i in range(sorted_steps_data_len):
+                step_data = sorted_steps_data[i]
+                if setup_mode == 'manual':
+                    share = round_down(step_data.get('share'))
+                else:
+                    share = round(1 - (sorted_steps_data_len - 1) * auto_step_share, 2) \
+                        if i == sorted_steps_data_len - 1 else auto_step_share
+                step = FuturesStep(signal=signal,
+                                   entry_price=step_data.get('entry_price'),
+                                   share=share,
+                                   margin=position.margin * share,
+                                   is_market=first_step_is_market if i == 0 and first_step_is_market else False)
+                step.save()
+                steps.append(step)
+
+            signal.steps.set(steps)
+            signal.related_steps = steps
+            position.save()
+            targets = []
+            targets_data = signal_data.get('targets')
+            if targets_data:
+                sort_targets_reverse = signal.side == 'sell'
+                sorted_targets_data = sorted(targets_data, reverse=sort_targets_reverse, key=lambda t: t['tp_price'])
+                auto_target_share = round_down(1 / len(sorted_targets_data))
+                for i in range(len(sorted_targets_data)):
+                    target_data = targets_data[i]
+                    share = round(1 - (len(sorted_targets_data) - 1) * auto_target_share, 2) if i == len(
+                        sorted_targets_data) - 1 else auto_target_share
+                    target = FuturesTarget(signal=signal,
+                                           tp_price=target_data.get('tp_price'),
+                                           share=share)
+                    target.save()
+                    targets.append(target)
+
+            signal.targets.set(targets)
+            signal.related_targets = targets
+
+            new_bot = FuturesBot(exchange_id=exchange_id,
+                                 credential_id=credential_id,
+                                 strategy=strategy,
+                                 position=position)
+
+            self.init_bot_requirements(bot=new_bot)
+            strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy)
+            new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(position))
+            new_bot.save()
+            if credential_id in self._bots:
+                self._bots[credential_id][str(new_bot.id)] = new_bot
             else:
-                share = round(1 - (sorted_steps_data_len - 1) * auto_step_share, 2) \
-                    if i == sorted_steps_data_len - 1 else auto_step_share
-            step = FuturesStep(signal=signal,
-                               entry_price=step_data.get('entry_price'),
-                               share=share,
-                               margin=position.margin * share,
-                               is_market=first_step_is_market if i == 0 and first_step_is_market else False)
-            step.save()
-            steps.append(step)
-
-        signal.steps.set(steps)
-        signal.related_steps = steps
-        position.save()
-        targets = []
-        targets_data = signal_data.get('targets')
-        if targets_data:
-            sort_targets_reverse = signal.side == 'sell'
-            sorted_targets_data = sorted(targets_data, reverse=sort_targets_reverse, key=lambda t: t['tp_price'])
-            auto_target_share = round_down(1 / len(sorted_targets_data))
-            for i in range(len(sorted_targets_data)):
-                target_data = targets_data[i]
-                share = round(1 - (len(sorted_targets_data) - 1) * auto_target_share, 2) if i == len(
-                    sorted_targets_data) - 1 else auto_target_share
-                target = FuturesTarget(signal=signal,
-                                       tp_price=target_data.get('tp_price'),
-                                       share=share)
-                target.save()
-                targets.append(target)
-
-        signal.targets.set(targets)
-        signal.related_targets = targets
-
-        new_bot = FuturesBot(exchange_id=exchange_id,
-                             credential_id=credential_id,
-                             strategy=strategy,
-                             position=position)
-
-        self.init_bot_requirements(bot=new_bot)
-        strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy)
-        new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(position))
-        new_bot.save()
-        if credential_id in self._bots:
-            self._bots[credential_id][str(new_bot.id)] = new_bot
-        else:
-            self._bots[credential_id] = {str(new_bot.id): new_bot}
-        return new_bot
+                self._bots[credential_id] = {str(new_bot.id): new_bot}
+            return new_bot
 
     def reload_bots(self):
         bots = list(FuturesBot.objects.filter(is_active=True))
@@ -229,11 +228,11 @@ class FuturesBotHandler:
             if not (symbol in symbol_prices and symbol_prices[symbol]):
                 if symbol in self._price_tickers:
                     price_ticker = self._price_tickers[symbol]
-                    price_ticker.stop()
                     logger = my_get_logger()
                     logger.warning(
                         'Error in futures{} price ticker {} was occurred!'.format(
                             ' muck' if is_test else '', price_ticker.id))
+                    price_ticker.stop()
                 time.sleep(10)
                 self._init_price_ticker(exchange_id, symbol)
 
@@ -303,8 +302,11 @@ class FuturesBotHandler:
             def close_ws():
                 _logger = my_get_logger()
                 _logger.warning('websocket {} was closed'.format(price_ticker.id))
-                asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
-                ws_client.close_connection()
+                try:
+                    asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+                    ws_client.close_connection()
+                except ConnectionClosedOK:
+                    _logger.warning('ConnectionClosedOK in price ticker {}'.format(price_ticker.id))
 
             price_ticker.stop = close_ws
 
@@ -452,13 +454,31 @@ class FuturesBotHandler:
         active_bots = self.get_bots(credential_id, is_active=True)
         return len([bot for bot in active_bots if bot.is_risky()])
 
+    def validate_bot_data(self, exchange_id, credential_id, symbol):
+        return all([self.validate_risky_bots_limit(credential_id),
+                    self.validate_contract_symbol(exchange_id, symbol),
+                    self.validate_duplicate_position(credential_id, symbol)])
+
     def validate_risky_bots_limit(self, credential_id):
         if not self.get_number_of_risky_bots(credential_id) < max_number_of_risky_bots:
             logger = my_get_logger()
             logger.error('Creating bot failed because of violating max number of risky bots!')
+            return False
+        return True
 
     def validate_contract_symbol(self, exchange_id, symbol):
         public_client = self.get_public_client(exchange_id)
         if symbol not in public_client.load_markets():
             logger = my_get_logger()
             logger.error('Creating bot failed because contract with symbol {} does not exists!'.format(symbol))
+            return False
+        return True
+
+    def validate_duplicate_position(self, credential_id, symbol):
+        active_bots = self.get_bots(credential_id, is_active=True)
+        for bot in active_bots:
+            if bot.position.signal.symbol == symbol:
+                logger = my_get_logger()
+                logger.error('Creating bot failed because position with symbol {} is duplicate!'.format(symbol))
+                return False
+        return True
