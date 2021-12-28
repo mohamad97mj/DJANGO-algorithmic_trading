@@ -69,7 +69,7 @@ def extract_steps(signal_data, value):
 
 
 def extract_targets(signal_data, value):
-    tp_prices = list(filter(lambda x: x, value.replace('-', ' ').split(' ')))
+    tp_prices = list(filter(lambda x: x, value.replace('-', ' ').split(' ')))[:5]
     targets_data = []
     for tp_price in tp_prices:
         try:
