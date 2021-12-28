@@ -10,7 +10,7 @@ from threading import Thread
 from dataclasses import dataclass, field
 from futures_trader.strategies.strategy_center import FuturesStrategyCenter
 from futures_trader.models import FuturesSignal, FuturesStep, FuturesTarget
-from global_utils import CustomException, CacheUtils, round_down, slash2dash, async_retry_on_timeout
+from global_utils import CustomException, CacheUtils, round_down, async_retry_on_timeout, with2without_slash_f
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 from kucoin_futures.client import WsToken
 from futures_trader.services.utils.kucoin_ws import MyKucoinFuturesWsClient
@@ -188,7 +188,6 @@ class FuturesBotHandler:
                                     t1 = time.time()
                                 self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
                             symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
-
                         logger = my_get_logger()
                         logger.debug('symbol_prices: {}'.format(symbol_prices))
 
@@ -239,7 +238,7 @@ class FuturesBotHandler:
     def _init_price_ticker(self, exchange_id, symbol):
         logger = my_get_logger()
         logger.info('price_ticker {} was started'.format(self.number_of_tickers))
-        if is_test:
+        if False:
             args = self._start_muck_symbol_price_ticker(exchange_id, symbol)
         else:
             args = self._start_symbol_price_ticker(exchange_id, symbol)
@@ -284,10 +283,13 @@ class FuturesBotHandler:
         cache_name = '{}_futures_price'.format(exchange_id)
         if exchange_id == 'kucoin':
             loop = asyncio.get_event_loop()
+            ticker_topic = '/contractMarket/tickerV2:{}'.format(with2without_slash_f(symbol))
 
             async def deal_msg(msg):
-                if msg['topic'] == '/market/ticker:{}'.format(slash2dash(symbol)):
-                    CacheUtils.write_to_cache(symbol, float(msg['data']['price']), cache_name)
+                print(msg)
+                if msg['topic'] == ticker_topic:
+                    price = (float(msg['data']['bestBidPrice']) + float(msg['data']['bestAskPrice'])) / 2
+                    CacheUtils.write_to_cache(symbol, price, cache_name)
 
             client = WsToken()
 
@@ -303,14 +305,14 @@ class FuturesBotHandler:
                 _logger = my_get_logger()
                 _logger.warning('websocket {} was closed'.format(price_ticker.id))
                 try:
-                    asyncio.run(ws_client.unsubscribe('/market/ticker:{}'.format(slash2dash(symbol))))
+                    asyncio.run(ws_client.unsubscribe(ticker_topic))
                     ws_client.close_connection()
                 except ConnectionClosedOK:
                     _logger.warning('ConnectionClosedOK in price ticker {}'.format(price_ticker.id))
 
             price_ticker.stop = close_ws
 
-            await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
+            await ws_client.subscribe(ticker_topic)
             while True:
                 await asyncio.sleep(60, loop=loop)
 
