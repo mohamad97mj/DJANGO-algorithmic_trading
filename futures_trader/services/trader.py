@@ -1,4 +1,5 @@
 from futures_trader.services.bot_handler import FuturesBotHandler
+from global_utils.custom_exception import CustomException
 
 bot_handler = FuturesBotHandler()
 
@@ -30,7 +31,13 @@ class FuturesBotTrader:
                                       position_data=bot_data['position'])
 
     @staticmethod
-    def edit_position(credential_id, bot_id, new_position_data):
+    def edit_position(credential_id, new_position_data, bot_id=None, symbol=None):
+        if not bot_id:
+            if not symbol:
+                raise CustomException('bot_id or symbol is required to edit position!')
+            else:
+                bot_id = bot_handler.find_active_bot_id_by_symbol(credential_id, symbol)
+
         return bot_handler.edit_position(credential_id, bot_id, new_position_data)
 
     @staticmethod

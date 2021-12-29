@@ -4,7 +4,7 @@ from global_utils import my_get_logger
 def extract_bnc_signal_data(message):
     if is_signal(message):
         lines = list(filter(lambda x: x, message.upper().split('\n')))
-        signal_data = {'source': 'BNC'}
+        signal_data = {'source': 'BNC', 'type': 'single'}
         for line in lines:
             splitted_line = line.split(':')
             if len(splitted_line) == 2:

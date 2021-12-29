@@ -53,6 +53,7 @@ class FuturesBotHandler:
             signal_data = position_data.get('signal')
             signal = FuturesSignal(**{key: signal_data.get(key) for key in
                                       ['symbol', 'side', 'leverage']})
+            signal.source = signal_data.get('source', 'manual')
 
             stoploss_data = signal_data.get('stoploss')
             if stoploss_data:
@@ -131,9 +132,9 @@ class FuturesBotHandler:
             new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(position))
             new_bot.save()
             if credential_id in self._bots:
-                self._bots[credential_id][str(new_bot.id)] = new_bot
+                self._bots[credential_id][new_bot.id] = new_bot
             else:
-                self._bots[credential_id] = {str(new_bot.id): new_bot}
+                self._bots[credential_id] = {new_bot.id: new_bot}
             return new_bot
 
     def reload_bots(self):
@@ -142,9 +143,9 @@ class FuturesBotHandler:
             self.init_bot_requirements(bot)
             self.set_bot_strategy_state_data(bot)
             if bot.credential_id in self._bots:
-                self._bots[bot.credential_id][str(bot.id)] = bot
+                self._bots[bot.credential_id][bot.id] = bot
             else:
-                self._bots[bot.credential_id] = {str(bot.id): bot}
+                self._bots[bot.credential_id] = {bot.id: bot}
 
     def set_bot_strategy_state_data(self, bot):
         strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
@@ -201,7 +202,7 @@ class FuturesBotHandler:
                                                bot.strategy_state_data,
                                                test=is_test)
                     if not bot.is_active:
-                        self._bots[bot.credential_id].pop(str(bot.id))
+                        self._bots[bot.credential_id].pop(bot.id)
 
                     if not bot.status == FuturesBot.Status.RUNNING.value:
                         price_ticker = self._price_tickers[bot.position.signal.symbol]
@@ -232,13 +233,13 @@ class FuturesBotHandler:
                         'Error in futures{} price ticker {} was occurred!'.format(
                             ' muck' if is_test else '', price_ticker.id))
                     price_ticker.stop()
-                time.sleep(10)
+                    # time.sleep(10) # maybe this is not required
                 self._init_price_ticker(exchange_id, symbol)
 
     def _init_price_ticker(self, exchange_id, symbol):
         logger = my_get_logger()
         logger.info('price_ticker {} was started'.format(self.number_of_tickers))
-        if False:
+        if is_test:
             args = self._start_muck_symbol_price_ticker(exchange_id, symbol)
         else:
             args = self._start_symbol_price_ticker(exchange_id, symbol)
@@ -286,7 +287,6 @@ class FuturesBotHandler:
             ticker_topic = '/contractMarket/tickerV2:{}'.format(with2without_slash_f(symbol))
 
             async def deal_msg(msg):
-                print(msg)
                 if msg['topic'] == ticker_topic:
                     price = (float(msg['data']['bestBidPrice']) + float(msg['data']['bestAskPrice'])) / 2
                     CacheUtils.write_to_cache(symbol, price, cache_name)
@@ -339,6 +339,14 @@ class FuturesBotHandler:
         if bot:
             return bot
         raise CustomException('No bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
+
+    def find_active_bot_id_by_symbol(self, credential_id, symbol):
+        active_bots = self.get_bots(credential_id, is_active=True)
+        for bot in active_bots:
+            if bot.position.signal.symbol == symbol:
+                return bot.id
+        logger = my_get_logger()
+        logger.error('No active bot with symbol {} was found for credential_id {}!'.format(symbol, credential_id))
 
     def get_bots(self, credential_id, is_active):
         if is_active:

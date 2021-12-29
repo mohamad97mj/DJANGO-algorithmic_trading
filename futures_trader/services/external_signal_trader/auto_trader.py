@@ -70,15 +70,19 @@ def consume_signal(signal_data):
     signal_data['setup_mode'] = 'auto'
     position_data = {
         'signal': signal_data,
-        'margin': position_margin,
     }
-    bot_data = {
-        'exchange_id': 'kucoin',
-        'credential_id': 'kucoin_main',
-        'strategy': 'manual',
-        'position': position_data,
-    }
-    FuturesBotTrader.create_bot(bot_data)
+    credential_id = 'kucoin_main'
+    if signal_data['type'] in ('single', 'primary'):
+        position_data['margin'] = position_margin
+        bot_data = {
+            'exchange_id': 'kucoin',
+            'credential_id': credential_id,
+            'strategy': 'manual',
+            'position': position_data,
+        }
+        FuturesBotTrader.create_bot(bot_data)
+    else:
+        FuturesBotTrader.edit_position(credential_id, position_data, symbol=signal_data['symbol'])
 
 
 def start_signal_consuming():
