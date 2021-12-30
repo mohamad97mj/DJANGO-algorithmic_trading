@@ -371,13 +371,14 @@ class FuturesBotHandler:
         new_signal_data = new_position_data.get('signal')
         if new_signal_data:
             new_steps_data = new_signal_data.get('steps')
+            setup_mode = new_signal_data.get('setup_mode', 'auto')
             if new_steps_data:
                 steps_was_edited = self._run_strategy_developer_command(
                     bot,
                     strategy_developer,
                     'edit_steps',
                     new_steps_data,
-                    new_signal_data.get('step_share_set_mode', 'auto'),
+                    setup_mode,
                 )
                 if steps_was_edited:
                     edited_data.append('steps')
@@ -389,6 +390,7 @@ class FuturesBotHandler:
                     strategy_developer,
                     'edit_targets',
                     new_targets_data,
+                    setup_mode,
                 )
                 if targets_was_edited:
                     edited_data.append('targets')

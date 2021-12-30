@@ -11,6 +11,7 @@ class StrategyStateData(JsonSerializable):
     symbol: str
     available_margin: float
     none_triggered_steps_share: float = 1.0
+    none_triggered_targets_share: float = 1.0
     all_steps_achieved: bool = False
     all_targets_achieved: bool = False
     unrealized_value: float = 0
@@ -60,21 +61,23 @@ class ManualStrategyDeveloper:
             else:
                 all_steps_achieved = False
 
-        all_targets_achieved = False
+        all_targets_achieved = True
         targets = signal.related_targets
-
+        none_triggered_targets_share = 1.0
         if targets:
             for target in targets:
-                if not target.is_triggered:
+                if target.is_triggered:
+                    none_triggered_targets_share = round(none_triggered_targets_share - target.share, 2)
+                else:
                     all_targets_achieved = False
-                    break
-            else:
-                all_targets_achieved = True
+        else:
+            all_targets_achieved = False
 
         strategy_state_data = StrategyStateData(
             symbol=signal.symbol,
             available_margin=available_margin,
             none_triggered_steps_share=round_down(none_triggered_steps_share),
+            none_triggered_targets_share=round_down(none_triggered_targets_share),
             all_steps_achieved=all_steps_achieved,
             all_targets_achieved=all_targets_achieved,
         )
@@ -163,6 +166,9 @@ class ManualStrategyDeveloper:
                              (signal.side == 'sell' and price < target.tp_price)):
                         target.is_triggered = True
 
+                        strategy_state_data.none_triggered_targets_share = \
+                            round(strategy_state_data.none_triggered_targets_share - target.share, 2)
+
                         if not j == (len(targets) - 1):
                             logger.info(
                                 'take_profit: (symbol: {}, tp_price: {}, size: {})'.format(
@@ -228,15 +234,15 @@ class ManualStrategyDeveloper:
         return operations
 
     @staticmethod
-    def edit_steps(position, strategy_state_data, new_steps_data, step_share_set_mode='auto'):
+    def edit_steps(position, strategy_state_data, new_steps_data, setup_mode='auto'):
         edit_is_required = ManualStrategyDeveloper._has_steps_changed(position,
                                                                       new_steps_data,
-                                                                      step_share_set_mode)
+                                                                      setup_mode)
         if edit_is_required:
             ManualStrategyDeveloper._edit_none_triggered_steps(position,
                                                                strategy_state_data,
                                                                new_steps_data,
-                                                               step_share_set_mode)
+                                                               setup_mode)
             return True
         return False
 
@@ -260,14 +266,13 @@ class ManualStrategyDeveloper:
     def _edit_none_triggered_steps(position: FuturesPosition,
                                    strategy_state_data: StrategyStateData,
                                    new_steps_data: List[dict],
-                                   step_share_set_mode):
+                                   setup_mode):
         signal = position.signal
         steps = signal.related_steps
-        targets = signal.related_targets
         if strategy_state_data.all_steps_achieved:
             raise CustomException('Editing steps is not possible because all steps has been triggered!')
         else:
-            if step_share_set_mode == 'manual':
+            if setup_mode == 'manual':
                 total_share = 0
                 for step_data in new_steps_data:
                     if not step_data['share']:
@@ -281,14 +286,14 @@ class ManualStrategyDeveloper:
                         signal.setup_mode = 'semi_auto'
                     else:
                         signal.setup_mode = 'manual'
-            elif step_share_set_mode == 'auto':
+            elif setup_mode == 'auto':
                 auto_step_share = round_down(strategy_state_data.none_triggered_steps_share / len(new_steps_data))
                 for i in range(len(new_steps_data) - 1):
                     new_steps_data[i]['share'] = auto_step_share
                 new_steps_data[len(new_steps_data) - 1]['share'] = round(
                     strategy_state_data.none_triggered_steps_share - (len(new_steps_data) - 1) * auto_step_share, 2)
                 if signal.setup_mode == 'manual':
-                    if targets[len(targets) - 1].is_triggered:
+                    if steps[0].is_triggered:
                         signal.setup_mode = 'semi_auto'
                     else:
                         signal.setup_mode = 'auto'
@@ -316,13 +321,15 @@ class ManualStrategyDeveloper:
         return position
 
     @staticmethod
-    def edit_targets(position, strategy_state_data, new_targets_data):
+    def edit_targets(position, strategy_state_data, new_targets_data, setup_mode):
         edit_is_required = ManualStrategyDeveloper._has_targets_changed(position,
                                                                         new_targets_data)
         if edit_is_required:
             ManualStrategyDeveloper._edit_none_triggered_targets(position,
                                                                  strategy_state_data,
-                                                                 new_targets_data)
+                                                                 new_targets_data,
+                                                                 setup_mode,
+                                                                 )
             return True
         return False
 
@@ -342,7 +349,8 @@ class ManualStrategyDeveloper:
     @staticmethod
     def _edit_none_triggered_targets(position: FuturesPosition,
                                      strategy_state_data: StrategyStateData,
-                                     new_targets_data: List[dict]):
+                                     new_targets_data: List[dict],
+                                     setup_mode):
         signal = position.signal
         targets = signal.related_targets
         if strategy_state_data.all_targets_achieved:
@@ -352,11 +360,38 @@ class ManualStrategyDeveloper:
                 if not target.is_triggered:
                     target.delete()
 
+            if setup_mode == 'manual':
+                total_share = 0
+                for target_data in new_targets_data:
+                    if not target_data['share']:
+                        raise CustomException('Target share is required in manual mode')
+                    total_share += round_down(target_data['share'])
+                if round_down(total_share) != round_down(strategy_state_data.none_triggered_targets_share):
+                    raise CustomException('Total shares must be equal to free share, free share is : {}'.format(
+                        strategy_state_data.none_triggered_targets_share))
+                if signal.setup_mode == 'auto':
+                    if targets[0].is_triggered:
+                        signal.setup_mode = 'semi_auto'
+                    else:
+                        signal.setup_mode = 'manual'
+            elif setup_mode == 'auto':
+                auto_target_share = round_down(strategy_state_data.none_triggered_targets_share / len(new_targets_data))
+                for i in range(len(new_targets_data) - 1):
+                    new_targets_data[i]['share'] = auto_target_share
+                new_targets_data[len(new_targets_data) - 1]['share'] = round(
+                    strategy_state_data.none_triggered_targets_share - (len(new_targets_data) - 1) * auto_target_share, 2)
+                if signal.setup_mode == 'manual':
+                    if targets[0].is_triggered:
+                        signal.setup_mode = 'semi_auto'
+                    else:
+                        signal.setup_mode = 'auto'
+
             new_targets = []
             for target_data in new_targets_data:
                 target = FuturesTarget(
                     signal=signal,
                     tp_price=target_data['tp_price'],
+                    share=target_data['share'],
                     is_triggered=False,
                 )
                 target.save()
