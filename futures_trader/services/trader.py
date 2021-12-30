@@ -31,14 +31,14 @@ class FuturesBotTrader:
                                       position_data=bot_data['position'])
 
     @staticmethod
-    def edit_position(credential_id, new_position_data, bot_id=None, symbol=None):
+    def edit_position(credential_id, new_position_data, bot_id=None, symbol=None, raise_error=False):
         if not bot_id:
             if not symbol:
                 raise CustomException('bot_id or symbol is required to edit position!')
             else:
                 bot_id = bot_handler.find_active_bot_id_by_symbol(credential_id, symbol)
-
-        return bot_handler.edit_position(credential_id, bot_id, new_position_data)
+        if bot_id:
+            return bot_handler.edit_position(credential_id, bot_id, new_position_data, raise_error=raise_error)
 
     @staticmethod
     def pause_bot(credential_id, bot_id):

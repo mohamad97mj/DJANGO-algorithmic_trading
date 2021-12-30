@@ -37,7 +37,8 @@ def extract_primary_setup(signal_data, line0):
     signal_data['side'] = side
     symbol = '{}/USDT'.format(params[1].upper())
     signal_data['symbol'] = symbol
-    steps = [{'entry_price': float(params[2])}]
+    # steps = [{'entry_price': float(params[2])}]
+    steps = [{'entry_price': -1}]
     signal_data['steps'] = steps
 
 

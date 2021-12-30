@@ -15,7 +15,10 @@ class FuturesPositionView(APIView):
         data = json.loads(request.body)
         credential_id = data.get('credential_id', 'kucoin_test')
         new_position_data = data['position']
-        new_position, edited_data = FuturesBotTrader.edit_position(credential_id, new_position_data, bot_id, )
+        new_position, edited_data = FuturesBotTrader.edit_position(credential_id,
+                                                                   new_position_data,
+                                                                   bot_id,
+                                                                   raise_error=True)
 
         position_serializer = FuturesPositionSerializer(instance=new_position)
         return Response(

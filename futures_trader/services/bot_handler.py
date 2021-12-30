@@ -359,65 +359,69 @@ class FuturesBotHandler:
                 self.set_bot_strategy_state_data(bot)
         return bots
 
-    def edit_position(self, credential_id, bot_id, new_position_data):
+    def edit_position(self, credential_id, bot_id, new_position_data, raise_error=False):
         bot = self.get_active_bot(credential_id, bot_id)
         if not bot:
-            raise CustomException(
-                'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
+            message = 'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id)
+            if raise_error:
+                raise CustomException(message)
+            else:
+                logger = my_get_logger()
+                logger.error(message)
+        else:
+            strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
 
-        strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
+            edited_data = []
+            new_signal_data = new_position_data.get('signal')
+            if new_signal_data:
+                new_steps_data = new_signal_data.get('steps')
+                setup_mode = new_signal_data.get('setup_mode', 'auto')
+                if new_steps_data:
+                    steps_was_edited = self._run_strategy_developer_command(
+                        bot,
+                        strategy_developer,
+                        'edit_steps',
+                        new_steps_data,
+                        setup_mode,
+                    )
+                    if steps_was_edited:
+                        edited_data.append('steps')
 
-        edited_data = []
-        new_signal_data = new_position_data.get('signal')
-        if new_signal_data:
-            new_steps_data = new_signal_data.get('steps')
-            setup_mode = new_signal_data.get('setup_mode', 'auto')
-            if new_steps_data:
-                steps_was_edited = self._run_strategy_developer_command(
+                new_targets_data = new_signal_data.get('targets')
+                if new_targets_data:
+                    targets_was_edited = self._run_strategy_developer_command(
+                        bot,
+                        strategy_developer,
+                        'edit_targets',
+                        new_targets_data,
+                        setup_mode,
+                    )
+                    if targets_was_edited:
+                        edited_data.append('targets')
+
+                new_stoploss = new_signal_data.get('stoploss')
+                if new_stoploss:
+                    stoploss_was_edited = self._run_strategy_developer_command(
+                        bot,
+                        strategy_developer,
+                        'edit_stoploss',
+                        new_stoploss,
+                    )
+                    if stoploss_was_edited:
+                        edited_data.append('stoploss')
+
+            new_margin = new_position_data.get('margin')
+            if new_margin:
+                margin_was_edited = self._run_strategy_developer_command(
                     bot,
                     strategy_developer,
-                    'edit_steps',
-                    new_steps_data,
-                    setup_mode,
+                    'edit_margin',
+                    new_margin
                 )
-                if steps_was_edited:
-                    edited_data.append('steps')
+                if margin_was_edited:
+                    edited_data.append('margin')
 
-            new_targets_data = new_signal_data.get('targets')
-            if new_targets_data:
-                targets_was_edited = self._run_strategy_developer_command(
-                    bot,
-                    strategy_developer,
-                    'edit_targets',
-                    new_targets_data,
-                    setup_mode,
-                )
-                if targets_was_edited:
-                    edited_data.append('targets')
-
-            new_stoploss = new_signal_data.get('stoploss')
-            if new_stoploss:
-                stoploss_was_edited = self._run_strategy_developer_command(
-                    bot,
-                    strategy_developer,
-                    'edit_stoploss',
-                    new_stoploss,
-                )
-                if stoploss_was_edited:
-                    edited_data.append('stoploss')
-
-        new_margin = new_position_data.get('margin')
-        if new_margin:
-            margin_was_edited = self._run_strategy_developer_command(
-                bot,
-                strategy_developer,
-                'edit_margin',
-                new_margin
-            )
-            if margin_was_edited:
-                edited_data.append('margin')
-
-        return bot.position, edited_data
+            return bot.position, edited_data
 
     def pause_bot(self, credential_id, bot_id):
         bot = self.get_active_bot(credential_id, bot_id)
