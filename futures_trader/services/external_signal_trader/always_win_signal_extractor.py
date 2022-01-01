@@ -35,7 +35,9 @@ def extract_primary_setup(signal_data, line0):
     params = line0.split(' ')
     side = 'buy' if params[0] == 'long' else 'sell'
     signal_data['side'] = side
-    symbol = '{}/USDT'.format(params[1].upper())
+    symbol = params[1].upper()
+    if '/USD' not in symbol:
+        symbol += '/USDT'
     signal_data['symbol'] = symbol
     # steps = [{'entry_price': float(params[2])}]
     steps = [{'entry_price': -1}]
