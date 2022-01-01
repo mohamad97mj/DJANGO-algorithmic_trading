@@ -307,7 +307,7 @@ class FuturesBotHandler:
                 try:
                     asyncio.run(ws_client.unsubscribe(ticker_topic))
                     ws_client.close_connection()
-                except ConnectionClosedOK:
+                except (ConnectionClosedOK, ConnectionClosedError):
                     _logger.warning('ConnectionClosedOK in price ticker {}'.format(price_ticker.id))
 
             price_ticker.stop = close_ws
