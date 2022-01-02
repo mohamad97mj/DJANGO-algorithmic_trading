@@ -189,7 +189,7 @@ class ManualStrategyDeveloper:
                             operations.append(tp_operation)
                             target.operation = tp_operation
 
-                            if j == 0:
+                            if j == 1:
                                 new_trigger_price = steps[0].entry_price
                                 stoploss_is_created = False
                                 if stoploss:

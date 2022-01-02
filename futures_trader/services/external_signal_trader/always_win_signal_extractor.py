@@ -2,15 +2,18 @@ def extract_always_win_signal_data(message):
     lower_msg = message.lower()
     lines = list(filter(lambda x: x, lower_msg.split('\n')))
     signal_data = {'source': 'ALWAYS_WIN'}
-
+    is_signal = False
     if is_primary_signal(lines[0]):
         signal_data['type'] = 'primary'
         signal_data['leverage'] = 11
         extract_primary_setup(signal_data, lines[0])
+        is_signal = True
     elif is_secondary_signal(lower_msg):
         signal_data['type'] = 'secondary'
         extract_secondary_setup(signal_data, lines)
-    return signal_data
+        is_signal = True
+    if is_signal:
+        return signal_data
 
 
 def is_primary_signal(line0):
