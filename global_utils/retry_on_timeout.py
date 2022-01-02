@@ -11,11 +11,11 @@ def retry_on_timeout(timeout_errors=None, attempts=None, delay=5):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             def caught_func():
-                _result, _error = None, True
+                _result, _error, _none_timeout_error = None, True, False
+                logger = my_get_logger()
                 try:
                     _result, _error = func(*args, **kwargs), False
                 except timeout_errors as e:
-                    logger = my_get_logger()
                     logger.warning('retry on timeout: {}!'.format(func.__name__))
                     # logger.warning(
                     #     "func={} args={} kwargs={} message={} traceback={}".format(func,
@@ -24,18 +24,24 @@ def retry_on_timeout(timeout_errors=None, attempts=None, delay=5):
                     #                                                                e,
                     #                                                                traceback.format_exc()))
                     time.sleep(delay)
+                except Exception as e:
+                    _none_timeout_error = True
+                    logger.exception(e)
                 finally:
-                    return _result, _error
+                    return _result, _error, _none_timeout_error
 
             if attempts:
                 for _ in range(attempts):
-                    result, error = caught_func()
+                    result, error, none_timeout_error = caught_func()
+                    if none_timeout_error:
+                        break
                     if not error:
                         return result
-
             else:
                 while True:
-                    result, error = caught_func()
+                    result, error, none_timeout_error = caught_func()
+                    if none_timeout_error:
+                        break
                     if not error:
                         return result
 
@@ -70,6 +76,8 @@ def async_retry_on_timeout(public_client, timeout_errors=None, attempts=None, de
                     #                                                                traceback.format_exc()))
                     _result, _error = None, True
                     time.sleep(delay)
+                except Exception as e:
+                    logger.exception(e)
                 finally:
                     return _result, _error
 
