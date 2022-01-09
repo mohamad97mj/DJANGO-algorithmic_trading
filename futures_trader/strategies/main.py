@@ -189,7 +189,7 @@ class ManualStrategyDeveloper:
                             operations.append(tp_operation)
                             target.operation = tp_operation
 
-                            if j == 1:
+                            if j == 1 or (j == 0 and signal.leverage > 10):
                                 new_trigger_price = steps[0].entry_price
                                 stoploss_is_created = False
                                 if stoploss:
@@ -379,7 +379,8 @@ class ManualStrategyDeveloper:
                 for i in range(len(new_targets_data) - 1):
                     new_targets_data[i]['share'] = auto_target_share
                 new_targets_data[len(new_targets_data) - 1]['share'] = round(
-                    strategy_state_data.none_triggered_targets_share - (len(new_targets_data) - 1) * auto_target_share, 2)
+                    strategy_state_data.none_triggered_targets_share - (len(new_targets_data) - 1) * auto_target_share,
+                    2)
                 if signal.setup_mode == 'manual':
                     if targets[0].is_triggered:
                         signal.setup_mode = 'semi_auto'
