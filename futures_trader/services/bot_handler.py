@@ -76,11 +76,14 @@ class FuturesBotHandler:
             sort_steps_reverse = signal.side == 'buy'
             sorted_steps_data = sorted(signal_data['steps'], reverse=sort_steps_reverse, key=lambda s: s['entry_price'])
             if signal.side == 'buy':
-                last_sorted_data = sorted_steps_data[len(sorted_steps_data) - 1]
-                if last_sorted_data['entry_price'] == -1:
-                    first_step_is_market = True
-                    public_client = self.get_public_client(exchange_id=exchange_id)
-                    last_sorted_data['entry_price'] = public_client.fetch_ticker(signal.symbol)
+                possibly_market_step_data = sorted_steps_data[len(sorted_steps_data) - 1]
+            else:
+                possibly_market_step_data = sorted_steps_data[0]
+            if possibly_market_step_data['entry_price'] == -1:
+                first_step_is_market = True
+                public_client = self.get_public_client(exchange_id=exchange_id)
+                possibly_market_step_data['entry_price'] = public_client.fetch_ticker(signal.symbol)
+                if signal.side == 'buy':
                     sorted_steps_data.insert(0, sorted_steps_data.pop())
 
             sorted_steps_data_len = len(sorted_steps_data)

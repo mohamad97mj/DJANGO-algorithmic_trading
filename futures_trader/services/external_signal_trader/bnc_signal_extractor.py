@@ -2,19 +2,20 @@ from global_utils import my_get_logger
 
 
 def extract_bnc_signal_data(message):
-    if is_signal(message):
-        lines = list(filter(lambda x: x, message.upper().split('\n')))
-        signal_data = {'source': 'BNC', 'type': 'single'}
-        for line in lines:
-            splitted_line = line.split(':')
-            if len(splitted_line) == 2:
-                key = splitted_line[0].strip()
-                value = splitted_line[1].strip()
-                if key in parameter_extractor_mapping:
-                    for f in parameter_extractor_mapping[key]:
-                        f(signal_data, value)
-        if is_valid(signal_data):
-            return signal_data
+    pass
+    # if is_signal(message):
+    #     lines = list(filter(lambda x: x, message.upper().split('\n')))
+    #     signal_data = {'source': 'BNC', 'type': 'single'}
+    #     for line in lines:
+    #         splitted_line = line.split(':')
+    #         if len(splitted_line) == 2:
+    #             key = splitted_line[0].strip()
+    #             value = splitted_line[1].strip()
+    #             if key in parameter_extractor_mapping:
+    #                 for f in parameter_extractor_mapping[key]:
+    #                     f(signal_data, value)
+    #     if is_valid(signal_data):
+    #         return signal_data
 
 
 def is_signal(message):
