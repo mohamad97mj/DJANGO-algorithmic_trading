@@ -1,6 +1,7 @@
 import sys
 from django.apps import AppConfig
 from .utils.app_vars import enable_futures
+from threading import Thread
 
 
 class FuturesTraderConfig(AppConfig):
@@ -16,4 +17,5 @@ class FuturesTraderConfig(AppConfig):
             # from futures_trader.trade import trade
             # trade()
             from futures_trader.services.technical_trader.auto_trader import start_signal_generating
-            start_signal_generating()
+            t = Thread(target=start_signal_generating)
+            t.start()
