@@ -1,6 +1,5 @@
 import numpy
 import pandas
-import pandas as pd
 from ta.momentum import RSIIndicator
 
 from ..clients.public_client import PublicClient
