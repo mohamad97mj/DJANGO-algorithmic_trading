@@ -2,7 +2,7 @@ from futures_trader.exchange import ef
 
 
 class PublicClient:
-    def __init__(self, exchange_id):
+    def __init__(self, exchange_id='kucoin'):
         self._exchange = ef.create_exchange(exchange_id=exchange_id)
 
     def fetch_ticker(self, symbol='BTC/USDT'):

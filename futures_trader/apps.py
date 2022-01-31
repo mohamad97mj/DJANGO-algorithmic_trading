@@ -13,5 +13,7 @@ class FuturesTraderConfig(AppConfig):
             from global_utils import my_get_logger
             logger = my_get_logger()
             logger.info("futures_trader app started!")
-            from futures_trader.trade import trade
-            trade()
+            # from futures_trader.trade import trade
+            # trade()
+            from futures_trader.services.technical_trader.auto_trader import start_signal_generating
+            start_signal_generating()

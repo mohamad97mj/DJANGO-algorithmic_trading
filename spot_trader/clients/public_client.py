@@ -2,7 +2,7 @@ from spot_trader.exchange import ef
 
 
 class PublicClient:
-    def __init__(self, exchange_id):
+    def __init__(self, exchange_id='kucoin'):
         self._exchange = ef.create_exchange(exchange_id=exchange_id)
 
         # def get_exchanges(self):

@@ -85,7 +85,7 @@ class Exchange:
     def load_markets(self, reload):
         if reload or not self.symbols:
             markets = self.get_contracts()
-            symbols = list(filter(lambda x: x, [without2with_slash_f(market['symbol']) for market in markets]))
+            symbols = list(filter(lambda x: x and x.endswith('USDT'), [without2with_slash_f(market['symbol']) for market in markets]))
             self.symbols = symbols
 
         return self.symbols
