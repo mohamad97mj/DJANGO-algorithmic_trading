@@ -88,7 +88,7 @@ DATABASES = {
         'USER': 'intellichange',
         'PASSWORD': 'mJ604998',
         'HOST': 'localhost',
-        'PORT': 6000,
+        'PORT': os.environ.get('DB_PORT', 6000),
     }
 }
 
