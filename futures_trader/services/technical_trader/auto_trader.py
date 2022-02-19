@@ -47,7 +47,7 @@ def start_signal_generating():
 
 def consume_signal(signal_data):
     signal_data['setup_mode'] = 'auto'
-    signal_data['leverage'] = 50
+    signal_data['leverage'] = 65
     signal_data['source'] = 'technical'
     position_data = {
         'signal': signal_data,
