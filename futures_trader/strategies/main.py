@@ -233,6 +233,9 @@ class ManualStrategyDeveloper:
 
         return operations
 
+    def get_operation(self):
+        pass
+
     @staticmethod
     def edit_steps(position, strategy_state_data, new_steps_data, setup_mode='auto'):
         edit_is_required = ManualStrategyDeveloper._has_steps_changed(position,

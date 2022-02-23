@@ -17,6 +17,7 @@ class FuturesPosition(models.Model):
                                blank=True)
     holding_size = models.FloatField(default=0)
     margin = models.FloatField()
+    order_type = models.CharField(max_length=100, default='market')
     keep_open = models.BooleanField(default=False)
     purchased_value = models.FloatField(default=0)
     released_margin = models.FloatField(default=0)

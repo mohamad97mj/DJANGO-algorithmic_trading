@@ -9,7 +9,7 @@ class FuturesBotTrader:
     @staticmethod
     def start_trading():
         bot_handler.reload_bots()
-        bot_handler.run_bots()
+        bot_handler.run_bots_limit_order_based()
 
     @staticmethod
     def get_bot(credential_id: str, bot_id: str):

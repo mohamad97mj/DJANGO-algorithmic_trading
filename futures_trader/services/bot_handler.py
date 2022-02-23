@@ -67,7 +67,7 @@ class FuturesBotHandler:
             signal.save()
 
             position = FuturesPosition(signal=signal,
-                                       **{k: position_data[k] for k in ['margin']})
+                                       **{k: position_data[k] for k in ['margin', 'order_type']})
 
             position.keep_open = position_data.get('keep_open', 'false') == 'true'
 
@@ -129,6 +129,8 @@ class FuturesBotHandler:
                                  credential_id=credential_id,
                                  strategy=strategy,
                                  position=position)
+            if position.order_type == 'limit':
+                new_bot.status = 'created'
 
             self.init_bot_requirements(bot=new_bot)
             strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy)
@@ -171,10 +173,10 @@ class FuturesBotHandler:
     def run_bots(self):
         while True:
             credentials = list(self._bots.keys())
-            running_bots = []
+            active_bots = []
             for credential in credentials:
-                running_bots += [bot for bot in list(self._bots[credential].values())]
-            for bot in running_bots:
+                active_bots += [bot for bot in list(self._bots[credential].values())]
+            for bot in active_bots:
                 try:
                     if bot.status == FuturesBot.Status.RUNNING.value:
                         strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
@@ -214,6 +216,71 @@ class FuturesBotHandler:
                 except Exception as e:
                     logger = my_get_logger()
                     logger.exception(e)
+            time.sleep(1)
+
+    def run_bots_limit_order_based(self):
+        while True:
+            credentials = list(self._bots.keys())
+            active_bots = []
+            for credential in credentials:
+                active_bots += [bot for bot in list(self._bots[credential].values())]
+            for bot in active_bots:
+                position = bot.position
+                signal = position.signal
+                step = signal.related_steps[0]
+                multiplier = 0.001
+                size = int(((step.margin * signal.leverage) / step.entry_price) / multiplier) * multiplier
+                if bot.status == FuturesBot.Status.CREATED.value:
+                    bot._private_client.create_limit_order(
+                        symbol=signal.symbol,
+                        leverage=signal.leverage,
+                        side=signal.side,
+                        size=size,
+                        price=step.entry_price,
+                        multiplier=multiplier
+                    )
+
+                    bot.status = FuturesBot.Status.WAITING.value
+                    bot.save()
+                else:
+                    open_positions = bot._private_client.get_all_positions()
+                    open_positions = open_positions if isinstance(open_positions, list) else []
+                    for open_position in open_positions:
+                        if open_position['symbol'] == with2without_slash_f(signal.symbol):
+                            if bot.status == FuturesBot.Status.WAITING.value:
+                                target = signal.related_targets[0]
+                                stoploss = signal.stoploss
+                                bot._private_client.create_limit_order(
+                                    symbol=signal.symbol,
+                                    leverage=signal.leverage,
+                                    side='buy' if signal.side == 'sell' else 'sell',
+                                    size=size,
+                                    price=target.tp_price,
+                                    multiplier=multiplier
+                                )
+                                bot._private_client.create_stop_market_order(
+                                    symbol=signal.symbol,
+                                    leverage=signal.leverage,
+                                    side='buy' if signal.side == 'sell' else 'sell',
+                                    size=size,
+                                    multiplier=multiplier,
+                                    stop='down' if signal.side == 'buy' else 'up',
+                                    stop_price=stoploss.trigger_price,
+                                )
+
+                                position.is_triggered = True
+                                bot.is_active = False
+                                bot.status = FuturesBot.Status.RUNNING.value
+                                bot.save()
+                            break
+                    else:
+                        if bot.status == FuturesBot.Status.RUNNING.value:
+                            bot._private_client.cancel_all_stop_orders(symbol=signal.symbol)
+                            bot._private_client.cancel_all_limit_orders(symbol=signal.symbol)
+                            bot.status = FuturesBot.Status.STOPPED.value
+                            self._bots[bot.credential_id].pop(bot.id)
+                            bot.save()
+
             time.sleep(1)
 
     def _get_prices_if_available(self, exchange_id, symbols: List):
@@ -463,7 +530,7 @@ class FuturesBotHandler:
             raise CustomException(
                 'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
 
-        bot.status = FuturesBot.Status.STOPPED_MANUALY.value
+        bot.status = FuturesBot.Status.STOPPED_MANUALLY.value
         bot.is_active = False
         bot.close_position(test=is_test)
         bot.save()

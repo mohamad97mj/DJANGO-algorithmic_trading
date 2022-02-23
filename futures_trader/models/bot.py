@@ -21,12 +21,15 @@ class FuturesBotManager(models.Manager):
 
 class FuturesBot(models.Model):
     class Status(models.TextChoices):
+        CREATED = 'created'
+        WAITING = 'waiting'
         RUNNING = 'running'
         PAUSED = 'paused'
         STOPPED_BY_STOPLOSS = 'stopped_by_stoploss'
         STOPPED_BY_TRAILING_STOPLOSS = 'stopped_by_trailing_stoploss'
         STOPPED_AFTER_FULL_TARGET = 'stopped_after_full_target'
-        STOPPED_MANUALY = 'stopped_manualy'
+        STOPPED_MANUALLY = 'stopped_manually'
+        STOPPED = 'stopped'
 
     objects = FuturesBotManager()
 
@@ -40,7 +43,7 @@ class FuturesBot(models.Model):
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
     status = models.CharField(default=Status.RUNNING.value,
-                              max_length=50)  # paused, stopped_systematically, stopped_manualy
+                              max_length=50)  # paused, stopped_systematically, stopped_manually
 
     def __init__(self, *args, **kwargs):
         super(FuturesBot, self).__init__(*args, **kwargs)
@@ -83,13 +86,24 @@ class FuturesBot(models.Model):
                     timestamp = time.time()
 
                 else:
-                    exchange_order = self._private_client.create_market_order(
-                        symbol=symbol,
-                        leverage=signal.leverage,
-                        side=order.side,
-                        size=size,
-                        multiplier=multiplier,
-                    )
+                    if order.type == 'market':
+                        exchange_order = self._private_client.create_market_order(
+                            symbol=symbol,
+                            leverage=signal.leverage,
+                            side=order.side,
+                            size=size,
+                            multiplier=multiplier,
+                        )
+                    else:
+                        exchange_order = self._private_client.create_limit_order(
+                            symbol=symbol,
+                            leverage=signal.leverage,
+                            side=order.side,
+                            size=size,
+                            price=order.price,
+                            multiplier=multiplier,
+                        )
+
                     exchange_order_id = exchange_order['id']
                     value = float(exchange_order['value'])
                     filled_value = float(exchange_order['filledValue'])

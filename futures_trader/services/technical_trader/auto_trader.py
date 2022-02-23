@@ -18,7 +18,8 @@ def start_signal_generating():
     logger = my_get_logger()
     pb = PublicClient()
     symbol = 'BTC/USDT'
-    tp_ratio = sl_ratio = 0.01
+    tp_ratio = 0.011
+    sl_ratio = 0.009
     timeframe = '5m'
 
     while True:
@@ -30,7 +31,7 @@ def start_signal_generating():
         price = pb.fetch_ticker(symbol=symbol)
         logger.debug('rsi: {}, price: {}'.format(rsi, price))
         if rsi <= 20 or rsi >= 80:
-            signal_data = {'symbol': symbol, 'steps': [{'entry_price': -1, }, ]}
+            signal_data = {'symbol': symbol, 'steps': [{'entry_price': price, }, ]}
             if rsi <= 20:
                 signal_data['side'] = 'buy'
                 signal_data['targets'] = [{'tp_price': int(price * (1 + tp_ratio)), }, ]
@@ -47,13 +48,14 @@ def start_signal_generating():
 
 def consume_signal(signal_data):
     signal_data['setup_mode'] = 'auto'
-    signal_data['leverage'] = 65
+    signal_data['leverage'] = 50
     signal_data['source'] = 'technical'
     position_data = {
         'signal': signal_data,
+        'margin':position_margin,
+        'order_type': 'limit'
     }
     credential_id = 'kucoin_main'
-    position_data['margin'] = position_margin
     bot_data = {
         'exchange_id': 'kucoin',
         'credential_id': credential_id,

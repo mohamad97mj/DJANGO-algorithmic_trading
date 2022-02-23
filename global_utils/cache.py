@@ -3,7 +3,7 @@ from django.conf import settings
 
 
 class CacheUtils:
-    default_timeout = settings.DEFAULT_TIMOUT
+    default_timeout = settings.DEFAULT_TIMEOUT
 
     @staticmethod
     def read_from_cache(key, cache_name):

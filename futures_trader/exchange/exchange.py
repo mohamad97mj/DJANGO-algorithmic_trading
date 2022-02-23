@@ -26,16 +26,36 @@ class Exchange:
     def get_order(self, order_id):
         return self._sdk_exchange.trade_client.get_order_details(orderId=order_id)
 
-    def create_market_order(self, symbol, leverage, side, size, multiplier):
+    def get_orders(self, symbol):
         if self._exchange_id == 'kucoin':
             symbol = with2without_slash_f(symbol)
+        return self._sdk_exchange.trade_client.get_open_order_details(symbol)
 
+    def create_limit_order(self, symbol, leverage, side, size, price, multiplier):
+        if self._exchange_id == 'kucoin':
+            symbol = with2without_slash_f(symbol)
+        size = int(size / multiplier)
+        exchange_order = self._sdk_exchange.trade_client.create_limit_order(symbol=symbol,
+                                                                            side=side,
+                                                                            lever=leverage,
+                                                                            size=size,
+                                                                            price=price)
+        return self.get_order(exchange_order['orderId'])
+
+    def create_market_order(self, symbol, leverage, side, size, multiplier, **kwargs):
+        if self._exchange_id == 'kucoin':
+            symbol = with2without_slash_f(symbol)
         size = int(size / multiplier)
         exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
                                                                              side=side,
                                                                              lever=leverage,
-                                                                             size=size)
+                                                                             size=size,
+                                                                             **kwargs)
         return self.get_order(exchange_order['orderId'])
+
+    def create_stop_market_order(self, symbol, leverage, side, size, multiplier, stop, stop_price):
+        return self.create_market_order(symbol, leverage, side, size, multiplier, stop=stop, stopPrice=stop_price,
+                                        stopPriceType='MP')
 
     def create_market_buy_order_in_cost(self, symbol, leverage, cost, price, multiplier):
         size = (cost * leverage) / price
@@ -53,6 +73,18 @@ class Exchange:
             symbol = with2without_slash_f(symbol)
 
         return self._sdk_exchange.trade_client.get_position_details(symbol=symbol)
+
+    def cancel_all_stop_orders(self, symbol):
+        if self._exchange_id == 'kucoin':
+            symbol = with2without_slash_f(symbol)
+
+        return self._sdk_exchange.trade_client.cancel_all_stop_order(symbol=symbol)
+
+    def cancel_all_limit_orders(self, symbol):
+        if self._exchange_id == 'kucoin':
+            symbol = with2without_slash_f(symbol)
+
+        return self._sdk_exchange.trade_client.cancel_all_limit_order(symbol=symbol)
 
     def close_position(self, symbol):
         if self._exchange_id == 'kucoin':
@@ -85,7 +117,8 @@ class Exchange:
     def load_markets(self, reload):
         if reload or not self.symbols:
             markets = self.get_contracts()
-            symbols = list(filter(lambda x: x and x.endswith('USDT'), [without2with_slash_f(market['symbol']) for market in markets]))
+            symbols = list(filter(lambda x: x and x.endswith('USDT'),
+                                  [without2with_slash_f(market['symbol']) for market in markets]))
             self.symbols = symbols
 
         return self.symbols

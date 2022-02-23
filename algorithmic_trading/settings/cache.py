@@ -1,5 +1,5 @@
 MEMORY_MAX_ENTRIES = 1000000
-DEFAULT_TIMOUT = 7
+DEFAULT_TIMEOUT = 7
 
 CACHES = {
     'default': {
@@ -14,7 +14,7 @@ CACHES = {
         'OPTIONS': {
             'MAX_ENTRIES': MEMORY_MAX_ENTRIES,
         },
-        'TIMEOUT': DEFAULT_TIMOUT,
+        'TIMEOUT': DEFAULT_TIMEOUT,
     },
     'binance_futures_price': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -23,7 +23,7 @@ CACHES = {
         'OPTIONS': {
             'MAX_ENTRIES': MEMORY_MAX_ENTRIES,
         },
-        'TIMEOUT': DEFAULT_TIMOUT,
+        'TIMEOUT': DEFAULT_TIMEOUT,
     },
     'kucoin_spot_price': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -32,7 +32,7 @@ CACHES = {
         'OPTIONS': {
             'MAX_ENTRIES': MEMORY_MAX_ENTRIES,
         },
-        'TIMEOUT': DEFAULT_TIMOUT,
+        'TIMEOUT': DEFAULT_TIMEOUT,
     },
 
     'kucoin_futures_price': {
@@ -42,7 +42,7 @@ CACHES = {
         'OPTIONS': {
             'MAX_ENTRIES': MEMORY_MAX_ENTRIES,
         },
-        'TIMEOUT': DEFAULT_TIMOUT,
+        'TIMEOUT': DEFAULT_TIMEOUT,
     }
 
 }
