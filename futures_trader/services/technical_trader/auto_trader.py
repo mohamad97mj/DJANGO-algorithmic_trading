@@ -15,6 +15,7 @@ rsi_muck_values = [22, 21, 20, 19, 18, 21, 22, 23, 24, 25, 26, 27, 28]
 
 
 def start_signal_generating():
+    condition_is_normal = True
     logger = my_get_logger()
     pb = PublicClient()
     symbol = 'BTC/USDT'
@@ -40,9 +41,11 @@ def start_signal_generating():
                 signal_data['side'] = 'sell'
                 signal_data['targets'] = [{'tp_price': int(price * (1 - tp_ratio)), }, ]
                 signal_data['stoploss'] = {'trigger_price': int(price * (1 + sl_ratio))}
-
-            signal_data_queue.put(signal_data)
-
+            if condition_is_normal:
+                signal_data_queue.put(signal_data)
+                condition_is_normal = False
+        elif 35 < rsi < 65:
+            condition_is_normal = True
         time.sleep(10)
 
 
@@ -52,7 +55,7 @@ def consume_signal(signal_data):
     signal_data['source'] = 'technical'
     position_data = {
         'signal': signal_data,
-        'margin':position_margin,
+        'margin': position_margin,
         'order_type': 'limit'
     }
     credential_id = 'kucoin_main'
