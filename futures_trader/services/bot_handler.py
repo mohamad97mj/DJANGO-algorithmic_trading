@@ -140,6 +140,9 @@ class FuturesBotHandler:
                 self._bots[credential_id][new_bot.id] = new_bot
             else:
                 self._bots[credential_id] = {new_bot.id: new_bot}
+
+            logger = my_get_logger()
+            logger.info('new bot was created!')
             return new_bot
 
     def reload_bots(self):

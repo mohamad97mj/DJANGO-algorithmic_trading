@@ -30,7 +30,7 @@ def start_signal_generating():
             rsi = TechnicalAnalyser.get_rsi(symbol=symbol, timeframe=timeframe)
 
         price = pb.fetch_ticker(symbol=symbol)
-        logger.debug('rsi: {}, price: {}'.format(rsi, price))
+        logger.debug('rsi: {}, price: {}, condition_is_normal: {}'.format(rsi, price, condition_is_normal))
         if rsi <= 20 or rsi >= 80:
             signal_data = {'symbol': symbol, 'steps': [{'entry_price': price, }, ]}
             if rsi <= 20:
@@ -42,6 +42,7 @@ def start_signal_generating():
                 signal_data['targets'] = [{'tp_price': int(price * (1 - tp_ratio)), }, ]
                 signal_data['stoploss'] = {'trigger_price': int(price * (1 + sl_ratio))}
             if condition_is_normal:
+                logger.info('new signal data was generated')
                 signal_data_queue.put(signal_data)
                 condition_is_normal = False
         elif 35 < rsi < 65:
@@ -65,6 +66,8 @@ def consume_signal(signal_data):
         'strategy': 'manual',
         'position': position_data,
     }
+    logger = my_get_logger()
+    logger.info('new signal data was consumed')
     FuturesBotTrader.create_bot(bot_data)
 
 
