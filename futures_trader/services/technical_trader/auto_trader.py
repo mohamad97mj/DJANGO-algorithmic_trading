@@ -24,7 +24,7 @@ def start_signal_generating():
     timeframe = '5m'
 
     while True:
-        if is_test:
+        if True:
             rsi = rsi_muck_values.pop(0)
         else:
             rsi = TechnicalAnalyser.get_rsi(symbol=symbol, timeframe=timeframe)

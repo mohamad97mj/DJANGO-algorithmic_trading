@@ -47,6 +47,9 @@ class FuturesBotHandler:
     def create_bot(self, exchange_id: str, credential_id: str, strategy: str, position_data: dict):
 
         if self.validate_bot_data(exchange_id, credential_id, position_data['signal']['symbol']):
+            logger = my_get_logger()
+            logger.info('in validation if')
+
             strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy=strategy)
             strategy_developer.validate_position_data(position_data=position_data)
 
@@ -141,7 +144,6 @@ class FuturesBotHandler:
             else:
                 self._bots[credential_id] = {new_bot.id: new_bot}
 
-            logger = my_get_logger()
             logger.info('new bot was created!')
             return new_bot
 
