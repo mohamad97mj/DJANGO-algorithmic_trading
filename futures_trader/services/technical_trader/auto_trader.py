@@ -16,7 +16,6 @@ rsi_muck_values = [22, 21, 20, 19, 18, 21, 22, 23, 24, 25, 26, 27, 28]
 
 def start_signal_generating():
     condition_is_normal = True
-    logger = my_get_logger()
     pb = PublicClient()
     symbol = 'BTC/USDT'
     tp_ratio = 0.011
@@ -24,13 +23,12 @@ def start_signal_generating():
     timeframe = '5m'
 
     while True:
-        if True:
+        if is_test:
             rsi = rsi_muck_values.pop(0)
         else:
             rsi = TechnicalAnalyser.get_rsi(symbol=symbol, timeframe=timeframe)
 
         price = pb.fetch_ticker(symbol=symbol)
-        logger.debug('rsi: {}, price: {}, condition_is_normal: {}'.format(rsi, price, condition_is_normal))
         if rsi <= 20 or rsi >= 80:
             signal_data = {'symbol': symbol, 'steps': [{'entry_price': price, }, ]}
             if rsi <= 20:
@@ -42,7 +40,6 @@ def start_signal_generating():
                 signal_data['targets'] = [{'tp_price': int(price * (1 - tp_ratio)), }, ]
                 signal_data['stoploss'] = {'trigger_price': int(price * (1 + sl_ratio))}
             if condition_is_normal:
-                logger.info('new signal data was generated')
                 signal_data_queue.put(signal_data)
                 condition_is_normal = False
         elif 35 < rsi < 65:
