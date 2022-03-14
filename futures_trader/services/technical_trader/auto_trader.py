@@ -14,6 +14,18 @@ signal_data_queue = queue.Queue()
 rsi_muck_values = [22, 21, 20, 19, 18, 21, 22, 23, 24, 25, 26, 27, 28]
 
 
+def log_cci():
+    pb = PublicClient()
+    symbol = 'BTC/USDT'
+    timeframe = '1h'
+    while True:
+        cci = TechnicalAnalyser.get_cci(symbol, timeframe, 40)
+        price = pb.fetch_ticker(symbol=symbol)
+        logger = my_get_logger()
+        logger.info('{},{}'.format(cci, price))
+        time.sleep(10)
+
+
 def start_signal_generating():
     condition_is_normal = True
     pb = PublicClient()
@@ -78,8 +90,11 @@ def start_signal_consuming():
 
 
 def start_auto_trading():
-    t1 = Thread(target=start_signal_generating)
-    t1.start()
+    t = Thread(target=log_cci)
+    t.start()
 
-    t2 = Thread(target=start_signal_consuming)
-    t2.start()
+    # t1 = Thread(target=start_signal_generating)
+    # t1.start()
+
+    # t2 = Thread(target=start_signal_consuming)
+    # t2.start()
