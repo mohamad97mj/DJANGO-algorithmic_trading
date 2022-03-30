@@ -70,12 +70,13 @@ def send_telegram_message():
 
 @catch_all_exceptions()
 def start_signal_generating_by_cci(pb, symbol, timeframe, n):
+    logger = my_get_logger()
     symbol_position_config = symbols_position_config[symbol]
     if False:
         cci, prev_cci = cci_muck_values.pop(0)
     else:
         cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
-    print(symbol, cci, prev_cci)
+    logger.info('{} {} {}'.format(symbol, cci, prev_cci))
     last_prev_cci = None
     while True:
         is_signal = False
@@ -83,7 +84,7 @@ def start_signal_generating_by_cci(pb, symbol, timeframe, n):
             cci, prev_cci = cci_muck_values.pop(0)
         else:
             cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
-        print(symbol, cci, prev_cci)
+        logger.info('{} {} {}'.format(symbol, cci, prev_cci))
         if last_prev_cci != prev_cci:
 
             if symbol_position_config.trend in ('up', 'range'):
@@ -104,7 +105,6 @@ def start_signal_generating_by_cci(pb, symbol, timeframe, n):
                 sign = 1 if side == 'buy' else -1
                 tp_price = price * (1 + sign * symbol_position_config.tp_ratio)
                 logger = my_get_logger()
-                logger.info('{},{}'.format(cci, price))
                 signal_data = {'symbol': symbol,
                                'leverage': symbol_position_config.leverage,
                                'steps': [{'entry_price': -1, }],
