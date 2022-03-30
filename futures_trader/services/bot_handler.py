@@ -236,7 +236,7 @@ class FuturesBotHandler:
                     bot._private_client.create_limit_order(
                         symbol=signal.symbol,
                         leverage=signal.leverage,
-                        side=signal.side,
+                        side=signal.trend,
                         size=size,
                         price=step.entry_price,
                         multiplier=multiplier
@@ -255,7 +255,7 @@ class FuturesBotHandler:
                                 bot._private_client.create_limit_order(
                                     symbol=signal.symbol,
                                     leverage=signal.leverage,
-                                    side='buy' if signal.side == 'sell' else 'sell',
+                                    side='buy' if signal.trend == 'sell' else 'sell',
                                     size=size,
                                     price=target.tp_price,
                                     multiplier=multiplier
@@ -263,10 +263,10 @@ class FuturesBotHandler:
                                 bot._private_client.create_stop_market_order(
                                     symbol=signal.symbol,
                                     leverage=signal.leverage,
-                                    side='buy' if signal.side == 'sell' else 'sell',
+                                    side='buy' if signal.trend == 'sell' else 'sell',
                                     size=size,
                                     multiplier=multiplier,
-                                    stop='down' if signal.side == 'buy' else 'up',
+                                    stop='down' if signal.trend == 'buy' else 'up',
                                     stop_price=stoploss.trigger_price,
                                 )
 
@@ -311,7 +311,7 @@ class FuturesBotHandler:
     def _init_price_ticker(self, exchange_id, symbol):
         logger = my_get_logger()
         logger.info('price_ticker {} was started'.format(self.number_of_tickers))
-        if is_test:
+        if False:
             args = self._start_muck_symbol_price_ticker(exchange_id, symbol)
         else:
             args = self._start_symbol_price_ticker(exchange_id, symbol)

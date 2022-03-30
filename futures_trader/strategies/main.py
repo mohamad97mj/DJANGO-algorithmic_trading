@@ -260,7 +260,7 @@ class ManualStrategyDeveloper:
                 'share': s.share,
             } for s in current_steps
         ]
-        reverse = signal.side == 'buy'
+        reverse = signal.trend == 'buy'
         sorted_new_steps_data = sorted(new_steps_data, reverse=reverse, key=lambda step: step['entry_price'])
         return current_steps_data != sorted_new_steps_data or (
                 current_setup_mode != 'semi_auto' and current_setup_mode != setup_mode)
@@ -345,7 +345,7 @@ class ManualStrategyDeveloper:
                 'tp_price': t.tp_price,
             } for t in current_targets
         ]
-        reverse = signal.side == 'sell'
+        reverse = signal.trend == 'sell'
         sorted_new_targets_data = sorted(new_targets_data, reverse=reverse, key=lambda target: target['tp_price'])
         return current_targets_data != sorted_new_targets_data
 

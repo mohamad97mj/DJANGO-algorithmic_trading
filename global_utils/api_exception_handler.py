@@ -14,6 +14,8 @@ def custom_api_exception_handler(exc, context):
     # Now add the HTTP status code to the response.
     # if response is not None:
     #     response.data['status_code'] = response.status_code
+    logger = my_get_logger()
+    logger.exception(exc)
 
     response = None
     status = 200

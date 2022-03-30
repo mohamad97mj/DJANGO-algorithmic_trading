@@ -13,21 +13,25 @@ class TechnicalAnalyser:
     @staticmethod
     def get_cci(symbol, timeframe, n):
         ohlcvs = pb.fetch_ohlcv(symbol, timeframe=timeframe)
-        np_array = numpy.array(ohlcvs)
-        open_prices = pandas.Series(np_array[:, 1])
-        high_prices = pandas.Series(np_array[:, 2])
-        low_prices = pandas.Series(np_array[:, 3])
-        close_prices = pandas.Series(np_array[:, 4])
+        if ohlcvs:
+            np_array = numpy.array(ohlcvs)
+            open_prices = pandas.Series(np_array[:, 1])
+            high_prices = pandas.Series(np_array[:, 2])
+            low_prices = pandas.Series(np_array[:, 3])
+            close_prices = pandas.Series(np_array[:, 4])
 
-        close_prices_ha = (open_prices + high_prices + low_prices + close_prices) / 4
-        # open_prices_ha = (open_prices[0: -1] + close_prices[0: -1]) / 2
+            # close_prices_ha = (open_prices + high_prices + low_prices + close_prices) / 4
+            # open_prices_ha = (open_prices[0: -1] + close_prices[0: -1]) / 2
 
-        TP = (high_prices + low_prices + close_prices_ha) / 3
-        sma = TP.rolling(n).mean()
-        mad = TP.rolling(n).apply(lambda x: pandas.Series(x).mad())
-        CCI = (TP - sma) / (0.015 * mad)
-        CCI_list = CCI.to_list()
-        return CCI_list[-1]
+            # TP = (high_prices + low_prices + close_prices_ha) / 3
+            TP = (high_prices + low_prices + close_prices) / 3
+            sma = TP.rolling(n).mean()
+            mad = TP.rolling(n).apply(lambda x: pandas.Series(x).mad())
+            CCI = (TP - sma) / (0.015 * mad)
+            CCI_list = CCI.to_list()
+            # return CCI_list
+            return CCI_list[-2], CCI_list[-3]
+        return None, None
 
     @staticmethod
     def get_rsi(symbol, timeframe):

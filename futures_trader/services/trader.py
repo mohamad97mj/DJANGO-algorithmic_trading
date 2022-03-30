@@ -9,7 +9,7 @@ class FuturesBotTrader:
     @staticmethod
     def start_trading():
         bot_handler.reload_bots()
-        bot_handler.run_bots_limit_order_based()
+        bot_handler.run_bots()
 
     @staticmethod
     def get_bot(credential_id: str, bot_id: str):
@@ -49,5 +49,11 @@ class FuturesBotTrader:
         return bot_handler.start_bot(credential_id, bot_id)
 
     @staticmethod
-    def stop_bot(credential_id, bot_id):
-        return bot_handler.stop_bot(credential_id, bot_id)
+    def stop_bot(credential_id, bot_id=None, symbol=None):
+        if not bot_id:
+            if not symbol:
+                raise CustomException('bot_id or symbol is required to stop bot!')
+            else:
+                bot_id = bot_handler.find_active_bot_id_by_symbol(credential_id, symbol)
+        if bot_id:
+            return bot_handler.stop_bot(credential_id, bot_id)

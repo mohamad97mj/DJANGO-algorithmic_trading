@@ -15,11 +15,11 @@ class FuturesSignalSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        sort_steps_reverse = instance.side == 'buy'
+        sort_steps_reverse = instance.trend == 'buy'
         sorted_steps = sorted(ret['steps'], reverse=sort_steps_reverse, key=lambda s: s['entry_price'])
         if sorted_steps[0]['entry_price'] == -1:
             sorted_steps.append(sorted_steps.pop(0))
         ret['steps'] = sorted_steps
-        sort_targets_reverse = instance.side == 'sell'
+        sort_targets_reverse = instance.trend == 'sell'
         ret['targets'] = sorted(ret['targets'], reverse=sort_targets_reverse, key=lambda s: s['tp_price'])
         return ret

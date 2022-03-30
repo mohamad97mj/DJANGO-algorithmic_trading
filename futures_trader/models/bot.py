@@ -79,7 +79,7 @@ class FuturesBot(models.Model):
             multiplier = self._public_client.get_contract(symbol)['multiplier']
             size = int(order.size / multiplier) * multiplier
             if operation.action == 'create':
-                if test:
+                if False:
                     exchange_order_id = None
                     value = size * price
                     filled_value = value
