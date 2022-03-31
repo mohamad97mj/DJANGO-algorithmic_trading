@@ -529,14 +529,14 @@ class FuturesBotHandler:
     def stop_bot(self, credential_id, bot_id):
         bot = self.get_active_bot(credential_id, bot_id)
         if not bot:
-            raise CustomException(
-                'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
-
-        bot.status = FuturesBot.Status.STOPPED_MANUALLY.value
-        bot.is_active = False
-        bot.close_position(test=is_test)
-        bot.save()
-        return bot
+            logger = my_get_logger()
+            logger.error('No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
+        else:
+            bot.status = FuturesBot.Status.STOPPED_MANUALLY.value
+            bot.is_active = False
+            bot.close_position(test=is_test)
+            bot.save()
+            return bot
 
     def get_number_of_risky_bots(self, credential_id):
         active_bots = self.get_bots(credential_id, is_active=True)
