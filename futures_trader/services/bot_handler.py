@@ -153,6 +153,7 @@ class FuturesBotHandler:
                 self._bots[bot.credential_id][bot.id] = bot
             else:
                 self._bots[bot.credential_id] = {bot.id: bot}
+        return bots
 
     def set_bot_strategy_state_data(self, bot):
         strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
@@ -174,11 +175,8 @@ class FuturesBotHandler:
 
     def run_bots(self):
         while True:
-            credentials = list(self._bots.keys())
-            active_bots = []
-            for credential in credentials:
-                active_bots += [bot for bot in list(self._bots[credential].values())]
-            for bot in active_bots:
+            bots = self.reload_bots()
+            for bot in bots:
                 try:
                     if bot.status == FuturesBot.Status.RUNNING.value:
                         strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)

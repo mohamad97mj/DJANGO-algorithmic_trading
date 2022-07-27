@@ -1,6 +1,6 @@
 from typing import List
 import ccxt
-from binance.client import Client as PythonBinanceExchange
+# from binance.client import Client as PythonBinanceExchange
 from global_utils import retry_on_timeout
 from spot_trader.utils.obtain_credential import obtain_credential
 from .exchange import Exchange
@@ -33,14 +33,14 @@ class ExchangeFactory:
         ccxt_exchange.set_sandbox_mode(enabled=is_sandbox)
         # ccxt_exchange.options['createMarketBuyOrderRequiresPrice'] = False
 
-        python_exchange = None
-        if exchange_id in ('binance',):
-            python_exchange = self._create_python_exchange(
-                exchange_id=exchange_id,
-                api_key=api_key,
-                secret=secret,
-                is_sandbox=is_sandbox
-            )
+        # python_exchange = None
+        # if exchange_id in ('binance',):
+        #     python_exchange = self._create_python_exchange(
+        #         exchange_id=exchange_id,
+        #         api_key=api_key,
+        #         secret=secret,
+        #         is_sandbox=is_sandbox
+        #     )
 
         sdk_exchange = None
         if exchange_id in ('kucoin',):
@@ -52,7 +52,7 @@ class ExchangeFactory:
 
         exchange = Exchange(exchange_id=exchange_id,
                             ccxt_exchange=ccxt_exchange,
-                            python_exchange=python_exchange,
+                            # python_exchange=python_exchange,
                             sdk_exchange=sdk_exchange
                             )
         self._exchanges.append(exchange)

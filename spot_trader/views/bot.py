@@ -13,14 +13,14 @@ class SpotBotsView(APIView):
     # permission_classes = [mypermissions.MyCustomIsAuthenticated]
     # @REQUEST_TIME.time()
 
-    @catch_all_exceptions(reraise=True)
+    @catch_all_exceptions()
     def get(self, request, format=None):
         credential_id = request.query_params.get('credential_id', 'kucoin_test')
         is_active = request.query_params.get('is_active', 'false') == 'true'
         bot_instances = SpotBotTrader.get_bots(credential_id=credential_id, is_active=is_active)
         return Response(data=SpotBotSerializer(bot_instances, many=True).data)
 
-    @catch_all_exceptions(reraise=True)
+    @catch_all_exceptions()
     def post(self, request, format=None):
         """
         Opens a new position.
@@ -38,13 +38,13 @@ class SpotBotsView(APIView):
 
 
 class SpotBotDetailView(APIView):
-    @catch_all_exceptions(reraise=True)
+    @catch_all_exceptions()
     def get(self, request, bot_id, format=None):
         credential_id = request.query_params.get('credential_id', 'kucoin_test')
         bot_instance = SpotBotTrader.get_bot(credential_id=credential_id, bot_id=bot_id)
         return Response(data=SpotBotSerializer(instance=bot_instance).data)
 
-    @catch_all_exceptions(reraise=True)
+    @catch_all_exceptions()
     def put(self, request, bot_id, format=None):
         data = json.loads(request.body)
         command = data['command']

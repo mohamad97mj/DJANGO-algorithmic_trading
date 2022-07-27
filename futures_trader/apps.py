@@ -10,9 +10,13 @@ class FuturesTraderConfig(AppConfig):
 
     def ready(self):
         if enable_futures and not any(
-                c in sys.argv for c in ['makemigrations', 'migrate', 'startapp', 'collectstatic']):
+                c in arg for c in ['celery', 'makemigrations', 'migrate', 'startapp', 'collectstatic'] for arg in
+                sys.argv):
             from global_utils import my_get_logger
+            from .tasks import notify_in_telegram
             logger = my_get_logger()
             logger.info("futures_trader app started!")
             from futures_trader.trade import trade
-            trade()
+            from futures_trader.utils.app_vars import enable_trading
+            if enable_trading:
+                trade()

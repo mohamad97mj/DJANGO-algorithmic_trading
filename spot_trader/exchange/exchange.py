@@ -12,11 +12,9 @@ class Exchange:
     def __init__(self,
                  exchange_id,
                  ccxt_exchange: ccxt.Exchange,
-                 python_exchange,
                  sdk_exchange: SdkExchange):  # pb stands for python binance
         self._exchange_id = exchange_id
         self._ccxt_exchange = ccxt_exchange
-        self._python_exchange = python_exchange
         self._sdk_exchange = sdk_exchange
 
     def fetch_status(self):

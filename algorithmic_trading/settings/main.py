@@ -88,7 +88,7 @@ DATABASES = {
         'USER': 'intellichange',
         'PASSWORD': 'mJ604998',
         'HOST': 'localhost',
-        'PORT': os.environ.get('DB_PORT', 6000),
+        'PORT': os.environ.get('DB_PORT', 5432),
     }
 }
 
@@ -139,3 +139,6 @@ else:
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/1"

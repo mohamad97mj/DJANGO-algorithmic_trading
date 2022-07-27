@@ -7,7 +7,7 @@ from django.core.cache import caches
 
 class SpotPriceMonitorView(APIView):
 
-    @catch_all_exceptions(log_level='error', reraise=True)
+    @catch_all_exceptions(log_level='error')
     def get(self, request, cache_name, location, format=None):
         from django.core.cache.backends import locmem
         content = []

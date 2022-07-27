@@ -7,9 +7,7 @@ from global_utils import async_retry_on_timeout, my_get_logger
 from spot_trader.models import SpotPosition, SpotBot, SpotStoploss
 from spot_trader.clients import PublicClient, PrivateClient
 from global_utils import with2without_slash, CacheUtils, CustomException, round_down, slash2dash
-from binance import AsyncClient, BinanceSocketManager
 from threading import Thread
-from aiohttp.client_exceptions import ClientConnectorError
 from dataclasses import dataclass, field
 from concurrent.futures._base import TimeoutError
 from spot_trader.strategies import SpotStrategyCenter
@@ -23,7 +21,7 @@ from spot_trader.utils.app_vars import is_test
 @dataclass
 class PriceTicker:
     thread: Thread
-    client: Union[AsyncClient, MyKucoinWsClient] = None
+    client: Union[MyKucoinWsClient] = None
     subscribers: Set = field(default_factory=lambda: set())
 
     def stop(self):
@@ -248,25 +246,7 @@ class SpotBotHandler:
 
     async def _start_symbol_price_ticker(self, exchange_id, symbol):
         cache_name = '{}_spot_price'.format(exchange_id)
-        if exchange_id == 'binance':
-            client = await async_retry_on_timeout(
-                self._public_clients[exchange_id],
-                timeout_errors=(ClientConnectorError, TimeoutError))(self._get_async_client)()
-            self._price_tickers[symbol].client = client
-
-            bm = BinanceSocketManager(client)
-            ts = bm.symbol_ticker_socket(with2without_slash(symbol))
-
-            async with ts as tscm:
-                while True:
-                    try:
-                        res = await tscm.recv()
-                        if res['e'] != 'error':
-                            CacheUtils.write_to_cache(symbol, float(res['c']), cache_name)
-                    except Exception as e:
-                        logger = my_get_logger()
-                        logger.error(e)
-        elif exchange_id == 'kucoin':
+        if exchange_id == 'kucoin':
             loop = asyncio.get_event_loop()
 
             async def deal_msg(msg):
@@ -288,9 +268,6 @@ class SpotBotHandler:
             await ws_client.subscribe('/market/ticker:{}'.format(slash2dash(symbol)))
             while True:
                 await asyncio.sleep(60, loop=loop)
-
-    async def _get_async_client(self):
-        return await AsyncClient.create()
 
     def _read_prices(self, exchange_id, symbols):
         cache_name = '{}_spot_price'.format(exchange_id)

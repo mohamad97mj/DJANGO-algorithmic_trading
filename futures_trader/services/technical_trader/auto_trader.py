@@ -40,26 +40,26 @@ symbols_position_config = {
 }
 
 
-def alarm_cci(symbol):
+def alarm_position(symbol):
     timeframe = '1h'
     last_prev_cci = None
     while True:
         cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, 40)
         if cci and prev_cci:
             if last_prev_cci != prev_cci:
-                if prev_cci < -100 < cci:
+                if prev_cci <= -100 <= cci:
                     send_telegram_message()
-                elif last_prev_cci > 100 > cci:
+                elif last_prev_cci >= 100 >= cci:
                     send_telegram_message()
             last_prev_cci = prev_cci
         time.sleep(60)
 
 
-def alarm_ccis():
+def alarm_positions():
     symbols = PublicClient().load_markets()
 
     for symbol in symbols:
-        t = Thread(target=alarm_cci, args=(symbol,))
+        t = Thread(target=alarm_position, args=(symbol,))
         t.start()
 
 
@@ -68,14 +68,15 @@ def send_telegram_message():
 
 
 @catch_all_exceptions()
-def start_signal_generating_by_cci(pb, symbol, timeframe, n):
+def start_technical_signal_generating_per_symbol(pb, symbol, timeframe, n):
     logger = my_get_logger()
     symbol_position_config = symbols_position_config[symbol]
     if False:
         cci, prev_cci = cci_muck_values.pop(0)
     else:
         cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
-    logger.info('{} {} {}'.format(symbol, cci, prev_cci))
+    macd = TechnicalAnalyser.get_macd(symbol)
+    logger.info('{} {} {} {}'.format(symbol, cci, prev_cci, macd))
     last_prev_cci = None
     while True:
         is_signal = False
@@ -83,7 +84,7 @@ def start_signal_generating_by_cci(pb, symbol, timeframe, n):
             cci, prev_cci = cci_muck_values.pop(0)
         else:
             cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
-        logger.info('{} {} {}'.format(symbol, cci, prev_cci))
+        logger.info('{} {} {} {}'.format(symbol, cci, prev_cci, macd))
         if last_prev_cci != prev_cci:
 
             if symbol_position_config.trend in ('up', 'range'):
@@ -114,49 +115,16 @@ def start_signal_generating_by_cci(pb, symbol, timeframe, n):
         time.sleep(10)
 
 
-def start_signal_generating_by_ccis():
+def start_technical_signal_generating():
     timeframe = '1h'
-    n = 40
+    n = 20
     pb = PublicClient()
     # symbols = pb.load_markets()
     symbols = symbols_position_config.keys()
 
     for symbol in symbols:
-        t = Thread(target=start_signal_generating_by_cci, args=(pb, symbol, timeframe, n,))
+        t = Thread(target=start_technical_signal_generating_per_symbol, args=(pb, symbol, timeframe, n,))
         t.start()
-
-
-def start_signal_generating():
-    condition_is_normal = True
-    pb = PublicClient()
-    symbol = 'BTC/USDT'
-    tp_ratio = 0.011
-    sl_ratio = 0.009
-    timeframe = '5m'
-
-    while True:
-        if is_test:
-            rsi = rsi_muck_values.pop(0)
-        else:
-            rsi = TechnicalAnalyser.get_rsi(symbol=symbol, timeframe=timeframe)
-
-        price = pb.fetch_ticker(symbol=symbol)
-        if rsi <= 20 or rsi >= 80:
-            signal_data = {'symbol': symbol, 'steps': [{'entry_price': price, }, ]}
-            if rsi <= 20:
-                signal_data['side'] = 'buy'
-                signal_data['targets'] = [{'tp_price': price * (1 + tp_ratio), }, ]
-                signal_data['stoploss'] = {'trigger_price': price * (1 - sl_ratio)}
-            else:
-                signal_data['side'] = 'sell'
-                signal_data['targets'] = [{'tp_price': price * (1 - tp_ratio), }, ]
-                signal_data['stoploss'] = {'trigger_price': price * (1 + sl_ratio)}
-            if condition_is_normal:
-                signal_data_queue.put(signal_data)
-                condition_is_normal = False
-        elif 35 < rsi < 65:
-            condition_is_normal = True
-        time.sleep(10)
 
 
 def consume_signal(signal_data):
@@ -189,10 +157,7 @@ def start_signal_consuming():
 
 
 def start_auto_trading():
-    # t = Thread(target=log_cci)
-    # t.start()
-
-    t1 = Thread(target=start_signal_generating_by_ccis)
+    t1 = Thread(target=start_technical_signal_generating)
     t1.start()
     #
     t2 = Thread(target=start_signal_consuming)

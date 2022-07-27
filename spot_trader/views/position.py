@@ -10,7 +10,7 @@ from ..serializers import SpotPositionSerializer
 class SpotPositionView(APIView):
     renderer_classes = (renderers.JSONRenderer,)
 
-    @catch_all_exceptions(reraise=True)
+    @catch_all_exceptions()
     def put(self, request, bot_id, format=None):
         data = json.loads(request.body)
         credential_id = data.get('credential_id', 'kucoin_test')

@@ -9,7 +9,7 @@ from global_utils import catch_all_exceptions
 
 class FuturesPriceMonitorView(APIView):
 
-    @catch_all_exceptions(log_level='error', reraise=True)
+    @catch_all_exceptions(log_level='error')
     def get(self, request, cache_name, location, format=None):
         from django.core.cache.backends import locmem
         content = []
@@ -31,7 +31,7 @@ class FuturesRiskyBotsView(APIView):
     # permission_classes = [mypermissions.MyCustomIsAuthenticated]
     # @REQUEST_TIME.time()
 
-    @catch_all_exceptions(reraise=True)
+    @catch_all_exceptions()
     def get(self, request, format=None):
         credential_id = request.query_params.get('credential_id', 'kucoin_test')
         number_of_risky_bots = FuturesBotTrader.get_number_of_risky_bots(credential_id)

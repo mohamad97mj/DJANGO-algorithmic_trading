@@ -15,3 +15,4 @@ from .symbol_converter import with2without_slash, without2with_slash, slash2dash
     without2with_slash_f
 from .truncate import truncate
 from .does_not_exists_exceptions import BotDoesNotExistsException, CredentialIdDoesNotExistsException
+from .time import utc2local
