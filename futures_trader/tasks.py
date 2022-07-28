@@ -5,6 +5,7 @@ from futures_trader.services.external_signal_trader.auto_trader import create_cl
 from spot_trader.clients import PublicClient
 from futures_trader.services.trader import FuturesBotTrader
 from global_utils.my_logging import my_get_logger
+from global_utils.catch_all_exceptions import catch_all_exceptions
 from concurrent.futures import ThreadPoolExecutor
 
 myclient = create_client()
@@ -17,12 +18,13 @@ def notify_in_telegram(message):
 
 
 @shared_task
+@catch_all_exceptions()
 def technical_auto_trade():
     global myclient
     if not myclient:
         myclient = create_client()
     appropriate_symbols = []
-    with ThreadPoolExecutor(50) as executor:
+    with ThreadPoolExecutor(10) as executor:
         futures = []
         for symbol in symbols:
             future = executor.submit(trade_per_symbol, symbol)
@@ -36,6 +38,7 @@ def technical_auto_trade():
     notify_in_telegram(message)
 
 
+@catch_all_exceptions()
 def trade_per_symbol(symbol):
     logger = my_get_logger()
     cci, prev_cci = TechnicalAnalyser.get_cci(symbol=symbol,
