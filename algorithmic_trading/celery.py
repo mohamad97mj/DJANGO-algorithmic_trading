@@ -20,7 +20,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'run-every-hour': {
         'task': 'futures_trader.tasks.technical_auto_trade',
-        'schedule': crontab(minute=23),
+        'schedule': crontab(minute=34),
         'options': {
             'expires': 30.0,
         },
