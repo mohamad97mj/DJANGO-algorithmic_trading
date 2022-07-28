@@ -10,7 +10,7 @@ myclient = create_client()
 
 
 def notify_in_telegram(message):
-    entity = myclient.get_entity(1577054047)
+    entity = myclient.get_entity('My alarms')
     myclient.send_message(entity, message)
 
 
