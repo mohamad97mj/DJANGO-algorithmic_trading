@@ -24,7 +24,7 @@ def technical_auto_trade():
     if not myclient:
         myclient = create_client()
     appropriate_symbols = []
-    with ThreadPoolExecutor(10) as executor:
+    with ThreadPoolExecutor(5) as executor:
         futures = []
         for symbol in symbols:
             future = executor.submit(trade_per_symbol, symbol)
