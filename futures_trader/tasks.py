@@ -43,7 +43,7 @@ def trade_per_symbol(symbol):
     logger = my_get_logger()
     cci, prev_cci = TechnicalAnalyser.get_cci(symbol=symbol,
                                               timeframe='1h',
-                                              n=44)
+                                              n=20)
     macd = TechnicalAnalyser.get_macd(symbol)
     bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol, timeframe='1h', n=20)
     logger.info("""
