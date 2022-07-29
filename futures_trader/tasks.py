@@ -85,8 +85,9 @@ def trade_per_symbol(symbol):
         tp1 = close * (1 + sign * risk)
         tp2 = close * (1 + sign * 2 * risk)
         stoploss = close * (1 - sign * risk)
+        leverage = int(30 / (100 * (risk / close)))
         signal_data = {'symbol': symbol,
-                       'leverage': 20,
+                       'leverage': leverage,
                        'steps': [{'entry_price': -1, }],
                        'targets': [{'tp_price': tp1}, {'tp_price': tp2}],
                        'side': side,
