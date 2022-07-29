@@ -26,7 +26,7 @@ class LevelFilter(logging.Filter):
 def my_get_logger(logger_name='trader'):
     logger_name = logger_name
     logger = logging.getLogger(logger_name)
-    if settings.DEBUG:
+    if settings.LOG2FILE:
         load_file_handlers(logger)
 
     return logger

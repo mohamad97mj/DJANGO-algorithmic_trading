@@ -2,7 +2,7 @@ import os
 from .main import STATIC_PATH, DEBUG
 import logging.config
 
-
+LOG2FILE = True
 LOGGING_CONFIG = None
 
 LOG_DIR = os.path.join(STATIC_PATH, 'logs')
