@@ -72,7 +72,7 @@ def technical_auto_trade():
             tp1 = close * (1 + sign * risk)
             tp2 = close * (1 + sign * 2 * risk)
             stoploss = close * (1 - sign * risk)
-            leverage = 30 / (100 * risk)
+            leverage = max(30 / (100 * risk), 20)
             signal_data = {'symbol': symbol,
                            'leverage': leverage,
                            'steps': [{'entry_price': -1, }],
