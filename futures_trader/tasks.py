@@ -29,7 +29,7 @@ def technical_auto_trade():
         cci, prev_cci = TechnicalAnalyser.get_cci(symbol=symbol,
                                                   timeframe='1h',
                                                   n=20)
-        macd = TechnicalAnalyser.get_macd(symbol)
+        macd, prev_macd = TechnicalAnalyser.get_macd(symbol)
         bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol, timeframe='1h', n=20)
         logger.info("""
             symbol: {},
@@ -45,7 +45,7 @@ def technical_auto_trade():
         ohlc = pbc.fetch_ohlcv(symbol, timeframe='1h', limit=1)[0]
         close = ohlc[4]
 
-        if prev_cci < -100 < cci and macd > 0:
+        if prev_cci < -100 < cci and macd > 0 and prev_macd > 0:
             side = 'buy'
             sign = 1
             risk = (close - bbd) / close
@@ -55,7 +55,7 @@ def technical_auto_trade():
             if 0 < rr < 1 / 3:
                 is_appropriate = True
                 appropriate_longs.append(symbol)
-        elif prev_cci > 100 > cci and macd < 0:
+        elif prev_cci > 100 > cci and macd < 0 and prev_macd < 0:
             side = 'sell'
             sign = -1
             risk = (bbu - close) / close

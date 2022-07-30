@@ -125,4 +125,4 @@ class TechnicalAnalyser:
     @staticmethod
     def get_macd(symbol, timeframe='4h'):
         macds = TechnicalAnalyser.get_macds(symbol, timeframe)
-        return macds[-1]
+        return macds[-1], macds[-2]

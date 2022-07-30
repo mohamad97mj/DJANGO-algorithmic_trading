@@ -75,7 +75,7 @@ def start_technical_signal_generating_per_symbol(pb, symbol, timeframe, n):
         cci, prev_cci = cci_muck_values.pop(0)
     else:
         cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
-    macd = TechnicalAnalyser.get_macd(symbol)
+    macd, prev_macd = TechnicalAnalyser.get_macd(symbol)
     logger.info('{} {} {} {}'.format(symbol, cci, prev_cci, macd))
     last_prev_cci = None
     while True:
