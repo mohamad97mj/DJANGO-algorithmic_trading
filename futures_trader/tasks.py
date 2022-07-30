@@ -5,6 +5,7 @@ from futures_trader.services.external_signal_trader.auto_trader import create_cl
 from spot_trader.clients import PublicClient
 from futures_trader.services.trader import FuturesBotTrader
 from global_utils.my_logging import my_get_logger
+from time import sleep
 
 myclient = create_client()
 
@@ -23,6 +24,7 @@ def technical_auto_trade():
     appropriate_longs = []
     appropriate_shorts = []
     for symbol in symbols:
+
         logger = my_get_logger()
         cci, prev_cci = TechnicalAnalyser.get_cci(symbol=symbol,
                                                   timeframe='1h',
@@ -90,6 +92,7 @@ def technical_auto_trade():
                 'position': position_data,
             }
             FuturesBotTrader.create_bot(bot_data)
+        sleep(0.5)
 
     message = 'appropriate symbols for long positions:{}\n appropriate symbols for short positions:{}'.format(
         appropriate_longs, appropriate_shorts)
