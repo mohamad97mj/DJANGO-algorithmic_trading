@@ -5,7 +5,7 @@ from global_utils import retry_on_timeout, apply2all_methods, with2without_slash
 from .sdk_exchange import SdkExchange
 
 
-@apply2all_methods(retry_on_timeout(timeout_errors=(NetworkError, ConnectionError)))
+@apply2all_methods(retry_on_timeout(timeout_errors=(Exception, NetworkError, ConnectionError)))
 class Exchange:
     symbols = None
 

@@ -10,7 +10,7 @@ from pprint import pprint
 def one2four(arr):
     result = []
     for i in arr:
-        for j in range(2):
+        for j in range(4):
             result.append(i)
     return result
 
@@ -24,7 +24,7 @@ def read_strategy_data():
         ohlcv_list = literal_eval(ohlcvs)
         ccis = TechnicalAnalyser.get_ccis(symbol=symbol, timeframe='1h', n=20, ohlcvs=ohlcv_list)[:-1]
         bb = TechnicalAnalyser.get_bollinger_bands(symbol=symbol, timeframe='1h', n=20, ohlcvs=ohlcv_list)[:-1]
-        macd = one2four(TechnicalAnalyser.get_macds(symbol=symbol, timeframe='2h', limit=500))[:-1]
+        macd = one2four(TechnicalAnalyser.get_macds(symbol=symbol, timeframe='4h', limit=20))[:-1]
         ohlcvs_filtered = [[datetime.fromtimestamp(int(ohlcv[0]) / 1000), ohlcv[2], ohlcv[3], ohlcv[4]]
                            for ohlcv in ohlcv_list[:-1]]
         for i in range(len(ohlcvs_filtered)):
