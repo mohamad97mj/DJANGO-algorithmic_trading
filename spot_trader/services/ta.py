@@ -2,7 +2,7 @@ import numpy
 import pandas
 import pandas as pd
 from ta.momentum import RSIIndicator
-from ta.trend import MACD
+from ta.trend import MACD, EMAIndicator
 
 from ..clients.public_client import PublicClient
 from futures_trader.clients.public_client import PublicClient as FuturesPublicClient
@@ -99,6 +99,15 @@ class TechnicalAnalyser:
         np_array = numpy.array(ohlcvs)
         close_prices = pandas.Series(np_array[:, 4])
         return close_prices.rolling(n).mean()
+
+    @staticmethod
+    def get_ema(symbol, timeframe, n, ohlcvs=None):
+        if not ohlcvs:
+            ohlcvs = pb.fetch_ohlcv(symbol, timeframe=timeframe)
+        np_array = numpy.array(ohlcvs)
+        close_prices = pandas.Series(np_array[:, 4])
+        ema = EMAIndicator(close=close_prices, window=n)
+        return ema
 
     @staticmethod
     def find_lowest_rsi(timeframe='15m'):

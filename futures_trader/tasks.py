@@ -35,10 +35,11 @@ def technical_auto_trade():
             symbol: {},
             prev_cci: {},
             cci: {},
+            prev_macd: {},
             macd: {},
             bbd: {},
             bbu: {}
-        """.format(symbol, prev_cci, cci, macd, bbd, bbu))
+        """.format(symbol, prev_cci, cci, prev_macd, macd, bbd, bbu))
         is_appropriate = False
         risk = side = sign = None
         pbc = PublicClient()
