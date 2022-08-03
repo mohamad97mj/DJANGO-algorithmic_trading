@@ -94,7 +94,7 @@ def technical_auto_trade():
                 'position': position_data,
             }
             FuturesBotTrader.create_bot(bot_data)
-        sleep(1.5)
+        sleep(1.25)
 
     message = 'appropriate symbols for long positions:{}\n appropriate symbols for short positions:{}'.format(
         appropriate_longs, appropriate_shorts)
