@@ -12,7 +12,7 @@ def retry_on_timeout_or_exception(timeout_errors=None, exceptions=None, attempts
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             def caught_func():
-                _result, _error, _none_timeout_error = None, True, False
+                _result, _error, = None, True
                 logger = my_get_logger()
                 try:
                     _result, _error = func(*args, **kwargs), False
@@ -24,25 +24,20 @@ def retry_on_timeout_or_exception(timeout_errors=None, exceptions=None, attempts
                     #                                                                kwargs,
                     #                                                                e,
                     #                                                                traceback.format_exc()))
-                    time.sleep(delay)
                 except exceptions as e:
-                    _none_timeout_error = True
                     logger.exception(e)
                 finally:
-                    return _result, _error, _none_timeout_error
+                    time.sleep(delay)
+                    return _result, _error
 
             if attempts:
                 for _ in range(attempts):
-                    result, error, none_timeout_error = caught_func()
-                    if none_timeout_error:
-                        break
+                    result, error = caught_func()
                     if not error:
                         return result
             else:
                 while True:
-                    result, error, none_timeout_error = caught_func()
-                    if none_timeout_error:
-                        break
+                    result, error = caught_func()
                     if not error:
                         return result
 
