@@ -25,7 +25,7 @@ def technical_auto_trade():
     appropriate_longs = []
     appropriate_shorts = []
     for symbol in symbols:
-
+        print(symbol)
         logger = my_get_logger()
         cci, prev_cci = TechnicalAnalyser.get_cci(symbol=symbol,
                                                   timeframe='1h',

@@ -24,10 +24,11 @@ def retry_on_timeout_or_exception(timeout_errors=None, exceptions=None, attempts
                     #                                                                kwargs,
                     #                                                                e,
                     #                                                                traceback.format_exc()))
+                    time.sleep(delay)
                 except exceptions as e:
                     logger.exception(e)
-                finally:
                     time.sleep(delay)
+                finally:
                     return _result, _error
 
             if attempts:
