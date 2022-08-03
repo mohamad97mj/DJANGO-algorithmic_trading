@@ -1,3 +1,4 @@
+import gc
 from celery import shared_task
 from spot_trader.services.ta import TechnicalAnalyser
 from fetch import symbols
@@ -98,3 +99,4 @@ def technical_auto_trade():
     message = 'appropriate symbols for long positions:{}\n appropriate symbols for short positions:{}'.format(
         appropriate_longs, appropriate_shorts)
     notify_in_telegram(message)
+    gc.collect()

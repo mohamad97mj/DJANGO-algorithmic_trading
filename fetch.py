@@ -63,7 +63,7 @@ def save_ohlc_data():
         data = pb.fetch_ohlcv(
             symbol=symbol,
             timeframe='1h',
-            limit=80,
+            limit=1000,
         )
         f = open("data/ohlcv/{}.txt".format(symbol.replace('/', '')), "w")
         f.write(str(data))

@@ -1,5 +1,6 @@
 import time
 import asyncio
+import gc
 import websockets
 from typing import List, Set
 from django.db.models import Q
@@ -217,6 +218,7 @@ class FuturesBotHandler:
                     logger = my_get_logger()
                     logger.exception(e)
             time.sleep(1)
+            gc.collect()
 
     def run_bots_limit_order_based(self):
         while True:
