@@ -1,10 +1,10 @@
 import ccxt
 from ccxt.base.errors import NetworkError
-from global_utils import retry_on_timeout, apply2all_methods, slash2dash
+from global_utils import retry_on_timeout_or_exception, apply2all_methods, slash2dash
 from .sdk_exchange import SdkExchange
 
 
-@apply2all_methods(retry_on_timeout(timeout_errors=NetworkError))
+@apply2all_methods(retry_on_timeout_or_exception(timeout_errors=NetworkError))
 class Exchange:
     default_params = {
     }

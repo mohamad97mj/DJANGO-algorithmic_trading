@@ -82,7 +82,7 @@ def technical_auto_trade():
                            'stoploss': {'trigger_price': stoploss}}
             position_data = {
                 'signal': signal_data,
-                'margin': 1,
+                'margin': 2,
                 'order_type': 'market'
             }
             credential_id = 'kucoin_main'

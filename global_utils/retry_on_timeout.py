@@ -4,8 +4,9 @@ import time
 from global_utils.my_logging import my_get_logger
 
 
-def retry_on_timeout(timeout_errors=None, attempts=None, delay=5):
+def retry_on_timeout_or_exception(timeout_errors=None, exceptions=None, attempts=None, delay=5):
     timeout_errors = timeout_errors or Exception
+    exceptions = exceptions or Exception
 
     def decorator(func):
         @functools.wraps(func)
@@ -24,7 +25,7 @@ def retry_on_timeout(timeout_errors=None, attempts=None, delay=5):
                     #                                                                e,
                     #                                                                traceback.format_exc()))
                     time.sleep(delay)
-                except Exception as e:
+                except exceptions as e:
                     _none_timeout_error = True
                     logger.exception(e)
                 finally:

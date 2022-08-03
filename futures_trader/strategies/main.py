@@ -4,7 +4,7 @@ from ..models import FuturesPosition, FuturesStep, FuturesTarget, FuturesStoplos
 from .utils import create_market_operation, create_market_operation_in_cost
 from global_utils import my_get_logger, CustomException, JsonSerializable, round_down
 from futures_trader.utils.app_vars import is_test
-
+from django.utils import timezone
 
 @dataclass
 class StrategyStateData(JsonSerializable):
@@ -99,8 +99,9 @@ class ManualStrategyDeveloper:
                  (signal.side == 'sell' and price > stoploss.trigger_price)):
 
             bot.close_position(test=is_test)
-
+            # use order instead of close position
             stoploss.is_triggered = True
+            stoploss.triggered_at = timezone.now()
             stoploss.save()
             bot.is_active = False
 
@@ -153,6 +154,7 @@ class ManualStrategyDeveloper:
 
                     step.operation = step_operation
                     step.is_triggered = True
+                    step.triggered_at = timezone.now()
                     step.save()
                     operations.append(step_operation)
                 i += 1
@@ -165,7 +167,7 @@ class ManualStrategyDeveloper:
                             ((signal.side == 'buy' and price > target.tp_price) or
                              (signal.side == 'sell' and price < target.tp_price)):
                         target.is_triggered = True
-
+                        target.triggered_at = timezone.now()
                         strategy_state_data.none_triggered_targets_share = \
                             round(strategy_state_data.none_triggered_targets_share - target.share, 2)
 
@@ -219,6 +221,7 @@ class ManualStrategyDeveloper:
                                 bot.is_active = False
                                 bot.status = FuturesBot.Status.STOPPED_AFTER_FULL_TARGET.value
                                 bot.close_position(is_test)
+                                # use order instead of close position
                                 bot.save()
                             logger.info('position_full_target')
 

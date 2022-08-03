@@ -8,6 +8,7 @@ class FuturesStep(models.Model):
     margin = models.FloatField(null=True, blank=True)
     is_market = models.BooleanField(default=False)
     is_triggered = models.BooleanField(default=False)
+    triggered_at = models.DateTimeField(null=True)
     purchased_size = models.FloatField(null=True, blank=True)
     cost = models.FloatField(default=0)
     operation = models.OneToOneField('FuturesOperation', related_name='step', on_delete=models.SET_NULL, null=True)

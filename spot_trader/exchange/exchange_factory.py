@@ -1,7 +1,7 @@
 from typing import List
 import ccxt
 # from binance.client import Client as PythonBinanceExchange
-from global_utils import retry_on_timeout
+from global_utils import retry_on_timeout_or_exception
 from spot_trader.utils.obtain_credential import obtain_credential
 from .exchange import Exchange
 from .sdk_exchange import SdkExchange
@@ -58,7 +58,7 @@ class ExchangeFactory:
         self._exchanges.append(exchange)
         return exchange
 
-    @retry_on_timeout(attempts=3)
+    @retry_on_timeout_or_exception(attempts=3)
     def _create_python_exchange(self, exchange_id, api_key, secret, is_sandbox):
         exchange = None
         if exchange_id == 'binance':

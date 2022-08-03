@@ -1,4 +1,4 @@
-from global_utils.retry_on_timeout import retry_on_timeout
+from global_utils import retry_on_timeout_or_exception
 
 
 class TelegramApi:
@@ -6,7 +6,7 @@ class TelegramApi:
     def __init__(self):
         self._client = self._create_client()
 
-    @retry_on_timeout(timeout_errors=(ConnectionError,))
+    @retry_on_timeout_or_exception(timeout_errors=(ConnectionError,))
     def _create_client(self):
         api_id = 764667
         api_hash = 'ffb6562fd4311e1487c60f068f5b74ce'

@@ -1,6 +1,6 @@
 from .catch_all_exceptions import catch_all_exceptions
 from .my_logging import my_get_logger
-from .retry_on_timeout import retry_on_timeout, async_retry_on_timeout
+from .retry_on_timeout import retry_on_timeout_or_exception, async_retry_on_timeout
 from .api_exception_handler import custom_api_exception_handler
 from .custom_exception import CustomException
 from .json_serializable import JsonSerializable

@@ -10,7 +10,7 @@ from .black_whale_signal_extractor import extract_black_whale_signal_data
 from .special_leverage_signal_extractor import extract_special_leverage_signal_data
 from .killer_rat_signal_extractor import extract_killer_rat_signal_data
 from .always_win_signal_extractor import extract_always_win_signal_data
-from global_utils.retry_on_timeout import retry_on_timeout
+from global_utils import retry_on_timeout_or_exception
 from futures_trader.config import position_margin
 from threading import Thread
 
@@ -19,7 +19,7 @@ from threading import Thread
 # signal_data_queue = queue.Queue()
 #
 #
-@retry_on_timeout(timeout_errors=(ConnectionError,))
+@retry_on_timeout_or_exception(timeout_errors=(ConnectionError,))
 def create_client():
     api_id = 764667
     api_hash = 'ffb6562fd4311e1487c60f068f5b74ce'

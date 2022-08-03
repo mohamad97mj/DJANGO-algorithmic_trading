@@ -1,11 +1,11 @@
 import ccxt
 from ccxt.base.errors import NetworkError
 from requests.exceptions import ConnectionError
-from global_utils import retry_on_timeout, apply2all_methods, with2without_slash_f, without2with_slash_f
+from global_utils import retry_on_timeout_or_exception, apply2all_methods, with2without_slash_f, without2with_slash_f
 from .sdk_exchange import SdkExchange
 
 
-@apply2all_methods(retry_on_timeout(timeout_errors=(Exception, NetworkError, ConnectionError), attempts=10))
+@apply2all_methods(retry_on_timeout_or_exception(timeout_errors=(NetworkError, ConnectionError), attempts=10))
 class Exchange:
     symbols = None
 

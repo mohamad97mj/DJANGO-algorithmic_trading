@@ -43,7 +43,8 @@ class FuturesBot(models.Model):
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
     status = models.CharField(default=Status.RUNNING.value,
-                              max_length=50)  # paused, stopped_systematically, stopped_manually
+                              max_length=50)
+    stopped_at = models.DateTimeField(null=True)
 
     def __init__(self, *args, **kwargs):
         super(FuturesBot, self).__init__(*args, **kwargs)

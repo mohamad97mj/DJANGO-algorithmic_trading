@@ -9,6 +9,7 @@ class FuturesTarget(models.Model):
     share = models.FloatField(default=0)
     holding_size = models.FloatField(default=0)
     is_triggered = models.BooleanField(default=False)
+    triggered_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     operation = models.OneToOneField('FuturesOperation', related_name='target', on_delete=models.SET_NULL, null=True)
 
