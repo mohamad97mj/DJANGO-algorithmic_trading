@@ -145,8 +145,11 @@ class FuturesBotHandler:
 
             return new_bot
 
-    def reload_bots(self):
-        bots = list(FuturesBot.objects.filter(is_active=True))
+    def reload_bots(self, credential_id=None):
+        bots_query_set = FuturesBot.objects.filter(is_active=True)
+        if credential_id:
+            bots_query_set.filter(credential_id=credential_id)
+        bots = list(bots_query_set)
         for bot in bots:
             self.init_bot_requirements(bot)
             self.set_bot_strategy_state_data(bot)
@@ -413,23 +416,12 @@ class FuturesBotHandler:
         raise CustomException('No bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
 
     def find_active_bot_id_by_symbol(self, credential_id, symbol):
-        active_bots = self.get_bots(credential_id, is_active=True)
+        active_bots = self.reload_bots(credential_id)
         for bot in active_bots:
             if bot.position.signal.symbol == symbol:
                 return bot.id
         logger = my_get_logger()
         logger.error('No active bot with symbol {} was found for credential_id {}!'.format(symbol, credential_id))
-
-    def get_bots(self, credential_id, is_active):
-        if is_active:
-            bots_dict: dict = self._bots.get(credential_id, {})
-            bots = list(bots_dict.values())
-        else:
-            bots = FuturesBot.objects.filter(Q(credential_id=credential_id))
-        for bot in bots:
-            if bot.is_active:
-                self.set_bot_strategy_state_data(bot)
-        return bots
 
     def edit_position(self, credential_id, bot_id, new_position_data, raise_error=False):
         bot = self.get_active_bot(credential_id, bot_id)
@@ -539,7 +531,7 @@ class FuturesBotHandler:
             return bot
 
     def get_number_of_risky_bots(self, credential_id):
-        active_bots = self.get_bots(credential_id, is_active=True)
+        active_bots = self.reload_bots(credential_id)
         return len([bot for bot in active_bots if bot.is_risky()])
 
     def validate_bot_data(self, exchange_id, credential_id, symbol):
@@ -563,7 +555,7 @@ class FuturesBotHandler:
         return True
 
     def validate_duplicate_position(self, credential_id, symbol):
-        active_bots = self.get_bots(credential_id, is_active=True)
+        active_bots = self.reload_bots(credential_id)
         for bot in active_bots:
             if bot.position.signal.symbol == symbol:
                 logger = my_get_logger()
