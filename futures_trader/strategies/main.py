@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from typing import List
 from ..models import FuturesPosition, FuturesStep, FuturesTarget, FuturesStoploss, FuturesBot
-from .utils import create_market_operation, create_market_operation_in_cost
+from .utils import create_market_operation, create_market_operation_in_cost, create_operation
 from global_utils import my_get_logger, CustomException, JsonSerializable, round_down
 from futures_trader.utils.app_vars import is_test
 from django.utils import timezone
+
 
 @dataclass
 class StrategyStateData(JsonSerializable):
@@ -236,8 +237,75 @@ class ManualStrategyDeveloper:
 
         return operations
 
-    def get_operation(self):
-        pass
+    @staticmethod
+    def get_operations_limit_based_orders(position: FuturesPosition, symbol_prices: dict):
+        operations = []
+        bot = position.bot
+        signal = position.signal
+        step = signal.related_steps[0]
+        symbol = signal.symbol
+        stoploss = signal.stoploss
+        price = symbol_prices[symbol]
+        target1 = signal.related_targets[0]
+        target2 = signal.related_targets[1]
+        if bot.status == FuturesBot.Status.CREATED.value:
+            step_operation = create_market_operation_in_cost(
+                symbol=symbol,
+                operation_type='step',
+                side=signal.side,
+                price=price,
+                margin=step.margin,
+                leverage=signal.leverage,
+                position=position)
+            operations.append(step_operation)
+            step.operation = step_operation
+            step.save()
+
+            stoploss_operation = create_operation(
+                position=position,
+                symbol=symbol,
+                operation_type='stoploss',
+                order_type='stop_market',
+                side='buy' if signal.side == 'sell' else 'sell',
+                price=stoploss.trigger_price,
+                size=step_operation.order.size)
+            operations.append(stoploss_operation)
+            stoploss.operation = stoploss_operation
+            stoploss.save()
+
+            take_profit_operation = create_operation(
+                position=position,
+                symbol=symbol,
+                operation_type='take_profit',
+                order_type='limit',
+                side='buy' if signal.side == 'sell' else 'sell',
+                price=target2.tp_price,
+                size=step_operation.order.size)
+            operations.append(take_profit_operation)
+            target1.operation = take_profit_operation
+            target1.save()
+
+            bot.status = FuturesBot.Status.RUNNING.value
+            bot.save()
+        elif bot.status == FuturesBot.Status.RUNNING.value:
+            if signal.side == 'buy' and price > target1.tp_price or \
+                    (signal.side == 'sell' and price < target1.tp_price):
+                stoploss.trigger_price = step.entry_price
+                stoploss.is_trailed = True
+                bot._private_client.cancel_all_stop_orders(symbol=signal.symbol)
+                stoploss_operation = create_operation(
+                    position=position,
+                    symbol=symbol,
+                    operation_type='stoploss',
+                    order_type='stop_market',
+                    side='buy' if signal.side == 'sell' else 'sell',
+                    price=stoploss.trigger_price,
+                    size=step.operation.order.size)
+                operations.append(stoploss_operation)
+                stoploss.operation = stoploss_operation
+                stoploss.save()
+
+        return operations
 
     @staticmethod
     def edit_steps(position, strategy_state_data, new_steps_data, setup_mode='auto'):
@@ -334,8 +402,7 @@ class ManualStrategyDeveloper:
             ManualStrategyDeveloper._edit_none_triggered_targets(position,
                                                                  strategy_state_data,
                                                                  new_targets_data,
-                                                                 setup_mode,
-                                                                 )
+                                                                 setup_mode)
             return True
         return False
 

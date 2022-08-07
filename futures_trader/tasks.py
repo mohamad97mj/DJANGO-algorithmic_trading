@@ -4,10 +4,14 @@ from spot_trader.services.ta import TechnicalAnalyser
 from fetch import symbols
 from futures_trader.services.external_signal_trader.auto_trader import create_client
 from spot_trader.clients import PublicClient
+from futures_trader.clients import PrivateClient
 from futures_trader.services.trader import FuturesBotTrader
 from global_utils.my_logging import my_get_logger
 from global_utils.catch_all_exceptions import catch_all_exceptions
 from time import sleep
+from global_utils import with2without_slash_f
+from futures_trader.models import FuturesBot
+from futures_trader.services.trader import bot_handler
 
 myclient = create_client()
 
@@ -85,7 +89,7 @@ def auto_trader_per_symbol(symbol, appropriate_longs, appropriate_shorts):
         tp1 = close * (1 + sign * risk)
         tp2 = close * (1 + sign * 2 * risk)
         stoploss = close * (1 - sign * risk)
-        leverage = min(30 / (100 * risk), 20)
+        leverage = min(10 / (100 * risk), 20)
         signal_data = {'symbol': symbol,
                        'leverage': leverage,
                        'steps': [{'entry_price': -1, }],
@@ -94,7 +98,7 @@ def auto_trader_per_symbol(symbol, appropriate_longs, appropriate_shorts):
                        'stoploss': {'trigger_price': stoploss}}
         position_data = {
             'signal': signal_data,
-            'margin': 2,
+            'margin': 6,
             'order_type': 'market'
         }
         credential_id = 'kucoin_main'
@@ -105,3 +109,25 @@ def auto_trader_per_symbol(symbol, appropriate_longs, appropriate_shorts):
             'position': position_data,
         }
         FuturesBotTrader.create_bot(bot_data)
+
+
+@shared_task
+@catch_all_exceptions()
+def cancel_remaining_orders():
+    active_bots = bot_handler.reload_bots()
+    prc = PrivateClient(exchange_id='kucoin', credential_id='kucoin_main')
+    open_positions = prc.get_all_positions()
+    open_positions = open_positions if isinstance(open_positions, list) else []
+    for bot in active_bots:
+        position = bot.position
+        signal = position.signal
+        for open_position in open_positions:
+            if open_position['symbol'] == with2without_slash_f(signal.symbol):
+                break
+        else:
+            if bot.status == FuturesBot.Status.RUNNING.value:
+                prc.cancel_all_stop_orders(symbol=signal.symbol)
+                prc.cancel_all_limit_orders(symbol=signal.symbol)
+                bot.status = FuturesBot.Status.STOPPED.value
+                bot.is_active = False
+                bot.save()

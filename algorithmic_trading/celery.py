@@ -18,11 +18,18 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    'run-every-hour': {
+    'auto-trade': {
         'task': 'futures_trader.tasks.technical_auto_trade',
         'schedule': crontab(minute=24),
         'options': {
             'expires': 30.0,
         },
     },
+    'cancel-orders': {
+        'task': 'futures_trader.tasks.cancel_remaining_orders',
+        'schedule': crontab(),
+        'options': {
+            'expires': 30.0,
+        },
+    }
 }

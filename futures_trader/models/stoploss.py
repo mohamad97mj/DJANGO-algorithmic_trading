@@ -7,4 +7,5 @@ class FuturesStoploss(models.Model):
     is_triggered = models.BooleanField(default=False)
     triggered_at = models.DateTimeField(null=True)
     is_trailed = models.BooleanField(default=False)
+    operation = models.OneToOneField('FuturesOperation', related_name='stoploss', on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(default=timezone.now, blank=True)

@@ -42,7 +42,7 @@ class FuturesBot(models.Model):
     total_pnl_percentage = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
-    status = models.CharField(default=Status.RUNNING.value,
+    status = models.CharField(default=Status.CREATED.value,
                               max_length=50)
     stopped_at = models.DateTimeField(null=True)
 
@@ -150,9 +150,66 @@ class FuturesBot(models.Model):
             signal.save()
             position.save()
 
-    def close_position(self, test):
-        if not test:
-            self._private_client.close_position(self.position.signal.symbol)
+    def execute_operations2(self,
+                            operations, ):
+        for operation in operations:
+            position = operation.position
+            signal = position.signal
+            order = operation.order
+            symbol = order.symbol
+            multiplier = self._public_client.get_contract(symbol)['multiplier']
+            size = int(order.size / multiplier) * multiplier
+            leverage = signal.leverage
+            if operation.action == 'create':
+                if order.type == 'market':
+                    exchange_order = self._private_client.create_market_order(
+                        symbol=symbol,
+                        leverage=leverage,
+                        side=order.side,
+                        size=size,
+                        multiplier=multiplier)
+                elif order.type == 'stop_market':
+                    exchange_order = self._private_client.create_stop_market_order(
+                        symbol=symbol,
+                        leverage=leverage,
+                        side='buy' if signal.side == 'sell' else 'sell',
+                        size=size,
+                        multiplier=multiplier,
+                        stop='down' if signal.side == 'buy' else 'up',
+                        stop_price=order.price,
+                    )
+                else:
+                    exchange_order = self._private_client.create_limit_order(
+                        symbol=symbol,
+                        leverage=leverage,
+                        side=order.side,
+                        size=size,
+                        price=order.price,
+                        multiplier=multiplier)
 
-    def is_risky(self):
-        return not self.position.signal.stoploss.is_trailed if self.position.signal.stoploss else True
+                exchange_order_id = exchange_order['id']
+                value = float(exchange_order['value'])
+                filled_value = float(exchange_order['filledValue'])
+                timestamp = exchange_order['createdAt']
+                order.exchange_order_id = exchange_order_id
+                order.size = size
+                order.status = 'done'
+                order.value = value
+                order.filled_value = filled_value
+                order.timestamp = timestamp
+                order.created_at = datetime.fromtimestamp(time.time(), tz=pytz.timezone(settings.TIME_ZONE))
+                order.save()
+
+            operation.status = 'executed'
+            operation.save()
+            signal.save()
+            position.save()
+
+
+def close_position(self, test):
+    if not test:
+        self._private_client.close_position(self.position.signal.symbol)
+
+
+def is_risky(self):
+    return not self.position.signal.stoploss.is_trailed if self.position.signal.stoploss else True

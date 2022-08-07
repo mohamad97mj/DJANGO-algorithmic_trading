@@ -146,6 +146,86 @@ def run():
     return positions
 
 
+def run2():
+    positions = {}
+    records = read_strategy_data()
+    for symbol in symbols:
+        positions[symbol] = []
+        open_position = None
+        for i in range(20, len(records[symbol])):
+            record = records[symbol][i]
+            date = record[0]
+            high = record[1]
+            low = record[2]
+            close = record[3]
+            cci = record[4]
+            bb_d = record[5]
+            bb_u = record[6]
+            macd = record[7]
+            prv_cci = records[symbol][i - 1][4]
+            is_long = prv_cci < -100 < cci and macd > 0
+            is_short = prv_cci > 100 > cci and macd < 0
+
+            if open_position:
+                if open_position.direction == 'long':
+                    if is_short:
+                        open_position.status = 'c'
+                        open_position.closed_at = date
+                        open_position = None
+                    else:
+                        if high > open_position.tp2:
+                            open_position.status = 'tp2'
+                            open_position.closed_at = date
+                            open_position = None
+                        elif low < open_position.stoploss:
+                            open_position.status = 'sl'
+                            open_position.closed_at = date
+                            open_position = None
+                else:
+                    if is_long:
+                        open_position.status = 'c'
+                        open_position.closed_at = date
+                        open_position = None
+                    else:
+                        if low < open_position.tp2:
+                            open_position.status = 'tp2'
+                            open_position.closed_at = date
+                            open_position = None
+                        elif high > open_position.stoploss:
+                            open_position.status = 'sl'
+                            open_position.closed_at = date
+                            open_position = None
+            else:
+                if is_long or is_short:
+                    if is_long:
+                        direction = 'long'
+                        sign = 1
+                        risk = (close - bb_d) / close
+                        reward = (bb_u - close) / close
+                    else:
+                        direction = 'short'
+                        sign = -1
+                        risk = (bb_u - close) / close
+                        reward = (close - bb_d) / close
+                    tp1 = close * (1 + 1.25 * sign * risk)
+                    tp2 = close * (1 + 2.5 * sign * risk)
+                    stoploss = close * (1 - 0.75 * sign * risk)
+                    rr = risk / reward
+                    if 0 < rr < 1 / 3:
+                        open_position = Position(opened_at=date,
+                                                 direction=direction,
+                                                 risk=risk,
+                                                 reward=reward,
+                                                 rr=rr,
+                                                 step=close,
+                                                 stoploss=stoploss,
+                                                 tp1=tp1,
+                                                 tp2=tp2,
+                                                 status='open')
+                        positions[symbol].append(open_position)
+    return positions
+
+
 def statistic():
     positions = run()
     symbol_statistics = []
@@ -169,7 +249,7 @@ def statistic():
         for position in positions[symbol]:
             symbol_statistic[position.status] += 1
             statistics[position.status] += 1
-    print(sorted(symbol_statistics, key=lambda dic: dic['tp2']/dic['sl'], reverse=True))
+    print(sorted(symbol_statistics, key=lambda dic: dic['tp2'] / dic['sl'], reverse=True))
     print(statistics)
 
     # pprint(positions['LINK/USDT'])

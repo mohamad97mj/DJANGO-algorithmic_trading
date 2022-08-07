@@ -223,70 +223,48 @@ class FuturesBotHandler:
             time.sleep(1)
             gc.collect()
 
-    def run_bots_limit_order_based(self):
+    def run_bots_semi_limit_order_based(self):
         while True:
-            credentials = list(self._bots.keys())
-            active_bots = []
-            for credential in credentials:
-                active_bots += [bot for bot in list(self._bots[credential].values())]
-            for bot in active_bots:
-                position = bot.position
-                signal = position.signal
-                step = signal.related_steps[0]
-                multiplier = 0.001
-                size = int(((step.margin * signal.leverage) / step.entry_price) / multiplier) * multiplier
-                if bot.status == FuturesBot.Status.CREATED.value:
-                    bot._private_client.create_limit_order(
-                        symbol=signal.symbol,
-                        leverage=signal.leverage,
-                        side=signal.trend,
-                        size=size,
-                        price=step.entry_price,
-                        multiplier=multiplier
-                    )
+            bots = self.reload_bots()
+            for bot in bots:
+                try:
+                    if bot.status in (FuturesBot.Status.RUNNING.value, FuturesBot.Status.CREATED.value):
+                        strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
+                        price_required_symbols = strategy_developer.get_strategy_symbols(bot.position)
+                        symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
+                        t1 = time.time()
+                        is_first_iteration = True
+                        while not symbol_prices:
+                            t2 = time.time()
+                            delta_t = t2 - t1
+                            if delta_t > 60 or is_first_iteration:
+                                if is_first_iteration:
+                                    is_first_iteration = False
+                                else:
+                                    t1 = time.time()
+                                self._start_symbols_price_ticker(bot.exchange_id, price_required_symbols)
+                            symbol_prices = self._get_prices_if_available(bot.exchange_id, price_required_symbols)
+                        logger = my_get_logger()
+                        logger.debug('symbol_prices: {}'.format(symbol_prices))
 
-                    bot.status = FuturesBot.Status.WAITING.value
-                    bot.save()
-                else:
-                    open_positions = bot._private_client.get_all_positions()
-                    open_positions = open_positions if isinstance(open_positions, list) else []
-                    for open_position in open_positions:
-                        if open_position['symbol'] == with2without_slash_f(signal.symbol):
-                            if bot.status == FuturesBot.Status.WAITING.value:
-                                target = signal.related_targets[0]
-                                stoploss = signal.stoploss
-                                bot._private_client.create_limit_order(
-                                    symbol=signal.symbol,
-                                    leverage=signal.leverage,
-                                    side='buy' if signal.trend == 'sell' else 'sell',
-                                    size=size,
-                                    price=target.tp_price,
-                                    multiplier=multiplier
-                                )
-                                bot._private_client.create_stop_market_order(
-                                    symbol=signal.symbol,
-                                    leverage=signal.leverage,
-                                    side='buy' if signal.trend == 'sell' else 'sell',
-                                    size=size,
-                                    multiplier=multiplier,
-                                    stop='down' if signal.trend == 'buy' else 'up',
-                                    stop_price=stoploss.trigger_price,
-                                )
+                        for symbol in price_required_symbols:
+                            self._price_tickers[symbol].subscribers.add(bot.id)
 
-                                position.is_triggered = True
-                                bot.is_active = False
-                                bot.status = FuturesBot.Status.RUNNING.value
-                                bot.save()
-                            break
-                    else:
-                        if bot.status == FuturesBot.Status.RUNNING.value:
-                            bot._private_client.cancel_all_stop_orders(symbol=signal.symbol)
-                            bot._private_client.cancel_all_limit_orders(symbol=signal.symbol)
-                            bot.status = FuturesBot.Status.STOPPED.value
-                            self._bots[bot.credential_id].pop(bot.id)
-                            bot.save()
+                        operations = strategy_developer.get_operations_limit_based_orders(position=bot.position,
+                                                                                          symbol_prices=symbol_prices)
+                        bot.execute_operations2(operations)
+                    if not bot.is_active:
+                        self._bots[bot.credential_id].pop(bot.id)
 
+                    if not bot.status == FuturesBot.Status.RUNNING.value:
+                        price_ticker = self._price_tickers[bot.position.signal.symbol]
+                        price_ticker.unsubscribe_bot(bot.id)
+
+                except Exception as e:
+                    logger = my_get_logger()
+                    logger.exception(e)
             time.sleep(1)
+            gc.collect()
 
     def _get_prices_if_available(self, exchange_id, symbols: List):
         symbol_prices = self._read_prices(exchange_id, symbols)
