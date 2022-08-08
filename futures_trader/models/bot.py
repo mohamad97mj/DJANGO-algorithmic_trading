@@ -205,11 +205,9 @@ class FuturesBot(models.Model):
             signal.save()
             position.save()
 
+    def close_position(self, test):
+        if not test:
+            self._private_client.close_position(self.position.signal.symbol)
 
-def close_position(self, test):
-    if not test:
-        self._private_client.close_position(self.position.signal.symbol)
-
-
-def is_risky(self):
-    return not self.position.signal.stoploss.is_trailed if self.position.signal.stoploss else True
+    def is_risky(self):
+        return not self.position.signal.stoploss.is_trailed if self.position.signal.stoploss else True
