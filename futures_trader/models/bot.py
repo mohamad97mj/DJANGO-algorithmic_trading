@@ -8,7 +8,7 @@ from global_utils import BotDoesNotExistsException
 from .operation import FuturesOperation
 from datetime import datetime
 from django.conf import settings
-
+from global_utils.math import find_decimal_place
 
 class FuturesBotManager(models.Manager):
     def find_from_db(self, bot_id):
@@ -157,7 +157,10 @@ class FuturesBot(models.Model):
             signal = position.signal
             order = operation.order
             symbol = order.symbol
-            multiplier = self._public_client.get_contract(symbol)['multiplier']
+            contract = self._public_client.get_contract(symbol)
+            multiplier = contract['multiplier']
+            precision = find_decimal_place(contract['tickSize'])
+            price = round(order.price, precision)
             size = int(order.size / multiplier) * multiplier
             leverage = signal.leverage
             if operation.action == 'create':
@@ -176,7 +179,7 @@ class FuturesBot(models.Model):
                         size=size,
                         multiplier=multiplier,
                         stop='down' if signal.side == 'buy' else 'up',
-                        stop_price=order.price,
+                        stop_price=price,
                     )
                 else:
                     exchange_order = self._private_client.create_limit_order(
@@ -184,7 +187,7 @@ class FuturesBot(models.Model):
                         leverage=leverage,
                         side=order.side,
                         size=size,
-                        price=order.price,
+                        price=price,
                         multiplier=multiplier)
 
                 exchange_order_id = exchange_order['id']
