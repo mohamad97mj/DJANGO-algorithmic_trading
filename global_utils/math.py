@@ -8,4 +8,7 @@ def round_down(n, d=2):
 
 
 def find_decimal_place(n):
-    return len(str(n).split(".")[1])
+    n = str(n)
+    if 'e' in n:
+        return int(n.split('-')[1])
+    return len(n.split(".")[1])

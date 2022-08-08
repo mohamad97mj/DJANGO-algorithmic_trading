@@ -158,6 +158,7 @@ class FuturesBot(models.Model):
             order = operation.order
             symbol = order.symbol
             contract = self._public_client.get_contract(symbol)
+            print(contract['tickSize'])
             multiplier = contract['multiplier']
             precision = find_decimal_place(contract['tickSize'])
             price = round(order.price, precision)
