@@ -10,6 +10,7 @@ from datetime import datetime
 from django.conf import settings
 from global_utils.math import find_decimal_place
 
+
 class FuturesBotManager(models.Manager):
     def find_from_db(self, bot_id):
         try:
@@ -161,7 +162,7 @@ class FuturesBot(models.Model):
             print(contract['tickSize'])
             multiplier = contract['multiplier']
             precision = find_decimal_place(contract['tickSize'])
-            price = round(order.price, precision)
+            price = int(order.price) if precision == 0 else round(order.price, precision)
             size = int(order.size / multiplier) * multiplier
             leverage = signal.leverage
             if operation.action == 'create':
