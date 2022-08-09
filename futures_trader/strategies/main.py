@@ -289,7 +289,7 @@ class ManualStrategyDeveloper:
             bot.save()
         elif bot.status == FuturesBot.Status.RUNNING.value:
             if signal.side == 'buy' and price > target1.tp_price or \
-                    (signal.side == 'sell' and price < target1.tp_price):
+                    (signal.side == 'sell' and price < target1.tp_price) and not stoploss.is_trailed:
                 stoploss.trigger_price = step.entry_price
                 stoploss.is_trailed = True
                 bot._private_client.cancel_all_stop_orders(symbol=signal.symbol)
