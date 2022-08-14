@@ -39,6 +39,7 @@ def read_strategy_data():
 @dataclass
 class Position:
     opened_at: datetime
+    macd: float
     direction: str
     risk: float
     reward: float
@@ -69,6 +70,7 @@ def run():
             bb_u = record[6]
             macd = record[7]
             prv_cci = records[symbol][i - 1][4]
+            # prv_macd = records[symbol][i - 1][7]
             is_long = prv_cci < -100 < cci and macd > 0
             is_short = prv_cci > 100 > cci and macd < 0
 
@@ -127,12 +129,13 @@ def run():
                         sign = -1
                         risk = (bb_u - close) / close
                         reward = (close - bb_d) / close
-                    tp1 = close * (1 + 1.25 * sign * risk)
-                    tp2 = close * (1 + 2.5 * sign * risk)
-                    stoploss = close * (1 - 0.75 * sign * risk)
+                    tp1 = close * (1 + 1 * sign * risk)
+                    tp2 = close * (1 + 2 * sign * risk)
+                    stoploss = close * (1 - sign * risk)
                     rr = risk / reward
                     if 0 < rr < 1 / 3:
                         open_position = Position(opened_at=date,
+                                                 macd=macd,
                                                  direction=direction,
                                                  risk=risk,
                                                  reward=reward,
@@ -213,6 +216,7 @@ def run2():
                     rr = risk / reward
                     if 0 < rr < 1 / 3:
                         open_position = Position(opened_at=date,
+                                                 macd=macd,
                                                  direction=direction,
                                                  risk=risk,
                                                  reward=reward,
@@ -228,6 +232,7 @@ def run2():
 
 def statistic():
     positions = run()
+    pprint(positions)
     symbol_statistics = []
     statistics = {
         'sl': 0,
@@ -249,7 +254,8 @@ def statistic():
         for position in positions[symbol]:
             symbol_statistic[position.status] += 1
             statistics[position.status] += 1
-    print(sorted(symbol_statistics, key=lambda dic: dic['tp2'] / dic['sl'], reverse=True))
+
+    pprint(sorted(symbol_statistics, key=lambda dic: dic['tp2'] / dic['sl'], reverse=True))
     print(statistics)
 
     # pprint(positions['LINK/USDT'])

@@ -23,6 +23,7 @@ class FuturesBotManager(models.Manager):
 class FuturesBot(models.Model):
     class Status(models.TextChoices):
         CREATED = 'created'
+        CONFIRMED = 'confirmed'
         WAITING = 'waiting'
         RUNNING = 'running'
         PAUSED = 'paused'

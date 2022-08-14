@@ -248,7 +248,7 @@ class ManualStrategyDeveloper:
         price = symbol_prices[symbol]
         target1 = signal.related_targets[0]
         target2 = signal.related_targets[1]
-        if bot.status == FuturesBot.Status.CREATED.value:
+        if bot.status == FuturesBot.Status.CONFIRMED.value:
             step_operation = create_market_operation_in_cost(
                 symbol=symbol,
                 operation_type='step',
