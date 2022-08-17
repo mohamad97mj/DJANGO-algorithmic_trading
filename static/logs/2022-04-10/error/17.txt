@@ -1,0 +1,72 @@
+ERROR 2022-04-10 17:52:04,640 catch_all_exceptions 101865 139812115834624 func=<function start_signal_generating_by_cci at 0x7f289a534670> args=(<futures_trader.clients.public_client.PublicClient object at 0x7f289a53c970>, 'FTM/USDT', '1h', 40) kwargs={} message=name 'self' is not defined traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/technical_trader/auto_trader.py", line 77, in start_signal_generating_by_cci
+    cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/spot_trader/services/ta.py", line 38, in get_cci
+    ccis = self.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs)
+NameError: name 'self' is not defined
+
+ERROR 2022-04-10 17:52:04,640 catch_all_exceptions 101865 139812124227328 func=<function start_signal_generating_by_cci at 0x7f289a534670> args=(<futures_trader.clients.public_client.PublicClient object at 0x7f289a53c970>, 'ROSE/USDT', '1h', 40) kwargs={} message=name 'self' is not defined traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/technical_trader/auto_trader.py", line 77, in start_signal_generating_by_cci
+    cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/spot_trader/services/ta.py", line 38, in get_cci
+    ccis = self.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs)
+NameError: name 'self' is not defined
+
+ERROR 2022-04-10 17:52:04,640 catch_all_exceptions 101865 139812339377920 func=<function start_signal_generating_by_cci at 0x7f289a534670> args=(<futures_trader.clients.public_client.PublicClient object at 0x7f289a53c970>, 'UNI/USDT', '1h', 40) kwargs={} message=name 'self' is not defined traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/technical_trader/auto_trader.py", line 77, in start_signal_generating_by_cci
+    cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/spot_trader/services/ta.py", line 38, in get_cci
+    ccis = self.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs)
+NameError: name 'self' is not defined
+
+ERROR 2022-04-10 17:52:04,640 catch_all_exceptions 101865 139812082263808 func=<function start_signal_generating_by_cci at 0x7f289a534670> args=(<futures_trader.clients.public_client.PublicClient object at 0x7f289a53c970>, '1INCH/USDT', '1h', 40) kwargs={} message=name 'self' is not defined traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/technical_trader/auto_trader.py", line 77, in start_signal_generating_by_cci
+    cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/spot_trader/services/ta.py", line 38, in get_cci
+    ccis = self.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs)
+NameError: name 'self' is not defined
+
+ERROR 2022-04-10 17:52:04,641 catch_all_exceptions 101865 139812364556032 func=<function start_signal_generating_by_cci at 0x7f289a534670> args=(<futures_trader.clients.public_client.PublicClient object at 0x7f289a53c970>, 'LINK/USDT', '1h', 40) kwargs={} message=name 'self' is not defined traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/technical_trader/auto_trader.py", line 77, in start_signal_generating_by_cci
+    cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/spot_trader/services/ta.py", line 38, in get_cci
+    ccis = self.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs)
+NameError: name 'self' is not defined
+
+ERROR 2022-04-10 17:52:04,641 catch_all_exceptions 101865 139812099049216 func=<function start_signal_generating_by_cci at 0x7f289a534670> args=(<futures_trader.clients.public_client.PublicClient object at 0x7f289a53c970>, 'MANA/USDT', '1h', 40) kwargs={} message=name 'self' is not defined traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/technical_trader/auto_trader.py", line 77, in start_signal_generating_by_cci
+    cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/spot_trader/services/ta.py", line 38, in get_cci
+    ccis = self.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs)
+NameError: name 'self' is not defined
+
+ERROR 2022-04-10 17:52:04,641 catch_all_exceptions 101865 139812090656512 func=<function start_signal_generating_by_cci at 0x7f289a534670> args=(<futures_trader.clients.public_client.PublicClient object at 0x7f289a53c970>, 'TRX/USDT', '1h', 40) kwargs={} message=name 'self' is not defined traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/technical_trader/auto_trader.py", line 77, in start_signal_generating_by_cci
+    cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/spot_trader/services/ta.py", line 38, in get_cci
+    ccis = self.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs)
+NameError: name 'self' is not defined
+
+ERROR 2022-04-10 17:52:04,641 catch_all_exceptions 101865 139812107441920 func=<function start_signal_generating_by_cci at 0x7f289a534670> args=(<futures_trader.clients.public_client.PublicClient object at 0x7f289a53c970>, 'MATIC/USDT', '1h', 40) kwargs={} message=name 'self' is not defined traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/technical_trader/auto_trader.py", line 77, in start_signal_generating_by_cci
+    cci, prev_cci = TechnicalAnalyser.get_cci(symbol, timeframe, n)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/spot_trader/services/ta.py", line 38, in get_cci
+    ccis = self.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs)
+NameError: name 'self' is not defined
+

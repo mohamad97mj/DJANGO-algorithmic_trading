@@ -1,0 +1,41 @@
+ERROR 2022-08-17 21:17:06,196 api_exception_handler 82315 140517899740928 Reverse for 'futures_signals_list' not found. 'futures_signals_list' is not a valid view function or pattern name.
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/base/views.py", line 19, in get
+    return render(request, 'base/home.html', context=contex)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/base.py", line 170, in render
+    return self._render(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/base.py", line 162, in _render
+    return self.nodelist.render(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/base.py", line 938, in render
+    bit = node.render_annotated(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/base.py", line 905, in render_annotated
+    return self.render(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/loader_tags.py", line 150, in render
+    return compiled_parent._render(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/base.py", line 162, in _render
+    return self.nodelist.render(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/base.py", line 938, in render
+    bit = node.render_annotated(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/base.py", line 905, in render_annotated
+    return self.render(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/loader_tags.py", line 62, in render
+    result = block.nodelist.render(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/base.py", line 938, in render
+    bit = node.render_annotated(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/base.py", line 905, in render_annotated
+    return self.render(context)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/template/defaulttags.py", line 449, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/urls/base.py", line 86, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/django/urls/resolvers.py", line 698, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'futures_signals_list' not found. 'futures_signals_list' is not a valid view function or pattern name.

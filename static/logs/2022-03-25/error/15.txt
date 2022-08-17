@@ -1,0 +1,1014 @@
+ERROR 2022-03-25 15:01:08,085 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.8/http/client.py", line 1348, in getresponse
+    response.begin()
+  File "/usr/lib/python3.8/http/client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.8/http/client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:07:16,563 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.8/http/client.py", line 1348, in getresponse
+    response.begin()
+  File "/usr/lib/python3.8/http/client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.8/http/client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:19:55,734 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.8/http/client.py", line 1348, in getresponse
+    response.begin()
+  File "/usr/lib/python3.8/http/client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.8/http/client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:21:29,808 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 1040, in _validate_conn
+    conn.connect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connection.py", line 416, in connect
+    self.sock = ssl_wrap_socket(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 449, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 493, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+  File "/usr/lib/python3.8/ssl.py", line 500, in wrap_socket
+    return self.sslsocket_class._create(
+  File "/usr/lib/python3.8/ssl.py", line 1040, in _create
+    self.do_handshake()
+  File "/usr/lib/python3.8/ssl.py", line 1309, in do_handshake
+    self._sslobj.do_handshake()
+socket.timeout: _ssl.c:1114: The handshake operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=conn.timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:21:58,641 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.8/http/client.py", line 1348, in getresponse
+    response.begin()
+  File "/usr/lib/python3.8/http/client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.8/http/client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:22:24,081 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 1040, in _validate_conn
+    conn.connect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connection.py", line 416, in connect
+    self.sock = ssl_wrap_socket(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 449, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 493, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+  File "/usr/lib/python3.8/ssl.py", line 500, in wrap_socket
+    return self.sslsocket_class._create(
+  File "/usr/lib/python3.8/ssl.py", line 1040, in _create
+    self.do_handshake()
+  File "/usr/lib/python3.8/ssl.py", line 1309, in do_handshake
+    self._sslobj.do_handshake()
+socket.timeout: _ssl.c:1114: The handshake operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=conn.timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:22:45,921 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.8/http/client.py", line 1348, in getresponse
+    response.begin()
+  File "/usr/lib/python3.8/http/client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.8/http/client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:23:04,453 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 1040, in _validate_conn
+    conn.connect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connection.py", line 416, in connect
+    self.sock = ssl_wrap_socket(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 449, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 493, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+  File "/usr/lib/python3.8/ssl.py", line 500, in wrap_socket
+    return self.sslsocket_class._create(
+  File "/usr/lib/python3.8/ssl.py", line 1040, in _create
+    self.do_handshake()
+  File "/usr/lib/python3.8/ssl.py", line 1309, in do_handshake
+    self._sslobj.do_handshake()
+socket.timeout: _ssl.c:1114: The handshake operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=conn.timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:23:51,401 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 1040, in _validate_conn
+    conn.connect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connection.py", line 416, in connect
+    self.sock = ssl_wrap_socket(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 449, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 493, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+  File "/usr/lib/python3.8/ssl.py", line 500, in wrap_socket
+    return self.sslsocket_class._create(
+  File "/usr/lib/python3.8/ssl.py", line 1040, in _create
+    self.do_handshake()
+  File "/usr/lib/python3.8/ssl.py", line 1309, in do_handshake
+    self._sslobj.do_handshake()
+socket.timeout: _ssl.c:1114: The handshake operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=conn.timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:24:50,809 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.8/http/client.py", line 1348, in getresponse
+    response.begin()
+  File "/usr/lib/python3.8/http/client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.8/http/client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:25:15,909 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.8/http/client.py", line 1348, in getresponse
+    response.begin()
+  File "/usr/lib/python3.8/http/client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.8/http/client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:27:21,901 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 1040, in _validate_conn
+    conn.connect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connection.py", line 416, in connect
+    self.sock = ssl_wrap_socket(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 449, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 493, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+  File "/usr/lib/python3.8/ssl.py", line 500, in wrap_socket
+    return self.sslsocket_class._create(
+  File "/usr/lib/python3.8/ssl.py", line 1040, in _create
+    self.do_handshake()
+  File "/usr/lib/python3.8/ssl.py", line 1309, in do_handshake
+    self._sslobj.do_handshake()
+socket.timeout: _ssl.c:1114: The handshake operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=conn.timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:29:03,241 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.8/http/client.py", line 1348, in getresponse
+    response.begin()
+  File "/usr/lib/python3.8/http/client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.8/http/client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:32:16,713 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 1040, in _validate_conn
+    conn.connect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connection.py", line 416, in connect
+    self.sock = ssl_wrap_socket(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 449, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/ssl_.py", line 493, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+  File "/usr/lib/python3.8/ssl.py", line 500, in wrap_socket
+    return self.sslsocket_class._create(
+  File "/usr/lib/python3.8/ssl.py", line 1040, in _create
+    self.do_handshake()
+  File "/usr/lib/python3.8/ssl.py", line 1309, in do_handshake
+    self._sslobj.do_handshake()
+socket.timeout: _ssl.c:1114: The handshake operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 389, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=conn.timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:32:38,573 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.8/http/client.py", line 1348, in getresponse
+    response.begin()
+  File "/usr/lib/python3.8/http/client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.8/http/client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:35:08,744 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.8/http/client.py", line 1348, in getresponse
+    response.begin()
+  File "/usr/lib/python3.8/http/client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.8/http/client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+ERROR 2022-03-25 15:37:08,557 retry_on_timeout 428758 140411674818304 HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib/python3.8/http/client.py", line 1348, in getresponse
+    response.begin()
+  File "/usr/lib/python3.8/http/client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib/python3.8/http/client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib/python3.8/socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "/usr/lib/python3.8/ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "/usr/lib/python3.8/ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/util/retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/packages/six.py", line 770, in reraise
+    raise value
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/urllib3/connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 103, in fetch_ticker
+    return float(self._sdk_exchange.market_client.get_ticker(symbol)['price'])
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/marke_data/market_data.py", line 418, in get_ticker
+    return self._request('GET', '/api/v1/ticker', auth=False, params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 87, in _request
+    response_data = requests.request(method, url, headers=headers, timeout=timeout)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/requests/adapters.py", line 529, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api-futures.kucoin.com', port=443): Read timed out. (read timeout=5)

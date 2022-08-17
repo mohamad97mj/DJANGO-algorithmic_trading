@@ -1,0 +1,1 @@
+INFO 2022-07-31 23:00:13,234 apps 92308 139931969066816 futures_trader app started!

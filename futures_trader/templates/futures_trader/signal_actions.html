@@ -1,0 +1,14 @@
+{% if record.status == 'waiting' %}
+    <form class="form-inline" action="{% url 'futures_trader:futures_signal_action' record.id %}" method="post">
+        <input name="action" value="reject" style="display: none"/>
+        <button type="submit" class="btn btn-danger">reject</button>
+        <button type="button" class="btn btn-success">confirm</button>
+    </form>
+{% elif record.status == 'rejected' %}
+    <form class="form-inline" action="{% url 'futures_trader:futures_signal_action' record.id %}" method="post">
+        <input name="action" value="unreject" style="display: none"/>
+        <button type="submit" class="btn btn-secondary">unreject</button>
+    </form>
+{% else %}
+    -
+{% endif %}

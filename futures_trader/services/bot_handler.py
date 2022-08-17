@@ -152,16 +152,16 @@ class FuturesBotHandler:
         bots = list(bots_query_set)
         for bot in bots:
             self.init_bot_requirements(bot)
-            self.set_bot_strategy_state_data(bot)
+            # self.set_bot_strategy_state_data(bot)
             if bot.credential_id in self._bots:
                 self._bots[bot.credential_id][bot.id] = bot
             else:
                 self._bots[bot.credential_id] = {bot.id: bot}
         return bots
 
-    def set_bot_strategy_state_data(self, bot):
-        strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
-        bot.set_strategy_state_data(strategy_developer.reload_setup(bot.position))
+    # def set_bot_strategy_state_data(self, bot):
+    #     strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
+    #     bot.set_strategy_state_data(strategy_developer.reload_setup(bot.position))
 
     def get_public_client(self, exchange_id):
         if exchange_id in self._public_clients:

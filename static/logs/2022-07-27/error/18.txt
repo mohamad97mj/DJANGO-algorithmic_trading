@@ -1,0 +1,1 @@
+ERROR 2022-07-27 18:34:05,554 bot_handler 98601 140034257725248 Creating bot failed because position with symbol TRX/USDT is duplicate!

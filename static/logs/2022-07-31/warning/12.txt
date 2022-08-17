@@ -1,0 +1,16 @@
+WARNING 2022-07-31 12:00:20,274 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:00:25,701 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:00:40,447 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:00:50,188 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:01:01,466 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:01:15,505 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:01:25,659 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:01:40,423 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:05:04,417 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:05:10,358 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:05:21,420 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:05:26,847 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:05:35,347 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:05:50,523 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:06:15,444 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!
+WARNING 2022-07-31 12:06:35,608 retry_on_timeout 38247 140568496256832 retry on timeout: fetch_ohlcv!

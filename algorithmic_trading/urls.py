@@ -17,7 +17,8 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    path('', include('base.urls', namespace='base')),
     path('admin/', admin.site.urls),
-    path('spot-api/', include('spot_trader.urls')),
-    path('futures-api/', include('futures_trader.urls')),
+    path('spot-api/', include('spot_trader.urls', namespace='spot_trader')),
+    path('futures-api/', include('futures_trader.urls', namespace='futures_trader')),
 ]

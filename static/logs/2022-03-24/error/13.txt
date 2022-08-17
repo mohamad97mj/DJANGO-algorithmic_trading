@@ -1,0 +1,102 @@
+ERROR 2022-03-24 13:13:54,471 bot_handler 434792 140225208653568 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:14:32,288 bot_handler 434866 139668756035328 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:14:47,296 bot_handler 434866 139668756035328 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:14:58,573 bot_handler 434925 140068170127104 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:14:59,578 bot_handler 434925 140068170127104 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:15:20,151 bot_handler 434982 140133441468160 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:16:11,937 bot_handler 435055 139630519248640 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:17:06,979 bot_handler 435139 140608639334144 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:18:22,971 bot_handler 435245 140030805370624 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:18:23,976 bot_handler 435245 140030805370624 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:18:26,025 retry_on_timeout 435245 140031360747264 200-{"code":"100001","msg":"Quantity parameter invalid"}
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 49, in create_market_order
+    exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/trade/trade.py", line 370, in create_market_order
+    return self._request('POST', '/api/v1/orders', params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 91, in _request
+    return self.check_response_data(response_data)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 108, in check_response_data
+    raise Exception("{}-{}".format(response_data.status_code, response_data.text))
+Exception: 200-{"code":"100001","msg":"Quantity parameter invalid"}
+ERROR 2022-03-24 13:18:26,030 bot_handler 435245 140031360747264 'NoneType' object is not subscriptable
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 208, in run_bots
+    bot.execute_operations(operations,
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/models/bot.py", line 107, in execute_operations
+    exchange_order_id = exchange_order['id']
+TypeError: 'NoneType' object is not subscriptable
+ERROR 2022-03-24 13:18:37,996 bot_handler 435245 140030805370624 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:18:39,003 bot_handler 435245 140030805370624 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:19:52,603 bot_handler 435429 140574522746624 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:20:04,651 bot_handler 435429 140574522746624 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:20:07,657 bot_handler 435429 140574522746624 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:20:14,568 retry_on_timeout 435429 140574992922368 200-{"code":"100001","msg":"Quantity parameter invalid"}
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 49, in create_market_order
+    exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/trade/trade.py", line 370, in create_market_order
+    return self._request('POST', '/api/v1/orders', params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 91, in _request
+    return self.check_response_data(response_data)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 108, in check_response_data
+    raise Exception("{}-{}".format(response_data.status_code, response_data.text))
+Exception: 200-{"code":"100001","msg":"Quantity parameter invalid"}
+ERROR 2022-03-24 13:20:14,572 bot_handler 435429 140574992922368 'NoneType' object is not subscriptable
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 208, in run_bots
+    bot.execute_operations(operations,
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/models/bot.py", line 107, in execute_operations
+    exchange_order_id = exchange_order['id']
+TypeError: 'NoneType' object is not subscriptable
+ERROR 2022-03-24 13:20:20,675 bot_handler 435429 140574522746624 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:20:22,678 bot_handler 435429 140574522746624 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:20:30,795 catch_all_exceptions 435429 140574531139328 func=<function start_signal_generating_by_cci at 0x7fda0f7e9160> args=() kwargs={} message=pop from empty list traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/technical_trader/auto_trader.py", line 49, in start_signal_generating_by_cci
+    cci = cci_muck_values.pop(0)
+IndexError: pop from empty list
+
+ERROR 2022-03-24 13:22:44,991 bot_handler 435616 140314759476992 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:22:46,029 bot_handler 435616 140314759476992 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:23:58,267 bot_handler 435875 139901737215744 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:24:10,318 bot_handler 435875 139901737215744 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:24:12,324 bot_handler 435875 139901737215744 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:24:25,340 bot_handler 435875 139901737215744 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:24:27,345 bot_handler 435875 139901737215744 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:24:35,682 catch_all_exceptions 435875 139901745608448 func=<function start_signal_generating_by_cci at 0x7f3d6a5a3160> args=() kwargs={} message=pop from empty list traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/technical_trader/auto_trader.py", line 49, in start_signal_generating_by_cci
+    cci = cci_muck_values.pop(0)
+IndexError: pop from empty list
+
+ERROR 2022-03-24 13:26:52,717 bot_handler 436199 140410370807552 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:27:04,756 bot_handler 436199 140410370807552 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:27:06,759 bot_handler 436199 140410370807552 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-24 13:27:07,405 retry_on_timeout 436199 140410841044736 200-{"code":"100001","msg":"Quantity parameter invalid"}
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 49, in create_market_order
+    exchange_order = self._sdk_exchange.trade_client.create_market_order(symbol=symbol,
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/trade/trade.py", line 370, in create_market_order
+    return self._request('POST', '/api/v1/orders', params=params)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 91, in _request
+    return self.check_response_data(response_data)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/kucoin_futures/base_request/base_request.py", line 108, in check_response_data
+    raise Exception("{}-{}".format(response_data.status_code, response_data.text))
+Exception: 200-{"code":"100001","msg":"Quantity parameter invalid"}
+ERROR 2022-03-24 13:27:07,407 bot_handler 436199 140410841044736 'NoneType' object is not subscriptable
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 208, in run_bots
+    bot.execute_operations(operations,
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/models/bot.py", line 107, in execute_operations
+    exchange_order_id = exchange_order['id']
+TypeError: 'NoneType' object is not subscriptable
+ERROR 2022-03-24 13:27:19,774 bot_handler 436199 140410370807552 Creating bot failed because position with symbol BTC/USDT is duplicate!

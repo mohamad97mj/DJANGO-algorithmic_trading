@@ -1,0 +1,18 @@
+WARNING 2022-08-07 15:18:27,536 bot_handler 137395 140426262603520 websocket 0 was closed
+WARNING 2022-08-07 15:18:37,090 bot_handler 137395 140426262603520 websocket 0 was closed
+WARNING 2022-08-07 15:18:37,090 bot_handler 137395 140426262603520 ConnectionClosedOK in price ticker 0
+WARNING 2022-08-07 15:18:38,136 bot_handler 137395 140426262603520 Error in futures price ticker 0 was occurred!
+WARNING 2022-08-07 15:18:38,136 bot_handler 137395 140426262603520 websocket 0 was closed
+WARNING 2022-08-07 15:18:38,136 bot_handler 137395 140426262603520 ConnectionClosedOK in price ticker 0
+WARNING 2022-08-07 15:18:50,372 bot_handler 137395 140426262603520 websocket 1 was closed
+WARNING 2022-08-07 15:19:12,426 bot_handler 137395 140426262603520 websocket 1 was closed
+WARNING 2022-08-07 15:19:12,426 bot_handler 137395 140426262603520 ConnectionClosedOK in price ticker 1
+WARNING 2022-08-07 15:19:13,470 bot_handler 137395 140426262603520 Error in futures price ticker 1 was occurred!
+WARNING 2022-08-07 15:19:13,470 bot_handler 137395 140426262603520 websocket 1 was closed
+WARNING 2022-08-07 15:19:13,471 bot_handler 137395 140426262603520 ConnectionClosedOK in price ticker 1
+WARNING 2022-08-07 15:20:36,466 bot_handler 137669 139635376248576 websocket 0 was closed
+WARNING 2022-08-07 15:20:46,057 bot_handler 137669 139635376248576 websocket 0 was closed
+WARNING 2022-08-07 15:20:46,057 bot_handler 137669 139635376248576 ConnectionClosedOK in price ticker 0
+WARNING 2022-08-07 15:20:47,110 bot_handler 137669 139635376248576 Error in futures price ticker 0 was occurred!
+WARNING 2022-08-07 15:20:47,110 bot_handler 137669 139635376248576 websocket 0 was closed
+WARNING 2022-08-07 15:20:47,110 bot_handler 137669 139635376248576 ConnectionClosedOK in price ticker 0

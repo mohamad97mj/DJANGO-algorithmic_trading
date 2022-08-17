@@ -1,0 +1,26 @@
+{% load static %}
+{% load render_table from django_tables2 %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <script src="{% static 'js/jquery.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <title>{% block title %}Title{% endblock %}</title>
+</head>
+<body id="bootstrap-overwrite">
+<div class="container p-md-5">
+    {% block content %}{% endblock content %}
+</div>
+{% block scripts %}{% endblock scripts %}
+{% block styles %}{% endblock styles %}
+</body>
+</html>

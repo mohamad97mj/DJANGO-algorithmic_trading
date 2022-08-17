@@ -1,0 +1,4 @@
+WARNING 2022-03-19 10:34:23,110 retry_on_timeout 303718 140634397005568 retry on timeout: fetch_ticker!
+WARNING 2022-03-19 10:34:37,443 retry_on_timeout 303718 140634397005568 retry on timeout: fetch_ticker!
+WARNING 2022-03-19 10:35:47,972 retry_on_timeout 303718 140634397005568 retry on timeout: fetch_ohlcv!
+WARNING 2022-03-19 10:36:30,297 retry_on_timeout 303718 140634397005568 retry on timeout: fetch_ticker!

@@ -1,0 +1,2 @@
+DEBUG 2022-02-24 09:07:24,125 auto_trader 163790 139660618848000 rsi: 29.855952793269978, price: 34476.0, condition_is_normal: True
+DEBUG 2022-02-24 09:07:36,818 auto_trader 163790 139660618848000 rsi: 29.021109073360307, price: 34413.0, condition_is_normal: True

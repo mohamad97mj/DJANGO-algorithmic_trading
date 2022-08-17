@@ -23,8 +23,6 @@ class FuturesBotManager(models.Manager):
 class FuturesBot(models.Model):
     class Status(models.TextChoices):
         CREATED = 'created'
-        CONFIRMED = 'confirmed'
-        WAITING = 'waiting'
         RUNNING = 'running'
         PAUSED = 'paused'
         STOPPED_BY_STOPLOSS = 'stopped_by_stoploss'
@@ -44,8 +42,7 @@ class FuturesBot(models.Model):
     total_pnl_percentage = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
-    status = models.CharField(default=Status.CREATED.value,
-                              max_length=50)
+    status = models.CharField(default=Status.CREATED.value, max_length=50)
     stopped_at = models.DateTimeField(null=True)
 
     def __init__(self, *args, **kwargs):
@@ -58,8 +55,8 @@ class FuturesBot(models.Model):
         self._private_client = private_client
         self._public_client = public_client
 
-    def set_strategy_state_data(self, strategy_state_data):
-        self.strategy_state_data = strategy_state_data
+    # def set_strategy_state_data(self, strategy_state_data):
+    #     self.strategy_state_data = strategy_state_data
 
     def ready(self):
         pass

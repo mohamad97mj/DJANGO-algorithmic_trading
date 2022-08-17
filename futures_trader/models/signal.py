@@ -2,18 +2,27 @@ import signal
 
 from django.utils import timezone
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 
 class FuturesSignal(models.Model):
     # signal_id = models.CharField(max_length=100, unique=True)
+
+    class Status(models.TextChoices):
+        WAITING = 'waiting'
+        CONFIRMED = 'confirmed'
+        REJECTED = 'rejected'
+
     symbol = models.CharField(max_length=50)
     source = models.CharField(max_length=30, default='manual')
     side = models.CharField(max_length=10)
     risk_level = models.CharField(max_length=20, default='medium')
-    leverage = models.IntegerField()
+    leverage = models.IntegerField(null=True, blank=True)
     stoploss = models.OneToOneField('FuturesStoploss', related_name='signal', null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now, blank=True)
-    setup_mode = models.CharField(max_length=50)
+    setup_mode = models.CharField(max_length=50, null=True, blank=True)
+    confirmations = ArrayField(models.CharField(max_length=20), blank=True, null=True)
+    status = models.CharField(max_length=10, default=Status.WAITING.value)
 
     def __init__(self, *args, **kwargs):
         super(FuturesSignal, self).__init__(*args, **kwargs)

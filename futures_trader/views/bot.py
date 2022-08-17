@@ -1,9 +1,16 @@
 import json
+from django_filters.views import FilterView
+from django_tables2.views import SingleTableMixin
 from rest_framework import renderers
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django_filters.views import FilterView
+from django_tables2.views import SingleTableMixin
+
 from ..services import FuturesBotTrader
 from ..serializers import FuturesBotSerializer
+from ..tables import FuturesBotTable
+from ..filters import FuturesBotFilter
 from global_utils import catch_all_exceptions
 
 
@@ -35,6 +42,12 @@ class FuturesBotsView(APIView):
             bot_data = FuturesBotSerializer(instance=bot_instance).data
 
         return Response(bot_data)
+
+
+class FuturesBotListView(SingleTableMixin, FilterView):
+    table_class = FuturesBotTable
+    filterset_class = FuturesBotFilter
+    template_name = 'base/filter_table.html'
 
 
 class FuturesBotDetailView(APIView):

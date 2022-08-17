@@ -1,0 +1,16 @@
+{% extends 'base/base.html' %}
+{% load render_table from django_tables2 %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+
+{% block content %}
+{% if filter %}
+<form action="" method="get" class="form form-inline">
+    {% bootstrap_form filter.form layout='' %}
+    {% bootstrap_button 'filter' %}
+</form>
+{% endif %}
+{% render_table table 'django_tables2/bootstrap.html' %}
+{% endblock content%}

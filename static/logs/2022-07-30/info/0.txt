@@ -1,0 +1,4 @@
+INFO 2022-07-30 00:28:29,582 bot_handler 89194 140322719655680 price_ticker 10 was started
+INFO 2022-07-30 00:28:51,444 bot_handler 89194 140322719655680 price_ticker 11 was started
+INFO 2022-07-30 00:29:17,925 bot_handler 89194 140322719655680 price_ticker 12 was started
+INFO 2022-07-30 00:29:54,268 bot_handler 89194 140322719655680 price_ticker 13 was started

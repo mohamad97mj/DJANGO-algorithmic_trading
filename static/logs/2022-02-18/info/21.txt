@@ -1,0 +1,36 @@
+INFO 2022-02-18 21:03:23,284 apps 25636 139911703643968 futures_trader app started!
+INFO 2022-02-18 21:03:23,597 bot_handler 25636 139911355229952 price_ticker 0 was started
+INFO 2022-02-18 21:04:37,024 apps 25707 139927290410816 futures_trader app started!
+INFO 2022-02-18 21:04:37,378 bot_handler 25707 139926942050048 price_ticker 0 was started
+INFO 2022-02-18 21:04:38,601 main 25707 139926942050048 step_operation: (symbol: BTC/USDT, price: 40152.0, margin: 1.0)
+INFO 2022-02-18 21:05:31,017 apps 25764 139792970766144 futures_trader app started!
+INFO 2022-02-18 21:05:31,376 bot_handler 25764 139792622425856 price_ticker 0 was started
+INFO 2022-02-18 21:05:59,296 apps 25803 139677769869120 futures_trader app started!
+INFO 2022-02-18 21:05:59,595 bot_handler 25803 139677421512448 price_ticker 0 was started
+INFO 2022-02-18 21:06:41,486 apps 25854 139648930662208 futures_trader app started!
+INFO 2022-02-18 21:06:41,819 bot_handler 25854 139648582301440 price_ticker 0 was started
+INFO 2022-02-18 21:07:29,915 bot_handler 25854 139648582301440 price_ticker 1 was started
+INFO 2022-02-18 21:08:32,053 apps 25929 140416518506304 futures_trader app started!
+INFO 2022-02-18 21:08:32,425 bot_handler 25929 140416170153728 price_ticker 0 was started
+INFO 2022-02-18 21:08:48,882 apps 25967 140541571352384 futures_trader app started!
+INFO 2022-02-18 21:08:49,213 bot_handler 25967 140541222995712 price_ticker 0 was started
+INFO 2022-02-18 21:09:07,530 auto_trader 25967 140540675245824 signal data was generated!
+INFO 2022-02-18 21:09:13,628 auto_trader 25967 140540675245824 signal data was generated!
+INFO 2022-02-18 21:09:19,657 auto_trader 25967 140540675245824 signal data was generated!
+INFO 2022-02-18 21:10:42,589 apps 26070 140130320615232 futures_trader app started!
+INFO 2022-02-18 21:10:56,429 auto_trader 26070 140129509160704 signal data was generated!
+INFO 2022-02-18 21:11:02,368 auto_trader 26070 140129509160704 signal data was generated!
+INFO 2022-02-18 21:11:09,223 auto_trader 26070 140129509160704 signal data was generated!
+INFO 2022-02-18 21:13:22,832 apps 26185 140133691275072 futures_trader app started!
+INFO 2022-02-18 21:13:36,583 auto_trader 26185 140132879836928 signal data was generated!
+INFO 2022-02-18 21:13:40,111 bot_handler 26185 140133409965824 price_ticker 0 was started
+INFO 2022-02-18 21:13:41,352 main 26185 140133409965824 step_operation: (symbol: BTC/USDT, price: 39999.0, margin: 1.0)
+INFO 2022-02-18 21:13:42,421 auto_trader 26185 140132879836928 signal data was generated!
+INFO 2022-02-18 21:13:49,177 auto_trader 26185 140132879836928 signal data was generated!
+INFO 2022-02-18 21:14:27,731 bot_handler 26185 140133409965824 price_ticker 1 was started
+INFO 2022-02-18 21:15:53,453 apps 26398 140575634958144 futures_trader app started!
+INFO 2022-02-18 21:16:08,742 auto_trader 26398 140574749357824 signal data was generated!
+INFO 2022-02-18 21:16:11,746 bot_handler 26398 140575286589184 price_ticker 0 was started
+INFO 2022-02-18 21:16:14,643 auto_trader 26398 140574749357824 signal data was generated!
+INFO 2022-02-18 21:16:17,348 main 26398 140575286589184 step_operation: (symbol: BTC/USDT, price: 39988.0, margin: 1.0)
+INFO 2022-02-18 21:16:20,628 auto_trader 26398 140574749357824 signal data was generated!

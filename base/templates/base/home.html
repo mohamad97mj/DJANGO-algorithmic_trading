@@ -1,0 +1,8 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Futures bots {% endblock title %}
+{% block content %}
+<a href="{% url 'futures_trader:futures_signal_list' %}?status=waiting&from_date={{from_date}}&from_time={{from_time}}">
+    Latest futures signal list
+</a>
+{% endblock content %}

@@ -1,0 +1,68 @@
+ERROR 2022-04-10 19:03:45,194 retry_on_timeout 6154 140296912160576 database is locked
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/external_signal_trader/auto_trader.py", line 28, in create_client
+    client.connect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sync.py", line 39, in syncified
+    return loop.run_until_complete(coro)
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/telegrambaseclient.py", line 536, in connect
+    self.session.auth_key = self._sender.auth_key
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sessions/sqlite.py", line 180, in auth_key
+    self._update_session_table()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sessions/sqlite.py", line 194, in _update_session_table
+    c.execute('delete from sessions')
+sqlite3.OperationalError: database is locked
+ERROR 2022-04-10 19:03:49,999 retry_on_timeout 6179 139740657518400 database is locked
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/external_signal_trader/auto_trader.py", line 28, in create_client
+    client.connect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sync.py", line 39, in syncified
+    return loop.run_until_complete(coro)
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/telegrambaseclient.py", line 536, in connect
+    self.session.auth_key = self._sender.auth_key
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sessions/sqlite.py", line 180, in auth_key
+    self._update_session_table()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sessions/sqlite.py", line 194, in _update_session_table
+    c.execute('delete from sessions')
+sqlite3.OperationalError: database is locked
+ERROR 2022-04-10 19:05:42,947 retry_on_timeout 6290 140217659651904 database is locked
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/external_signal_trader/auto_trader.py", line 28, in create_client
+    client.connect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sync.py", line 39, in syncified
+    return loop.run_until_complete(coro)
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/telegrambaseclient.py", line 536, in connect
+    self.session.auth_key = self._sender.auth_key
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sessions/sqlite.py", line 180, in auth_key
+    self._update_session_table()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sessions/sqlite.py", line 194, in _update_session_table
+    c.execute('delete from sessions')
+sqlite3.OperationalError: database is locked
+ERROR 2022-04-10 19:05:46,323 retry_on_timeout 6304 140074255652672 database is locked
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 17, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/external_signal_trader/auto_trader.py", line 28, in create_client
+    client.connect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sync.py", line 39, in syncified
+    return loop.run_until_complete(coro)
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/telegrambaseclient.py", line 536, in connect
+    self.session.auth_key = self._sender.auth_key
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sessions/sqlite.py", line 180, in auth_key
+    self._update_session_table()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sessions/sqlite.py", line 194, in _update_session_table
+    c.execute('delete from sessions')
+sqlite3.OperationalError: database is locked

@@ -1,0 +1,9 @@
+INFO 2022-02-21 13:07:47,513 apps 84880 139830240233280 futures_trader app started!
+INFO 2022-02-21 13:08:13,000 apps 84967 139963338950464 futures_trader app started!
+INFO 2022-02-21 13:08:13,037 bot_handler 84967 139963272259328 price_ticker 0 was started
+INFO 2022-02-21 13:08:21,320 main 84967 139963272259328 stoploss_triggered: (symbol: BTC/USDT, price: 39586.0, size: 0.001)
+INFO 2022-02-21 13:09:51,272 apps 85125 140638956549952 futures_trader app started!
+INFO 2022-02-21 13:13:00,638 apps 85270 140216461465408 futures_trader app started!
+INFO 2022-02-21 13:13:42,218 apps 85365 140533166987072 futures_trader app started!
+INFO 2022-02-21 13:24:37,740 apps 85662 140632882042688 futures_trader app started!
+INFO 2022-02-21 13:27:01,392 apps 85798 139709367347008 futures_trader app started!

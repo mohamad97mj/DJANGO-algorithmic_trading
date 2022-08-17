@@ -1,0 +1,14 @@
+ERROR 2022-02-23 13:37:40,744 bot_handler 154254 140493249894144 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:37:52,762 bot_handler 154254 140493249894144 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:41:50,386 bot_handler 154490 139673477314304 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:42:03,404 bot_handler 154490 139673477314304 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:44:49,831 bot_handler 154592 139829492872960 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:45:00,847 bot_handler 154592 139829492872960 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:46:00,622 bot_handler 154708 140508903110400 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:46:10,632 bot_handler 154708 140508903110400 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:46:21,651 bot_handler 154708 140508903110400 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:47:58,853 bot_handler 154807 139946397136640 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:48:08,866 bot_handler 154807 139946397136640 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:48:20,883 bot_handler 154807 139946397136640 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:51:17,461 bot_handler 154993 139694583633664 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-02-23 13:51:29,479 bot_handler 154993 139694583633664 Creating bot failed because position with symbol BTC/USDT is duplicate!

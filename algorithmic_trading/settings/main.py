@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'bootstrap5',
+    'django_tables2',
+    'base',
     'spot_trader',
     'futures_trader',
 ]

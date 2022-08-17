@@ -1,0 +1,54 @@
+ERROR 2022-07-30 13:58:10,770 catch_all_exceptions 96291 140639480792896 func=<function technical_auto_trade at 0x7fe92561f8b0> args=() kwargs={} message=Cannot send requests while disconnected traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/tasks.py", line 38, in technical_auto_trade
+    macd: {},
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/tasks.py", line 15, in notify_in_telegram
+    entity = myclient.get_entity('My alarms')
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sync.py", line 39, in syncified
+    return loop.run_until_complete(coro)
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/dialogs.py", line 256, in get_dialogs
+    return await self.iter_dialogs(*args, **kwargs).collect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/requestiter.py", line 113, in collect
+    async for message in self:
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/requestiter.py", line 74, in __anext__
+    if await self._load_next_chunk():
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/dialogs.py", line 53, in _load_next_chunk
+    r = await self.client(self.request)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/users.py", line 30, in __call__
+    return await self._call(self._sender, request, ordered=ordered)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/users.py", line 63, in _call
+    future = sender.send(request, ordered=ordered)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/network/mtprotosender.py", line 172, in send
+    raise ConnectionError('Cannot send requests while disconnected')
+ConnectionError: Cannot send requests while disconnected
+
+ERROR 2022-07-30 13:58:10,770 catch_all_exceptions 96291 140639480792896 func=<function technical_auto_trade at 0x7fe92561f8b0> args=() kwargs={} message=Cannot send requests while disconnected traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/tasks.py", line 38, in technical_auto_trade
+    macd: {},
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/tasks.py", line 15, in notify_in_telegram
+    entity = myclient.get_entity('My alarms')
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/sync.py", line 39, in syncified
+    return loop.run_until_complete(coro)
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/dialogs.py", line 256, in get_dialogs
+    return await self.iter_dialogs(*args, **kwargs).collect()
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/requestiter.py", line 113, in collect
+    async for message in self:
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/requestiter.py", line 74, in __anext__
+    if await self._load_next_chunk():
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/dialogs.py", line 53, in _load_next_chunk
+    r = await self.client(self.request)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/users.py", line 30, in __call__
+    return await self._call(self._sender, request, ordered=ordered)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/client/users.py", line 63, in _call
+    future = sender.send(request, ordered=ordered)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/telethon/network/mtprotosender.py", line 172, in send
+    raise ConnectionError('Cannot send requests while disconnected')
+ConnectionError: Cannot send requests while disconnected
+

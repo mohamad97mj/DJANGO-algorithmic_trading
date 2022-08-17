@@ -1,0 +1,102 @@
+WARNING 2022-02-18 21:03:24,695 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:24,770 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:24,868 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:24,952 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,052 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,135 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,195 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,248 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,343 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,396 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,486 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,503 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,608 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,667 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,719 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,732 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,825 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,871 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,929 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:25,997 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,061 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,081 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,124 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,177 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,281 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,370 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,397 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,450 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,519 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,577 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,637 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,689 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,737 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,787 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,863 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:26,933 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,064 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,143 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,199 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,248 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,250 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,272 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,300 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,318 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,410 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,474 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,562 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,641 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,680 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,725 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,768 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,838 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,886 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,929 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:27,973 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,027 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,085 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,134 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,182 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,208 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,235 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,334 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,362 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,434 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,610 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,643 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,680 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,718 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,739 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:03:28,859 bot_handler 25636 139910935283456 Could not connect to muck price server from price ticker 0!
+WARNING 2022-02-18 21:06:13,912 bot_handler 25803 139677005756160 received 1011 (unexpected error); then sent 1011 (unexpected error)
+WARNING 2022-02-18 21:06:20,090 bot_handler 25803 139677421512448 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:06:20,091 bot_handler 25803 139677421512448 websocket 0 was closed
+WARNING 2022-02-18 21:06:21,100 bot_handler 25803 139677421512448 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:06:21,101 bot_handler 25803 139677421512448 websocket 0 was closed
+WARNING 2022-02-18 21:06:22,106 bot_handler 25803 139677421512448 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:06:22,107 bot_handler 25803 139677421512448 websocket 0 was closed
+WARNING 2022-02-18 21:06:23,110 bot_handler 25803 139677421512448 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:06:23,111 bot_handler 25803 139677421512448 websocket 0 was closed
+WARNING 2022-02-18 21:06:24,118 bot_handler 25803 139677421512448 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:06:24,119 bot_handler 25803 139677421512448 websocket 0 was closed
+WARNING 2022-02-18 21:06:25,124 bot_handler 25803 139677421512448 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:06:25,125 bot_handler 25803 139677421512448 websocket 0 was closed
+WARNING 2022-02-18 21:07:29,912 bot_handler 25854 139648582301440 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:07:29,914 bot_handler 25854 139648582301440 websocket 0 was closed
+WARNING 2022-02-18 21:07:43,130 bot_handler 25854 139648160470784 sent 1011 (unexpected error) keepalive ping timeout; no close frame received
+WARNING 2022-02-18 21:08:35,527 bot_handler 25929 140415751657216 no close frame received or sent
+WARNING 2022-02-18 21:08:41,799 bot_handler 25929 140416170153728 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:08:41,799 bot_handler 25929 140416170153728 websocket 0 was closed
+WARNING 2022-02-18 21:08:42,804 bot_handler 25929 140416170153728 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:08:42,805 bot_handler 25929 140416170153728 websocket 0 was closed
+WARNING 2022-02-18 21:08:43,813 bot_handler 25929 140416170153728 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:08:43,814 bot_handler 25929 140416170153728 websocket 0 was closed
+WARNING 2022-02-18 21:08:44,818 bot_handler 25929 140416170153728 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:08:44,819 bot_handler 25929 140416170153728 websocket 0 was closed
+WARNING 2022-02-18 21:08:45,824 bot_handler 25929 140416170153728 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:08:45,825 bot_handler 25929 140416170153728 websocket 0 was closed
+WARNING 2022-02-18 21:08:46,830 bot_handler 25929 140416170153728 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:08:46,831 bot_handler 25929 140416170153728 websocket 0 was closed
+WARNING 2022-02-18 21:14:27,729 bot_handler 26185 140133409965824 Error in futures muck price ticker 0 was occurred!
+WARNING 2022-02-18 21:14:27,731 bot_handler 26185 140133409965824 websocket 0 was closed
+WARNING 2022-02-18 21:14:41,348 bot_handler 26185 140132888229632 sent 1011 (unexpected error) keepalive ping timeout; no close frame received

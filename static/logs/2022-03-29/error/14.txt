@@ -1,0 +1,13 @@
+ERROR 2022-03-29 14:35:24,907 bot_handler 92507 140098316969728 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-29 14:35:29,953 bot_handler 92507 140098316969728 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-29 14:35:48,074 bot_handler 92507 140098316969728 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-29 14:35:50,108 bot_handler 92507 140098316969728 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-29 14:36:04,209 bot_handler 92507 140098316969728 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-29 14:36:06,240 bot_handler 92507 140098316969728 Creating bot failed because position with symbol BTC/USDT is duplicate!
+ERROR 2022-03-29 14:36:14,501 catch_all_exceptions 92507 140098325362432 func=<function start_signal_generating_by_cci at 0x7f6b4a7a7820> args=() kwargs={} message=pop from empty list traceback=Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
+    return func(*args, **kwargs)
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/technical_trader/auto_trader.py", line 49, in start_signal_generating_by_cci
+    cci = cci_muck_values.pop(0)
+IndexError: pop from empty list
+

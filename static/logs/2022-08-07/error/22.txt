@@ -1,0 +1,131 @@
+ERROR 2022-08-07 22:39:47,023 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:48,077 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:49,151 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:50,211 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:51,269 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:52,322 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:53,374 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:54,427 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:55,481 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:56,533 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:57,695 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:58,758 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:39:59,831 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:40:00,913 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:40:01,966 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:40:03,044 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:40:04,101 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:40:05,164 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:40:06,222 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:40:07,281 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:40:08,336 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:40:09,400 bot_handler 162445 140054365157120 'BNB/USDT'
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/services/bot_handler.py", line 260, in run_bots_semi_limit_order_based
+    price_ticker = self._price_tickers[bot.position.signal.symbol]
+KeyError: 'BNB/USDT'
+ERROR 2022-08-07 22:55:47,250 retry_on_timeout 164281 140207041128256 test exception
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 18, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 27, in get_order
+    raise Exception('test exception')
+Exception: test exception
+ERROR 2022-08-07 22:55:52,255 retry_on_timeout 164281 140207041128256 test exception
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 18, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 27, in get_order
+    raise Exception('test exception')
+Exception: test exception
+ERROR 2022-08-07 22:55:57,259 retry_on_timeout 164281 140207041128256 test exception
+Traceback (most recent call last):
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/retry_on_timeout.py", line 18, in caught_func
+    _result, _error = func(*args, **kwargs), False
+  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/exchange/exchange.py", line 27, in get_order
+    raise Exception('test exception')
+Exception: test exception
