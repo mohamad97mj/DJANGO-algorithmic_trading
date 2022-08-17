@@ -29,10 +29,10 @@ def technical_auto_trade():
         myclient = create_client()
     appropriate_symbols = []
     for symbol in symbols:
-        result = auto_trader_per_symbol(symbol, appropriate_longs, appropriate_shorts)
+        result = auto_trader_per_symbol(symbol)
         if result:
             appropriate_symbols.append(result)
-        sleep(1.25)
+        sleep(1)
 
     message = 'appropriate symbols:{}\n'.format(appropriate_symbols)
     notify_in_telegram(message)
