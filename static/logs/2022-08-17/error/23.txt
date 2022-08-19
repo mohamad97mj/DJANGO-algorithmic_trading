@@ -1,7 +1,0 @@
-ERROR 2022-08-17 23:57:53,999 api_exception_handler 91342 139760781645568 Method "GET" not allowed.
-Traceback (most recent call last):
-  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/rest_framework/views.py", line 506, in dispatch
-    response = handler(request, *args, **kwargs)
-  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/venv/lib/python3.8/site-packages/rest_framework/views.py", line 167, in http_method_not_allowed
-    raise exceptions.MethodNotAllowed(request.method)
-rest_framework.exceptions.MethodNotAllowed: Method "GET" not allowed.

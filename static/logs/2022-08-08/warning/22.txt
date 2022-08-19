@@ -1,2 +1,0 @@
-WARNING 2022-08-08 22:01:05,287 bot_handler 182896 139803745470208 Error in futures price ticker 0 was occurred!
-WARNING 2022-08-08 22:01:05,288 bot_handler 182896 139803745470208 websocket 0 was closed

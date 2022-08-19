@@ -1,2 +1,0 @@
-INFO 2022-04-13 20:59:41,505 apps 60468 139680506505024 futures_trader app started!
-INFO 2022-04-13 20:59:43,855 apps 60793 140517470693184 futures_trader app started!

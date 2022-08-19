@@ -1,9 +1,0 @@
-INFO 2022-08-09 10:36:33,325 apps 5717 140494931183424 futures_trader app started!
-INFO 2022-08-09 10:36:33,394 bot_handler 5717 140494298302208 price_ticker 0 was started
-INFO 2022-08-09 10:37:31,888 apps 6117 139914337371968 futures_trader app started!
-INFO 2022-08-09 10:39:29,647 apps 6214 140125164189504 futures_trader app started!
-INFO 2022-08-09 10:39:59,239 apps 6291 139869882906432 futures_trader app started!
-INFO 2022-08-09 10:40:42,748 bot_handler 6291 139869315557120 price_ticker 0 was started
-INFO 2022-08-09 10:43:29,757 apps 6421 139780169619264 futures_trader app started!
-INFO 2022-08-09 10:46:04,779 apps 6561 140052187420480 futures_trader app started!
-INFO 2022-08-09 10:46:14,356 bot_handler 6561 140051553531648 price_ticker 0 was started

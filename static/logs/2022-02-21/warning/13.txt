@@ -1,7 +1,0 @@
-WARNING 2022-02-21 13:08:21,322 bot_handler 84967 139963272259328 websocket 0 was closed
-WARNING 2022-02-21 13:15:31,048 retry_on_timeout 85365 140532377167616 retry on timeout: fetch_ohlcv!
-WARNING 2022-02-21 13:20:04,979 retry_on_timeout 85365 140532377167616 retry on timeout: fetch_ohlcv!
-WARNING 2022-02-21 13:30:24,008 retry_on_timeout 85798 139708577462016 retry on timeout: fetch_ohlcv!
-WARNING 2022-02-21 13:35:17,441 retry_on_timeout 85798 139708577462016 retry on timeout: fetch_ohlcv!
-WARNING 2022-02-21 13:37:51,660 retry_on_timeout 85798 139708577462016 retry on timeout: fetch_ohlcv!
-WARNING 2022-02-21 13:37:56,672 retry_on_timeout 85798 139708577462016 retry on timeout: fetch_ohlcv!

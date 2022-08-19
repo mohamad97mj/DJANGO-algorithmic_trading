@@ -1,3 +1,0 @@
-ERROR 2022-02-21 19:45:20,950 bot_handler 94992 140489439328000 Creating bot failed because position with symbol BTC/USDT is duplicate!
-ERROR 2022-02-21 19:48:21,093 bot_handler 95350 140488410986240 Creating bot failed because position with symbol BTC/USDT is duplicate!
-ERROR 2022-02-21 19:48:31,162 bot_handler 95350 140488410986240 Creating bot failed because position with symbol BTC/USDT is duplicate!

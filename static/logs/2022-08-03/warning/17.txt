@@ -1,2 +1,0 @@
-WARNING 2022-08-03 17:01:15,593 retry_on_timeout 55470 140173706053440 retry on timeout: fetch_ohlcv!
-WARNING 2022-08-03 17:08:15,554 retry_on_timeout 56063 140359822530368 retry on timeout: fetch_ohlcv!

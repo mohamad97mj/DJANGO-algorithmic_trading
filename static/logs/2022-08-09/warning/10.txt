@@ -1,2 +1,0 @@
-WARNING 2022-08-09 10:35:16,325 retry_on_timeout 5717 140494931183424 retry on timeout: create_client!
-WARNING 2022-08-09 10:36:27,410 retry_on_timeout 5717 140494931183424 retry on timeout: create_client!

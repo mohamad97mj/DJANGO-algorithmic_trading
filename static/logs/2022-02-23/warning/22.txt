@@ -1,7 +1,0 @@
-WARNING 2022-02-23 22:27:19,932 retry_on_timeout 158463 140094308456192 retry on timeout: fetch_ohlcv!
-WARNING 2022-02-23 22:27:24,965 retry_on_timeout 158463 140094308456192 retry on timeout: fetch_ohlcv!
-WARNING 2022-02-23 22:27:29,983 retry_on_timeout 158463 140094308456192 retry on timeout: fetch_ohlcv!
-WARNING 2022-02-23 22:27:34,998 retry_on_timeout 158463 140094308456192 retry on timeout: fetch_ohlcv!
-WARNING 2022-02-23 22:27:40,013 retry_on_timeout 158463 140094308456192 retry on timeout: fetch_ohlcv!
-WARNING 2022-02-23 22:27:45,047 retry_on_timeout 158463 140094308456192 retry on timeout: fetch_ohlcv!
-WARNING 2022-02-23 22:27:50,081 retry_on_timeout 158463 140094308456192 retry on timeout: fetch_ohlcv!

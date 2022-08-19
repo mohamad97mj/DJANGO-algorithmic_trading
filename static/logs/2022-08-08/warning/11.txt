@@ -1,5 +1,0 @@
-WARNING 2022-08-08 11:29:43,070 bot_handler 179259 140225442096896 Error in futures price ticker 0 was occurred!
-WARNING 2022-08-08 11:29:43,070 bot_handler 179259 140225442096896 websocket 0 was closed
-WARNING 2022-08-08 11:31:45,112 bot_handler 179649 140046801704704 Error in futures price ticker 0 was occurred!
-WARNING 2022-08-08 11:31:45,113 bot_handler 179649 140046801704704 websocket 0 was closed
-WARNING 2022-08-08 11:32:00,227 retry_on_timeout 179649 140046919153408 retry on timeout: fetch_status!

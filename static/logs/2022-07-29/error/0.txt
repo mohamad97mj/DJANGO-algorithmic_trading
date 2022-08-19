@@ -1,7 +1,0 @@
-ERROR 2022-07-29 00:31:09,195 catch_all_exceptions 62001 140127345137472 func=<function technical_auto_trade at 0x7f71e7bc28b0> args=() kwargs={} message=division by zero traceback=Traceback (most recent call last):
-  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/global_utils/catch_all_exceptions.py", line 11, in wrapper
-    return func(*args, **kwargs)
-  File "/home/mohammad/others/codes/intellichange/DJANGO-algorithmic_trading/futures_trader/tasks.py", line 23, in technical_auto_trade
-    0/0
-ZeroDivisionError: division by zero
-
