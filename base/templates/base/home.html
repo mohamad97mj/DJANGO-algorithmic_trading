@@ -2,7 +2,14 @@
 
 {% block title %}Futures bots {% endblock title %}
 {% block content %}
-<a href="{% url 'futures_trader:futures_signal_list' %}?status=waiting&from_date={{from_date}}&from_time={{from_time}}">
-    Latest futures signal list
-</a>
+    <div>
+        <a href="{% url 'futures_trader:futures_signal_list' %}?status=waiting&from_date={{ from_date }}&from_time={{ from_time }}">
+            Latest futures signal list
+        </a>
+    </div>
+    <div>
+        <a href="{% url 'futures_trader:futures_bot_list' %}?is_active=true">
+            Active futures bot list
+        </a>
+    </div>
 {% endblock content %}

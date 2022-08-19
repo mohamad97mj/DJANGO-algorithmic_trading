@@ -157,7 +157,6 @@ class FuturesBot(models.Model):
             order = operation.order
             symbol = order.symbol
             contract = self._public_client.get_contract(symbol)
-            print(contract['tickSize'])
             multiplier = contract['multiplier']
             precision = find_decimal_place(contract['tickSize'])
             price = int(order.price) if precision == 0 else round(order.price, precision)
@@ -210,7 +209,10 @@ class FuturesBot(models.Model):
 
     def close_position(self, test):
         if not test:
-            self._private_client.close_position(self.position.signal.symbol)
+            symbol = self.position.signal.symbol
+            self._private_client.close_position(symbol)
+            self._private_client.cancel_all_limit_orders(symbol=symbol)
+            self._private_client.cancel_all_stop_orders(symbol=symbol)
 
     def is_risky(self):
         return not self.position.signal.stoploss.is_trailed if self.position.signal.stoploss else True

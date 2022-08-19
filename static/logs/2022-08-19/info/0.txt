@@ -1,0 +1,4 @@
+INFO 2022-08-19 00:49:56,947 apps 84865 140365039249216 futures_trader app started!
+INFO 2022-08-19 00:50:04,542 apps 84939 140127348365120 futures_trader app started!
+INFO 2022-08-19 00:55:15,087 apps 85424 140698830677824 futures_trader app started!
+INFO 2022-08-19 00:56:24,410 apps 85621 139987261376320 futures_trader app started!

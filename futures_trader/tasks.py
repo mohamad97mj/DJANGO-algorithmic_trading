@@ -3,8 +3,7 @@ from celery import shared_task
 from spot_trader.services.ta import TechnicalAnalyser
 from fetch import symbols
 from futures_trader.services.external_signal_trader.auto_trader import create_client
-from spot_trader.clients import PublicClient
-from futures_trader.clients import PrivateClient
+from futures_trader.clients import PrivateClient, PublicClient
 from futures_trader.services.trader import FuturesBotTrader
 from global_utils.my_logging import my_get_logger
 from global_utils.catch_all_exceptions import catch_all_exceptions
@@ -46,9 +45,7 @@ def auto_trader_per_symbol(symbol):
                                               n=20)
     macd, prev_macd = TechnicalAnalyser.get_macd(symbol)
     bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol, timeframe='1h', n=20)
-    pbc = PublicClient()
-    ohlc = pbc.fetch_ohlcv(symbol, timeframe='1h', limit=1)[0]
-    close = ohlc[4]
+    close = PublicClient.fetch_ticker(symbol)
     confirmations = []
     is_signal = False
 

@@ -2,7 +2,7 @@ import queue
 import time
 from threading import Thread
 
-from futures_trader.config import position_margin
+from futures_trader.config import POSITION_MARGIN
 from futures_trader.services.trader import FuturesBotTrader
 from futures_trader.utils.app_vars import is_test
 from futures_trader.clients.public_client import PublicClient
@@ -132,7 +132,7 @@ def consume_signal(signal_data):
     signal_data['source'] = 'technical'
     position_data = {
         'signal': signal_data,
-        'margin': position_margin,
+        'margin': POSITION_MARGIN,
         'order_type': 'market'
     }
     credential_id = 'kucoin_main'

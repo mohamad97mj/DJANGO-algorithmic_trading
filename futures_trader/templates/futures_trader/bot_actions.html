@@ -1,0 +1,31 @@
+{% if record.status == 'running' %}
+    <form class="form-inline">
+        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                data-bs-target="#confirmModal-{{ record.id }}">stop
+        </button>
+    </form>
+{% endif %}
+
+
+<div class="modal fade" id="confirmModal-{{ record.id }}" tabindex="-1" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Stop bot confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Are you sure you want to stop bot with symbol {{ record.position.signal.symbol }}</h6>
+                <form method="post"
+                      action="{% url 'futures_trader:futures_bot_action' record.id %}?is_active={{ request.GET.is_active }}&status={{ request.GET.status }}&from_date={{ request.GET.from_data }}&from_time={{ request.GET.from_time }}&to_date={{ request.GET.to_date }}&to_time={{ request.GET.to_time }}">
+                    <div class="mt-3">
+                        <input type="hidden" name="action" value="stop"/>
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-sm btn-success">Confirm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

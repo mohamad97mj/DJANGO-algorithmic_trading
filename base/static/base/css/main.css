@@ -1,0 +1,15 @@
+.myform {
+    text-align: right;
+}
+
+.small-form {
+    width: 250px;
+}
+
+.error-message {
+    margin-top: 3px;
+    color: #e31e30;
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+}

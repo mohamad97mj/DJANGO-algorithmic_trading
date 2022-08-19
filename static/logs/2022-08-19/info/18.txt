@@ -1,0 +1,4 @@
+INFO 2022-08-19 18:02:49,967 apps 121394 139690337646400 futures_trader app started!
+INFO 2022-08-19 18:03:36,271 bot_handler 121394 139689762096896 price_ticker 0 was started
+INFO 2022-08-19 18:05:48,385 apps 121702 140132017162048 futures_trader app started!
+INFO 2022-08-19 18:06:38,960 bot_handler 121702 140131473053440 price_ticker 0 was started

@@ -40,6 +40,7 @@ class PriceTicker:
 class FuturesBotHandler:
 
     def __init__(self):
+        self._active_bots = None
         self._bots = {}
         self._public_clients = {}
         self._price_tickers = {}
@@ -47,16 +48,20 @@ class FuturesBotHandler:
 
     def create_bot(self, exchange_id: str, credential_id: str, strategy: str, position_data: dict):
 
-        if self.validate_bot_data(exchange_id, credential_id, position_data['signal']['symbol']):
+        signal_data = position_data.get('signal')
+
+        if self.validate_bot_data(exchange_id, credential_id, signal_data.get('symbol', signal_data['obj'].symbol)):
 
             strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy=strategy)
             strategy_developer.validate_position_data(position_data=position_data)
 
             signal_data = position_data.get('signal')
-            signal = FuturesSignal(**{key: signal_data.get(key) for key in
-                                      ['symbol', 'side', 'leverage']})
+            if 'obj' in signal_data:
+                signal = signal_data['obj']
+            else:
+                signal = FuturesSignal(**{key: signal_data.get(key) for key in
+                                          ['symbol', 'side', 'leverage']})
             signal.source = signal_data.get('source', 'manual')
-
             stoploss_data = signal_data.get('stoploss')
             if stoploss_data:
                 stoploss = FuturesStoploss(trigger_price=stoploss_data['trigger_price'])
@@ -69,7 +74,7 @@ class FuturesBotHandler:
             signal.save()
 
             position = FuturesPosition(signal=signal,
-                                       **{k: position_data[k] for k in ['margin', 'order_type']})
+                                       **{k: position_data[k] for k in ['margin']})
 
             position.keep_open = position_data.get('keep_open', 'false') == 'true'
 
@@ -131,12 +136,7 @@ class FuturesBotHandler:
                                  credential_id=credential_id,
                                  strategy=strategy,
                                  position=position)
-            if position.order_type == 'limit':
-                new_bot.status = 'created'
-
             self.init_bot_requirements(bot=new_bot)
-            strategy_developer = FuturesStrategyCenter.get_strategy_developer(strategy)
-            new_bot.set_strategy_state_data(strategy_developer.init_strategy_state_data(position))
             new_bot.save()
             if credential_id in self._bots:
                 self._bots[credential_id][new_bot.id] = new_bot
@@ -379,17 +379,10 @@ class FuturesBotHandler:
         method2run = getattr(strategy_developer, command)
         return method2run(bot.position, bot.strategy_state_data, *args, **kwargs)
 
-    def get_active_bot(self, credential_id, bot_id):
-        if credential_id in self._bots and bot_id in self._bots[credential_id]:
-            bot = self._bots[credential_id][bot_id]
-            if bot.credential_id == credential_id:
-                return bot
-
     def get_bot(self, credential_id, bot_id):
-        bot = self.get_active_bot(credential_id, bot_id)
-        if not bot:
-            bot = FuturesBot.objects.filter(Q(id=bot_id) & Q(credential_id=credential_id)).first()
+        bot = FuturesBot.objects.filter(Q(id=bot_id) & Q(credential_id=credential_id)).first()
         if bot:
+            self.init_bot_requirements(bot)
             return bot
         raise CustomException('No bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
 
@@ -401,103 +394,103 @@ class FuturesBotHandler:
         logger = my_get_logger()
         logger.error('No active bot with symbol {} was found for credential_id {}!'.format(symbol, credential_id))
 
-    def edit_position(self, credential_id, bot_id, new_position_data, raise_error=False):
-        bot = self.get_active_bot(credential_id, bot_id)
-        if not bot:
-            message = 'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id)
-            if raise_error:
-                raise CustomException(message)
-            else:
-                logger = my_get_logger()
-                logger.error(message)
-        else:
-            strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
-
-            edited_data = []
-            new_signal_data = new_position_data.get('signal')
-            if new_signal_data:
-                new_steps_data = new_signal_data.get('steps')
-                setup_mode = new_signal_data.get('setup_mode', 'auto')
-                if new_steps_data:
-                    steps_was_edited = self._run_strategy_developer_command(
-                        bot,
-                        strategy_developer,
-                        'edit_steps',
-                        new_steps_data,
-                        setup_mode,
-                    )
-                    if steps_was_edited:
-                        edited_data.append('steps')
-
-                new_targets_data = new_signal_data.get('targets')
-                if new_targets_data:
-                    targets_was_edited = self._run_strategy_developer_command(
-                        bot,
-                        strategy_developer,
-                        'edit_targets',
-                        new_targets_data,
-                        setup_mode,
-                    )
-                    if targets_was_edited:
-                        edited_data.append('targets')
-
-                new_stoploss = new_signal_data.get('stoploss')
-                if new_stoploss:
-                    stoploss_was_edited = self._run_strategy_developer_command(
-                        bot,
-                        strategy_developer,
-                        'edit_stoploss',
-                        new_stoploss,
-                    )
-                    if stoploss_was_edited:
-                        edited_data.append('stoploss')
-
-            new_margin = new_position_data.get('margin')
-            if new_margin:
-                margin_was_edited = self._run_strategy_developer_command(
-                    bot,
-                    strategy_developer,
-                    'edit_margin',
-                    new_margin
-                )
-                if margin_was_edited:
-                    edited_data.append('margin')
-
-            return bot.position, edited_data
-
-    def pause_bot(self, credential_id, bot_id):
-        bot = self.get_active_bot(credential_id, bot_id)
-        if not bot:
-            raise CustomException(
-                'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
-
-        if bot.status == FuturesBot.Status.PAUSED.value:
-            raise CustomException('bot with id {} is already paused!'.format(bot_id))
-
-        if bot.status == FuturesBot.Status.RUNNING.value:
-            price_ticker = self._price_tickers[bot.position.signal.symbol]
-            price_ticker.unsubscribe_bot(bot.id)
-
-            bot.status = FuturesBot.Status.PAUSED.value
-            bot.save()
-            return bot
-
-    def start_bot(self, credential_id, bot_id):
-        bot = self.get_active_bot(credential_id, bot_id)
-        if not bot:
-            raise CustomException(
-                'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
-
-        if bot.status == FuturesBot.Status.RUNNING.value:
-            raise CustomException('bot with id {} is already running!'.format(bot_id))
-
-        if bot.status == FuturesBot.Status.PAUSED.value:
-            bot.status = FuturesBot.Status.RUNNING.value
-            bot.save()
-            return bot
+    # def edit_position(self, credential_id, bot_id, new_position_data, raise_error=False):
+    #     bot = self.get_active_bot(credential_id, bot_id)
+    #     if not bot:
+    #         message = 'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id)
+    #         if raise_error:
+    #             raise CustomException(message)
+    #         else:
+    #             logger = my_get_logger()
+    #             logger.error(message)
+    #     else:
+    #         strategy_developer = FuturesStrategyCenter.get_strategy_developer(bot.strategy)
+    #
+    #         edited_data = []
+    #         new_signal_data = new_position_data.get('signal')
+    #         if new_signal_data:
+    #             new_steps_data = new_signal_data.get('steps')
+    #             setup_mode = new_signal_data.get('setup_mode', 'auto')
+    #             if new_steps_data:
+    #                 steps_was_edited = self._run_strategy_developer_command(
+    #                     bot,
+    #                     strategy_developer,
+    #                     'edit_steps',
+    #                     new_steps_data,
+    #                     setup_mode,
+    #                 )
+    #                 if steps_was_edited:
+    #                     edited_data.append('steps')
+    #
+    #             new_targets_data = new_signal_data.get('targets')
+    #             if new_targets_data:
+    #                 targets_was_edited = self._run_strategy_developer_command(
+    #                     bot,
+    #                     strategy_developer,
+    #                     'edit_targets',
+    #                     new_targets_data,
+    #                     setup_mode,
+    #                 )
+    #                 if targets_was_edited:
+    #                     edited_data.append('targets')
+    #
+    #             new_stoploss = new_signal_data.get('stoploss')
+    #             if new_stoploss:
+    #                 stoploss_was_edited = self._run_strategy_developer_command(
+    #                     bot,
+    #                     strategy_developer,
+    #                     'edit_stoploss',
+    #                     new_stoploss,
+    #                 )
+    #                 if stoploss_was_edited:
+    #                     edited_data.append('stoploss')
+    #
+    #         new_margin = new_position_data.get('margin')
+    #         if new_margin:
+    #             margin_was_edited = self._run_strategy_developer_command(
+    #                 bot,
+    #                 strategy_developer,
+    #                 'edit_margin',
+    #                 new_margin
+    #             )
+    #             if margin_was_edited:
+    #                 edited_data.append('margin')
+    #
+    #         return bot.position, edited_data
+    #
+    # def pause_bot(self, credential_id, bot_id):
+    #     bot = self.get_active_bot(credential_id, bot_id)
+    #     if not bot:
+    #         raise CustomException(
+    #             'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
+    #
+    #     if bot.status == FuturesBot.Status.PAUSED.value:
+    #         raise CustomException('bot with id {} is already paused!'.format(bot_id))
+    #
+    #     if bot.status == FuturesBot.Status.RUNNING.value:
+    #         price_ticker = self._price_tickers[bot.position.signal.symbol]
+    #         price_ticker.unsubscribe_bot(bot.id)
+    #
+    #         bot.status = FuturesBot.Status.PAUSED.value
+    #         bot.save()
+    #         return bot
+    #
+    # def start_bot(self, credential_id, bot_id):
+    #     bot = self.get_active_bot(credential_id, bot_id)
+    #     if not bot:
+    #         raise CustomException(
+    #             'No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))
+    #
+    #     if bot.status == FuturesBot.Status.RUNNING.value:
+    #         raise CustomException('bot with id {} is already running!'.format(bot_id))
+    #
+    #     if bot.status == FuturesBot.Status.PAUSED.value:
+    #         bot.status = FuturesBot.Status.RUNNING.value
+    #         bot.save()
+    #         return bot
 
     def stop_bot(self, credential_id, bot_id):
-        bot = self.get_active_bot(credential_id, bot_id)
+        bot = self.get_bot(credential_id, bot_id)
         if not bot:
             logger = my_get_logger()
             logger.error('No active bot with id {} was found for credential_id {}'.format(bot_id, credential_id))

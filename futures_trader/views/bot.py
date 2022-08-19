@@ -1,11 +1,14 @@
 import json
+from urllib.parse import urlencode
+
 from django_filters.views import FilterView
 from django_tables2.views import SingleTableMixin
+from django.shortcuts import reverse, render, redirect
 from rest_framework import renderers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django_filters.views import FilterView
-from django_tables2.views import SingleTableMixin
+
 
 from ..services import FuturesBotTrader
 from ..serializers import FuturesBotSerializer
@@ -48,6 +51,15 @@ class FuturesBotListView(SingleTableMixin, FilterView):
     table_class = FuturesBotTable
     filterset_class = FuturesBotFilter
     template_name = 'base/filter_table.html'
+
+
+class FuturesBotActionView(APIView):
+    def post(self, request, bot_id):
+        data = request.data
+        action = data.get('action')
+        if action == 'stop':
+            FuturesBotTrader.stop_bot('kucoin_main', bot_id)
+        return redirect(reverse('futures_trader:futures_bot_list') + '?' + urlencode(request.query_params))
 
 
 class FuturesBotDetailView(APIView):

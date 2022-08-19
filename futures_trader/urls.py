@@ -13,6 +13,10 @@ urlpatterns = [
          views.FuturesBotListView.as_view(),
          name='futures_bot_list'),
 
+    path('bot-action/<slug:bot_id>',
+         views.FuturesBotActionView.as_view(),
+         name='futures_bot_action'),
+
     path('signal-list/',
          views.FuturesSignalListView.as_view(),
          name='futures_signal_list'),
