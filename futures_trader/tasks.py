@@ -45,7 +45,7 @@ def auto_trader_per_symbol(symbol):
                                               n=20)
     macd, prev_macd = TechnicalAnalyser.get_macd(symbol)
     bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol, timeframe='1h', n=20)
-    close = PublicClient.fetch_ticker(symbol)
+    close = PublicClient().fetch_ticker(symbol)
     confirmations = []
     is_signal = False
 
