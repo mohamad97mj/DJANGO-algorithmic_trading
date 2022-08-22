@@ -1,6 +1,6 @@
 {% if record.status == 'waiting' %}
     <form class="form-inline"
-          action="{% url 'futures_trader:futures_signal_action' record.id %}?symbol={{ request.GET.symbol }}&status={{ request.GET.status }}&from_date={{ request.GET.from_data }}&from_time={{ request.GET.from_time }}&to_date={{ request.GET.to_date }}&to_time={{ request.GET.to_time }}"
+          action="{% url 'futures_trader:futures_signal_action' record.id %}?symbol={{ request.GET.symbol }}&status={{ request.GET.status }}&from_date={{ request.GET.from_date }}&from_time={{ request.GET.from_time }}&to_date={{ request.GET.to_date }}&to_time={{ request.GET.to_time }}"
           method="post">
         <input type="hidden" name="action" value="reject"/>
         <button type="submit" class="btn btn-danger btn-sm">reject</button>
@@ -10,7 +10,7 @@
     </form>
 {% elif record.status == 'rejected' %}
     <form class="form-inline"
-          action="{% url 'futures_trader:futures_signal_action' record.id %}?symbol={{ request.GET.symbol }}&status={{ request.GET.status }}&from_date={{ request.GET.from_data }}&from_time={{ request.GET.from_time }}&to_date={{ request.GET.to_date }}&to_time={{ request.GET.to_time }}"
+          action="{% url 'futures_trader:futures_signal_action' record.id %}?symbol={{ request.GET.symbol }}&status={{ request.GET.status }}&from_date={{ request.GET.from_date }}&from_time={{ request.GET.from_time }}&to_date={{ request.GET.to_date }}&to_time={{ request.GET.to_time }}"
           method="post">
         <input type="hidden" name="action" value="unreject"/>
         <button type="submit" class="btn btn-secondary btn-sm">unreject</button>
