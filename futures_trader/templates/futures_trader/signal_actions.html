@@ -30,7 +30,7 @@
             </div>
             <div class="modal-body">
                 <form method="post"
-                      action="{% url 'futures_trader:futures_signal_action' record.id %}?symbol={{ request.GET.symbol }}&status={{ request.GET.status }}&from_date={{ request.GET.from_data }}&from_time={{ request.GET.from_time }}&to_date={{ request.GET.to_date }}&to_time={{ request.GET.to_time }}">
+                      action="{% url 'futures_trader:futures_signal_action' record.id %}?symbol={{ request.GET.symbol }}&status={{ request.GET.status }}&from_date={{ request.GET.from_date }}&from_time={{ request.GET.from_time }}&to_date={{ request.GET.to_date }}&to_time={{ request.GET.to_time }}">
                     <input type="hidden" name="action" value="confirm"/>
                     <label>
                         Target 1

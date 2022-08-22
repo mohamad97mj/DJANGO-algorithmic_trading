@@ -62,4 +62,6 @@ class FuturesSignalActionView(APIView):
             signal.status = 'confirmed'
             signal.save()
 
+        x = request.query_params
+        y = urlencode(x)
         return redirect(reverse('futures_trader:futures_signal_list') + '?' + urlencode(request.query_params))
