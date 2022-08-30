@@ -72,7 +72,7 @@ def auto_trader_per_symbol(symbol):
             confirmations.append('Bollinger Bands')
         if macd < 0 and prev_macd < 0:
             confirmations.append('Trend')
-    if is_signal:
+    if len(confirmations) == 3:
         signal_data = {'symbol': symbol,
                        'side': side,
                        'confirmations': confirmations}
