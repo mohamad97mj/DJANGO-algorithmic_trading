@@ -24,7 +24,7 @@ def read_strategy_data():
         ohlcv_list = literal_eval(ohlcvs)
         ccis = TechnicalAnalyser.get_ccis(symbol=symbol, timeframe='1h', n=20, ohlcvs=ohlcv_list)[:-1]
         bb = TechnicalAnalyser.get_bollinger_bands(symbol=symbol, timeframe='1h', n=20, ohlcvs=ohlcv_list)[:-1]
-        macd = one2four(TechnicalAnalyser.get_macds(symbol=symbol, timeframe='4h', limit=250))[:-1]
+        macd = one2four(TechnicalAnalyser.get_macds(symbol=symbol, timeframe='4h', limit=180))[:-1]
         ohlcvs_filtered = [[datetime.fromtimestamp(int(ohlcv[0]) / 1000), ohlcv[2], ohlcv[3], ohlcv[4]]
                            for ohlcv in ohlcv_list[:-1]]
         for i in range(len(ohlcvs_filtered)):
@@ -210,9 +210,9 @@ def run2():
                         sign = -1
                         risk = (bb_u - close) / close
                         reward = (close - bb_d) / close
-                    tp1 = close * (1 + 1.25 * sign * risk)
-                    tp2 = close * (1 + 2.5 * sign * risk)
-                    stoploss = close * (1 - 0.75 * sign * risk)
+                    tp1 = close * (1 + 1 * sign * risk)
+                    tp2 = close * (1 + 2 * sign * risk)
+                    stoploss = close * (1 - 1 * sign * risk)
                     rr = risk / reward
                     if 0 < rr < 1 / 3:
                         open_position = Position(opened_at=date,

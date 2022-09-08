@@ -56,7 +56,7 @@ def auto_trader_per_symbol(symbol):
         risk = (close - bbd) / close
         reward = (bbu - close) / close
         rr = risk / reward
-        if 0 < rr < 1 / 3:
+        if 0 < rr < 1 / 2:
             confirmations.append('Bollinger Bands')
         if macd > 0 and prev_macd > 0:
             confirmations.append('Trend')
@@ -68,7 +68,7 @@ def auto_trader_per_symbol(symbol):
         risk = (bbu - close) / close
         reward = (close - bbd) / close
         rr = risk / reward
-        if 0 < rr < 1 / 3:
+        if 0 < rr < 1 / 2:
             confirmations.append('Bollinger Bands')
         if macd < 0 and prev_macd < 0:
             confirmations.append('Trend')
