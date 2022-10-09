@@ -61,7 +61,4 @@ class FuturesSignalActionView(APIView):
             FuturesBotTrader.create_bot(bot_data)
             signal.status = 'confirmed'
             signal.save()
-
-        x = request.query_params
-        y = urlencode(x)
         return redirect(reverse('futures_trader:futures_signal_list') + '?' + urlencode(request.query_params))

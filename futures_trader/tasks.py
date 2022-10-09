@@ -44,35 +44,32 @@ def auto_trader_per_symbol(symbol):
                                               timeframe='1h',
                                               n=20)
     macd, prev_macd = TechnicalAnalyser.get_macd(symbol)
-    bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol, timeframe='1h', n=20)
-    close = PublicClient().fetch_ticker(symbol)
+    # bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol, timeframe='1h', n=20)
+    # close = PublicClient().fetch_ticker(symbol)
     confirmations = []
-    is_signal = False
 
     if prev_cci < -100 < cci:
-        is_signal = True
         confirmations.append('CCI')
         side = 'buy'
-        risk = (close - bbd) / close
-        reward = (bbu - close) / close
-        rr = risk / reward
-        if 0 < rr < 1 / 2:
-            confirmations.append('Bollinger Bands')
-        if macd > 0 and prev_macd > 0:
+        # risk = (close - bbd) / close
+        # reward = (bbu - close) / close
+        # rr = risk / reward
+        # if 0 < rr < 1 / 2:
+        #     confirmations.append('Bollinger Bands')
+        if macd > 0:
             confirmations.append('Trend')
 
     elif prev_cci > 100 > cci:
-        is_signal = True
         confirmations.append('CCI')
         side = 'sell'
-        risk = (bbu - close) / close
-        reward = (close - bbd) / close
-        rr = risk / reward
-        if 0 < rr < 1 / 2:
-            confirmations.append('Bollinger Bands')
-        if macd < 0 and prev_macd < 0:
+        # risk = (bbu - close) / close
+        # reward = (close - bbd) / close
+        # rr = risk / reward
+        # if 0 < rr < 1 / 2:
+        #     confirmations.append('Bollinger Bands')
+        if macd < 0:
             confirmations.append('Trend')
-    if len(confirmations) == 3:
+    if len(confirmations) == 2:
         signal_data = {'symbol': symbol,
                        'side': side,
                        'confirmations': confirmations}

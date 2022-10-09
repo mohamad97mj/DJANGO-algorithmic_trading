@@ -133,7 +133,8 @@ def run():
                     tp2 = close * (1 + 2 * sign * risk)
                     stoploss = close * (1 - sign * risk)
                     rr = risk / reward
-                    if 0 < rr < 1 / 3:
+                    # if 0 < rr < 1 / 3:
+                    if True:
                         open_position = Position(opened_at=date,
                                                  macd=macd,
                                                  direction=direction,
