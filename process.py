@@ -23,7 +23,7 @@ def read_strategy_data():
         ohlcvs = f.readline()
         ohlcv_list = literal_eval(ohlcvs)
         ccis = TechnicalAnalyser.get_ccis(symbol=symbol, timeframe='1h', n=20, ohlcvs=ohlcv_list)[:-1]
-        bb = TechnicalAnalyser.get_bollinger_bands(symbol=symbol, timeframe='1h', n=20, ohlcvs=ohlcv_list)[:-1]
+        bb = one2four(TechnicalAnalyser.get_bollinger_bands(symbol=symbol, timeframe='4h', n=20, limit=180))[:-1]
         macd = one2four(TechnicalAnalyser.get_macds(symbol=symbol, timeframe='4h', limit=180))[:-1]
         ohlcvs_filtered = [[datetime.fromtimestamp(int(ohlcv[0]) / 1000), ohlcv[2], ohlcv[3], ohlcv[4]]
                            for ohlcv in ohlcv_list[:-1]]
@@ -81,7 +81,14 @@ def run():
                         open_position.closed_at = date
                         open_position = None
                     else:
-                        if high > open_position.tp2:
+                        if low < open_position.stoploss:
+                            if open_position.is_stoploss_trailed:
+                                open_position.status = 'tsl'
+                            else:
+                                open_position.status = 'sl'
+                            open_position.closed_at = date
+                            open_position = None
+                        elif high > open_position.tp2:
                             open_position.status = 'tp2'
                             open_position.closed_at = date
                             open_position = None
@@ -89,20 +96,20 @@ def run():
                             open_position.status = 'tp1'
                             open_position.stoploss = open_position.step
                             open_position.is_stoploss_trailed = True
-                        elif low < open_position.stoploss:
-                            if open_position.is_stoploss_trailed:
-                                open_position.status = 'tsl'
-                            else:
-                                open_position.status = 'sl'
-                            open_position.closed_at = date
-                            open_position = None
                 else:
                     if is_long:
                         open_position.status = 'c'
                         open_position.closed_at = date
                         open_position = None
                     else:
-                        if low < open_position.tp2:
+                        if high > open_position.stoploss:
+                            if open_position.is_stoploss_trailed:
+                                open_position.status = 'tsl'
+                            else:
+                                open_position.status = 'sl'
+                            open_position.closed_at = date
+                            open_position = None
+                        elif low < open_position.tp2:
                             open_position.status = 'tp2'
                             open_position.closed_at = date
                             open_position = None
@@ -110,13 +117,6 @@ def run():
                             open_position.status = 'tp1'
                             open_position.stoploss = open_position.step
                             open_position.is_stoploss_trailed = True
-                        elif high > open_position.stoploss:
-                            if open_position.is_stoploss_trailed:
-                                open_position.status = 'tsl'
-                            else:
-                                open_position.status = 'sl'
-                            open_position.closed_at = date
-                            open_position = None
             else:
                 if is_long or is_short:
                     if is_long:
@@ -124,17 +124,19 @@ def run():
                         sign = 1
                         risk = (close - bb_d) / close
                         reward = (bb_u - close) / close
+                        # is_consolidation = 100 * (bb_u - bb_d) / bb_d < 5
                     else:
                         direction = 'short'
                         sign = -1
                         risk = (bb_u - close) / close
                         reward = (close - bb_d) / close
-                    tp1 = close * (1 + 1 * sign * risk)
+                        # is_consolidation = 100 * (bb_u - bb_d) / bb_u < 5
+                    tp1 = close * (1 + 2 * sign * risk)
                     tp2 = close * (1 + 2 * sign * risk)
                     stoploss = close * (1 - sign * risk)
                     rr = risk / reward
-                    # if 0 < rr < 1 / 3:
-                    if True:
+                    if 0 < rr < 1 / 3:
+                    # if True:
                         open_position = Position(opened_at=date,
                                                  macd=macd,
                                                  direction=direction,
@@ -177,11 +179,11 @@ def run2():
                         open_position.closed_at = date
                         open_position = None
                     else:
-                        if high > open_position.tp2:
+                        if low < open_position.stoploss:
                             open_position.status = 'tp2'
                             open_position.closed_at = date
                             open_position = None
-                        elif low < open_position.stoploss:
+                        if high > open_position.tp2:
                             open_position.status = 'sl'
                             open_position.closed_at = date
                             open_position = None
@@ -191,12 +193,12 @@ def run2():
                         open_position.closed_at = date
                         open_position = None
                     else:
-                        if low < open_position.tp2:
-                            open_position.status = 'tp2'
+                        if high > open_position.stoploss:
+                            open_position.status = 'sl'
                             open_position.closed_at = date
                             open_position = None
-                        elif high > open_position.stoploss:
-                            open_position.status = 'sl'
+                        elif low < open_position.tp2:
+                            open_position.status = 'tp2'
                             open_position.closed_at = date
                             open_position = None
             else:

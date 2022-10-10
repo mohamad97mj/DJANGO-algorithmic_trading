@@ -44,36 +44,59 @@ def auto_trader_per_symbol(symbol):
                                               timeframe='1h',
                                               n=20)
     macd, prev_macd = TechnicalAnalyser.get_macd(symbol)
-    # bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol, timeframe='1h', n=20)
-    # close = PublicClient().fetch_ticker(symbol)
+    bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol, timeframe='4h', n=20)
+    close = PublicClient().fetch_ticker(symbol)
     confirmations = []
 
     if prev_cci < -100 < cci:
         confirmations.append('CCI')
         side = 'buy'
-        # risk = (close - bbd) / close
-        # reward = (bbu - close) / close
-        # rr = risk / reward
-        # if 0 < rr < 1 / 2:
-        #     confirmations.append('Bollinger Bands')
-        if macd > 0:
+        risk = (close - bbd) / close
+        stoploss = bbd
+        tp1 = tp2 = close * (1 + 2 * risk)
+        reward = (bbu - close) / close
+        rr = risk / reward
+        if 0 < rr < 1 / 3:
+            confirmations.append('Bollinger Bands')
+        if macd > 0 and prev_macd > 0:
             confirmations.append('Trend')
 
     elif prev_cci > 100 > cci:
         confirmations.append('CCI')
         side = 'sell'
-        # risk = (bbu - close) / close
-        # reward = (close - bbd) / close
-        # rr = risk / reward
-        # if 0 < rr < 1 / 2:
-        #     confirmations.append('Bollinger Bands')
-        if macd < 0:
+        stoploss = bbu
+        risk = (bbu - close) / close
+        tp1 = tp2 = close * (1 - 2 * risk)
+        reward = (close - bbd) / close
+        rr = risk / reward
+        if 0 < rr < 1 / 3:
+            confirmations.append('Bollinger Bands')
+        if macd < 0 and prev_macd < 0:
             confirmations.append('Trend')
-    if len(confirmations) == 2:
+    if len(confirmations) == 3:
+        leverage = min(int(10 / (100 * risk)), 20)
         signal_data = {'symbol': symbol,
                        'side': side,
-                       'confirmations': confirmations}
+                       'confirmations': confirmations,
+                       'leverage': leverage}
         FuturesSignal.objects.create(**signal_data)
+        signal_data = {'obj': signal,
+                       'steps': [{'entry_price': -1, }],
+                       'targets': [{'tp_price': tp1}, {'tp_price': tp2}],
+                       'stoploss': {'trigger_price': stoploss}}
+        position_data = {
+            'signal': signal_data,
+            'margin': 25,
+        }
+        bot_data = {
+            'exchange_id': 'kucoin',
+            'credential_id': 'kucoin_main',
+            'strategy': 'manual',
+            'position': position_data,
+        }
+        FuturesBotTrader.create_bot(bot_data)
+        signal.status = 'confirmed'
+        signal.save()
         return symbol
 
 
