@@ -56,7 +56,7 @@ def auto_trader_per_symbol(symbol):
         # tp1 = tp2 = close * (1 + 2 * risk)
         reward = (bbu - close) / close
         rr = risk / reward
-        if 0 < rr < 1 / 2:
+        if 0 < rr < 2:
             confirmations.append('Bollinger Bands')
         if macd > 0 and prev_macd > 0:
             confirmations.append('Trend')
@@ -69,7 +69,7 @@ def auto_trader_per_symbol(symbol):
         # tp1 = tp2 = close * (1 - 2 * risk)
         reward = (close - bbd) / close
         rr = risk / reward
-        if 0 < rr < 1 / 2:
+        if 0 < rr < 2:
             confirmations.append('Bollinger Bands')
         if macd < 0 and prev_macd < 0:
             confirmations.append('Trend')
