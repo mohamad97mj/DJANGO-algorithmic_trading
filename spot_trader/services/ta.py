@@ -13,9 +13,9 @@ pb = PublicClient()
 class TechnicalAnalyser:
 
     @staticmethod
-    def get_ccis(symbol, timeframe, n, ohlcvs=None):
+    def get_ccis(symbol, timeframe='1h', n=20, ohlcvs=None, limit=40):
         if not ohlcvs:
-            ohlcvs = pb.fetch_ohlcv(symbol, timeframe=timeframe)
+            ohlcvs = pb.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
         if ohlcvs:
             np_array = numpy.array(ohlcvs)
             open_prices = pandas.Series(np_array[:, 1])
@@ -36,8 +36,8 @@ class TechnicalAnalyser:
             return CCI_list
 
     @staticmethod
-    def get_cci(symbol, timeframe, n, ohlcvs=None):
-        ccis = TechnicalAnalyser.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs)
+    def get_cci(symbol, timeframe='1h', n=20, ohlcvs=None):
+        ccis = TechnicalAnalyser.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs, limit=n + 1)
         if ccis:
             return ccis[-1], ccis[-2]
         return None, None
@@ -74,7 +74,7 @@ class TechnicalAnalyser:
             return rsi_14
 
     @staticmethod
-    def get_bollinger_bands(symbol, timeframe, n, ohlcvs=None, limit=20):
+    def get_bollinger_bands(symbol, timeframe='4h', n=20, ohlcvs=None, limit=20):
         if not ohlcvs:
             ohlcvs = pb.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
         np_array = numpy.array(ohlcvs)
@@ -88,8 +88,8 @@ class TechnicalAnalyser:
         return band_array
 
     @staticmethod
-    def get_bollinger_band(symbol, timeframe, n):
-        bollinger_bands = TechnicalAnalyser.get_bollinger_bands(symbol, timeframe, n)
+    def get_bollinger_band(symbol, timeframe='4h', n=20, ohlcvs=None):
+        bollinger_bands = TechnicalAnalyser.get_bollinger_bands(symbol, timeframe, n, ohlcvs, limit=n + 1)
         return bollinger_bands[-1]
 
     @staticmethod
@@ -132,6 +132,6 @@ class TechnicalAnalyser:
             return macd.macd_diff().tolist()
 
     @staticmethod
-    def get_macd(symbol, timeframe='4h'):
-        macds = TechnicalAnalyser.get_macds(symbol, timeframe)
+    def get_macd(symbol, timeframe='4h', ohlcvs=None):
+        macds = TechnicalAnalyser.get_macds(symbol, timeframe, ohlcvs=ohlcvs)
         return macds[-1], macds[-2]

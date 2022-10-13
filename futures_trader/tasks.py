@@ -3,7 +3,7 @@ from celery import shared_task
 from spot_trader.services.ta import TechnicalAnalyser
 from fetch import symbols
 from futures_trader.services.external_signal_trader.auto_trader import create_client
-from futures_trader.clients import PrivateClient, PublicClient
+from futures_trader.clients import PrivateClient, PublicClient as FuturesPublicClient
 from futures_trader.services.trader import FuturesBotTrader
 from global_utils.my_logging import my_get_logger
 from global_utils.catch_all_exceptions import catch_all_exceptions
@@ -11,6 +11,9 @@ from time import sleep
 from global_utils import with2without_slash_f
 from futures_trader.models import FuturesBot, FuturesSignal
 from futures_trader.services.trader import bot_handler
+from spot_trader.clients import PublicClient as SpotPublicClient
+from candlestick import detect_patterns_in_two_previous_candles, has_long_candlestick_confirmation, \
+    has_short_candlestick_confirmation
 
 myclient = create_client()
 
@@ -40,12 +43,12 @@ def technical_auto_trade():
 
 @catch_all_exceptions()
 def auto_trader_per_symbol(symbol):
-    cci, prev_cci = TechnicalAnalyser.get_cci(symbol=symbol,
-                                              timeframe='1h',
-                                              n=20)
+    # spot_public_client = SpotPublicClient()
+    cci, prev_cci = TechnicalAnalyser.get_cci(symbol)
     macd, prev_macd = TechnicalAnalyser.get_macd(symbol)
-    bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol, timeframe='4h', n=20)
-    close = PublicClient().fetch_ticker(symbol)
+    bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol)
+    previous_candle_patterns, current_candle_patterns = detect_patterns_in_two_previous_candles(symbol)
+    close = FuturesPublicClient().fetch_ticker(symbol)
     confirmations = []
 
     if prev_cci < -100 < cci:
@@ -60,6 +63,8 @@ def auto_trader_per_symbol(symbol):
             confirmations.append('Bollinger Bands')
         if macd > 0 and prev_macd > 0:
             confirmations.append('Trend')
+        if has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
+            confirmations.append('Candlestick')
 
     elif prev_cci > 100 > cci:
         confirmations.append('CCI')
@@ -73,7 +78,10 @@ def auto_trader_per_symbol(symbol):
             confirmations.append('Bollinger Bands')
         if macd < 0 and prev_macd < 0:
             confirmations.append('Trend')
-    if len(confirmations) == 3:
+        if has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
+            confirmations.append('Candlestick')
+
+    if len(confirmations) == 4:
         # leverage = min(int(10 / (100 * risk)), 20)
         signal_data = {'symbol': symbol,
                        'side': side,

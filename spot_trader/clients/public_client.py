@@ -38,5 +38,5 @@ class PublicClient:
     def fetch_ticker(self, symbol='BTC/USDT'):
         return self._exchange.fetch_ticker(symbol=symbol)
 
-    def fetch_ohlcv(self, symbol='BTC/USDT', timeframe='1m', since=None, limit=60):
+    def fetch_ohlcv(self, symbol='BTC/USDT', timeframe='1h', since=None, limit=60):
         return self._exchange.fetch_ohlcv(symbol=symbol, timeframe=timeframe, since=since, limit=limit)

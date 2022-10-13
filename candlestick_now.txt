@@ -1,0 +1,242 @@
+{
+   "1INCH/USDT": [
+      {},
+      {}
+   ],
+   "AAVE/USDT": [
+      [
+         "2_BEARISH_CDL3OUTSIDE"
+      ],
+      {}
+   ],
+   "ADA/USDT": [
+      {},
+      {}
+   ],
+   "ALGO/USDT": [
+      {},
+      {}
+   ],
+   "APE/USDT": [
+      {},
+      [
+         "1_BULLISH_CDLMATCHINGLOW"
+      ]
+   ],
+   "ATOM/USDT": [
+      {},
+      {}
+   ],
+   "AVAX/USDT": [
+      {},
+      [
+         "1_BULLISH_CDLMATCHINGLOW"
+      ]
+   ],
+   "AXS/USDT": [
+      {},
+      {}
+   ],
+   "BAT/USDT": [
+      {},
+      {}
+   ],
+   "BCH/USDT": [
+      {},
+      {}
+   ],
+   "BNB/USDT": [
+      {},
+      {}
+   ],
+   "BTC/USDT": [
+      [
+         "2_BEARISH_CDL3OUTSIDE"
+      ],
+      {}
+   ],
+   "CELO/USDT": [
+      {},
+      {}
+   ],
+   "CHZ/USDT": [
+      {},
+      {}
+   ],
+   "COMP/USDT": [
+      {},
+      {}
+   ],
+   "CRO/USDT": [
+      {},
+      {}
+   ],
+   "CRV/USDT": [
+      {},
+      {}
+   ],
+   "DASH/USDT": [
+      {},
+      {}
+   ],
+   "DOGE/USDT": [
+      {},
+      {}
+   ],
+   "DOT/USDT": [
+      {},
+      {}
+   ],
+   "EGLD/USDT": [
+      {},
+      [
+         "1_BULLISH_CDLMATCHINGLOW"
+      ]
+   ],
+   "ENJ/USDT": [
+      {},
+      {}
+   ],
+   "EOS/USDT": [
+      {},
+      {}
+   ],
+   "ETC/USDT": [
+      {},
+      {}
+   ],
+   "ETH/USDT": [
+      [
+         "2_BEARISH_CDL3OUTSIDE"
+      ],
+      {}
+   ],
+   "FIL/USDT": [
+      {},
+      {}
+   ],
+   "FLOW/USDT": [
+      {},
+      [
+         "1_BULLISH_CDLMATCHINGLOW"
+      ]
+   ],
+   "FTM/USDT": [
+      {},
+      {}
+   ],
+   "GRT/USDT": [
+      {},
+      {}
+   ],
+   "HBAR/USDT": [
+      {},
+      {}
+   ],
+   "ICP/USDT": [
+      {},
+      {}
+   ],
+   "KSM/USDT": [
+      {},
+      {}
+   ],
+   "LINK/USDT": [
+      {},
+      [
+         "1_BULLISH_CDLMATCHINGLOW"
+      ]
+   ],
+   "LRC/USDT": [
+      {},
+      {}
+   ],
+   "LTC/USDT": [
+      {},
+      {}
+   ],
+   "LUNA/USDT": [
+      {},
+      {}
+   ],
+   "MANA/USDT": [
+      {},
+      [
+         "1_BULLISH_CDLMATCHINGLOW"
+      ]
+   ],
+   "MATIC/USDT": [
+      [
+         "1_BULLISH_CDLMATCHINGLOW"
+      ],
+      {}
+   ],
+   "MKR/USDT": [
+      {},
+      {}
+   ],
+   "NEAR/USDT": [
+      {},
+      {}
+   ],
+   "NEO/USDT": [
+      {},
+      [
+         "1_BULLISH_CDLMATCHINGLOW"
+      ]
+   ],
+   "ONE/USDT": [
+      {},
+      {}
+   ],
+   "ROSE/USDT": [
+      {},
+      {}
+   ],
+   "SAND/USDT": [
+      {},
+      [
+         "1_BULLISH_CDLMATCHINGLOW"
+      ]
+   ],
+   "SOL/USDT": [
+      {},
+      {}
+   ],
+   "SUSHI/USDT": [
+      {},
+      {}
+   ],
+   "THETA/USDT": [
+      {},
+      {}
+   ],
+   "TRX/USDT": [
+      {},
+      {}
+   ],
+   "UNI/USDT": [
+      {},
+      {}
+   ],
+   "VET/USDT": [
+      {},
+      [
+         "1_BULLISH_CDLMATCHINGLOW"
+      ]
+   ],
+   "WAVES/USDT": [
+      [
+         "2_BEARISH_CDL3OUTSIDE"
+      ],
+      {}
+   ],
+   "XLM/USDT": [
+      {},
+      {}
+   ],
+   "ZEC/USDT": [
+      {},
+      {}
+   ]
+}

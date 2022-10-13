@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from fetch import symbols
 from ast import literal_eval
@@ -6,6 +7,7 @@ from spot_trader.services.ta import TechnicalAnalyser
 from global_utils import utc2local
 from pprint import pprint
 from spot_trader.clients import PublicClient
+from candlestick import detect_patterns, has_long_candlestick_confirmation, has_short_candlestick_confirmation
 
 
 def one2four(arr, last_datetime: datetime):
@@ -72,6 +74,9 @@ class Position:
 
 def run():
     positions = {}
+    detect_patterns()
+    f = open('candlestick.txt')
+    candle_patterns = json.load(f)
     records = read_strategy_data()
     for symbol in symbols:
         positions[symbol] = []
@@ -79,6 +84,11 @@ def run():
         for i in range(179, len(records[symbol])):
             record = records[symbol][i]
             date = record[0]
+            date_str = date.strftime("%m/%d/%Y, %H:%M:%S")
+            current_candle_patterns = candle_patterns[symbol].get(date_str, [])
+            last_date = records[symbol][i - 1][0]
+            last_date_str = last_date.strftime("%m/%d/%Y, %H:%M:%S")
+            last_candle_patterns = candle_patterns[symbol].get(last_date_str, [])
             high = record[1]
             low = record[2]
             close = record[3]
@@ -86,6 +96,7 @@ def run():
             bb_d = record[5]
             bb_u = record[6]
             macd = record[7]
+
             prv_cci = records[symbol][i - 1][4]
             if not (bb_d and macd and prv_cci):
                 continue
@@ -93,9 +104,11 @@ def run():
             is_long = prv_cci < -100 < cci and macd > 0
             is_short = prv_cci > 100 > cci and macd < 0
 
+            open_new_position = not open_position
             if open_position:
                 if open_position.direction == 'long':
                     if is_short:
+                        open_new_position = True
                         open_position.status = 'c'
                         open_position.closed_at = date
                         open_position = None
@@ -117,6 +130,7 @@ def run():
                             open_position.is_stoploss_trailed = True
                 else:
                     if is_long:
+                        open_new_position = True
                         open_position.status = 'c'
                         open_position.closed_at = date
                         open_position = None
@@ -136,7 +150,7 @@ def run():
                             open_position.status = 'tp1'
                             open_position.stoploss = open_position.step
                             open_position.is_stoploss_trailed = True
-            else:
+            if open_new_position:
                 if is_long or is_short:
                     if is_long:
                         direction = 'long'
@@ -154,7 +168,10 @@ def run():
                     tp2 = close * (1 + 2 * sign * risk)
                     stoploss = close * (1 - sign * risk)
                     rr = risk / reward
-                    if 0 < rr < 2:
+                    if 0 < rr < 2 and ((is_long and has_long_candlestick_confirmation(last_candle_patterns,
+                                                                                      current_candle_patterns)) or
+                                       (is_short and has_short_candlestick_confirmation(last_candle_patterns,
+                                                                                        current_candle_patterns))):
                         # if True:
                         open_position = Position(opened_at=date,
                                                  macd=macd,
@@ -191,10 +208,12 @@ def run2():
             is_long = prv_cci < -100 < cci and macd > 0
             is_short = prv_cci > 100 > cci and macd < 0
 
+            open_new_position = not open_position
             if open_position:
                 if open_position.direction == 'long':
                     if is_short:
                         open_position.status = 'c'
+                        open_new_position = True
                         open_position.closed_at = date
                         open_position = None
                     else:
@@ -209,6 +228,7 @@ def run2():
                 else:
                     if is_long:
                         open_position.status = 'c'
+                        open_new_position = True
                         open_position.closed_at = date
                         open_position = None
                     else:
@@ -220,7 +240,7 @@ def run2():
                             open_position.status = 'tp2'
                             open_position.closed_at = date
                             open_position = None
-            else:
+            if open_new_position:
                 if is_long or is_short:
                     if is_long:
                         direction = 'long'
