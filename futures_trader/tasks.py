@@ -51,7 +51,7 @@ def auto_trader_per_symbol(symbol):
     close = FuturesPublicClient().fetch_ticker(symbol)
     confirmations = []
 
-    if prev_cci < -100 < cci:
+    if prev_cci < -100:
         confirmations.append('CCI')
         side = 'buy'
         risk = (close - bbd) / close
@@ -66,7 +66,7 @@ def auto_trader_per_symbol(symbol):
         if has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
             confirmations.append('Candlestick')
 
-    elif prev_cci > 100 > cci:
+    elif prev_cci > 100:
         confirmations.append('CCI')
         side = 'sell'
         risk = (bbu - close) / close
