@@ -36,9 +36,8 @@ def technical_auto_trade():
     for symbol in symbols:
         result, data_log = auto_trader_per_symbol(symbol)
         if result:
-            appropriate_symbols.append(result)
+            appropriate_symbols.append(symbol)
         notify_in_telegram(data_log, 'My logs')
-        sleep(1)
 
     message = 'appropriate symbols:{}\n'.format(appropriate_symbols)
     notify_in_telegram(message, 'My alarms')
