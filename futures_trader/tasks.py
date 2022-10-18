@@ -31,7 +31,7 @@ def technical_auto_trade():
         myclient = create_client()
     appropriate_symbols = []
     data_logs = ''
-    for symbol in symbols[:3]:
+    for symbol in symbols:
         result, data_log = auto_trader_per_symbol(symbol)
         if result:
             appropriate_symbols.append(result)
