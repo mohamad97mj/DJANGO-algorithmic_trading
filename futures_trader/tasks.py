@@ -30,17 +30,15 @@ def technical_auto_trade():
     if not myclient:
         myclient = create_client()
     appropriate_symbols = []
-    data_logs = ''
     for symbol in symbols:
         result, data_log = auto_trader_per_symbol(symbol)
         if result:
             appropriate_symbols.append(result)
-        data_logs += data_log
+        notify_in_telegram(data_log, 'My logs')
         sleep(1)
 
     message = 'appropriate symbols:{}\n'.format(appropriate_symbols)
     notify_in_telegram(message, 'My alarms')
-    notify_in_telegram(data_logs, 'My logs')
     gc.collect()
 
 
@@ -48,19 +46,17 @@ def technical_auto_trade():
 def auto_trader_per_symbol(symbol):
     logger = my_get_logger()
     # spot_public_client = SpotPublicClient()
-    data_log = '''
-        .....................................................................
-        symbol: {},
-        prev_cci: {},
-        cci: {},
-        prev_macd: {},
-        macd: {},
-        bbd: {},
-        bbu: {},
-        rr: {},
-        previous_candle_patterns: {},
-        current_candle_patterns: {},
-        confirmations: {}'''
+    data_log = '''symbol: {},
+prev_cci: {},
+cci: {},
+prev_macd: {},
+macd: {},
+bbd: {},
+bbu: {},
+rr: {},
+previous_candle_patterns: {},
+current_candle_patterns: {},
+confirmations: {}'''
     cci, prev_cci = TechnicalAnalyser.get_cci(symbol)
     macd, prev_macd = TechnicalAnalyser.get_macd(symbol)
     bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol)
