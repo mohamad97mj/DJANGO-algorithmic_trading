@@ -1,4 +1,5 @@
 import gc
+import datetime
 from celery import shared_task
 from spot_trader.services.ta import TechnicalAnalyser
 from fetch import symbols
@@ -29,6 +30,8 @@ def technical_auto_trade():
     global myclient
     if not myclient:
         myclient = create_client()
+    datetime_str = datetime.datetime.now().strftime("%Y/%m/%d, %H") + ':30'
+    notify_in_telegram(datetime_str, 'My logs')
     appropriate_symbols = []
     for symbol in symbols:
         result, data_log = auto_trader_per_symbol(symbol)
