@@ -6,3 +6,5 @@ from .step import FuturesStep
 from .bot import FuturesBot
 from .target import FuturesTarget
 from .stoploss import FuturesStoploss
+from .trade_zone import FuturesFlatSupportTradeZone, FuturesFlatResistanceTradeZone, \
+    FuturesInclineSupportTradeZone, FuturesInclineResistanceTradeZone

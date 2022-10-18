@@ -2,3 +2,4 @@ from .bot import FuturesBotsView, FuturesBotDetailView, FuturesBotListView, Futu
 from .signal import FuturesSignalListView, FuturesSignalActionView
 from .position import FuturesPositionView
 from .monitor import FuturesRiskyBotsView, FuturesPriceMonitorView
+from .trade_zone import FuturesTradeZoneCreateView

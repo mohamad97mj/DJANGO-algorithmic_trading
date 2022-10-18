@@ -56,3 +56,5 @@ pyparsing~=3.0.7
 pycparser~=2.21
 wrapt~=1.14.0
 plotly
+
+django-bootstrap-datepicker-plus

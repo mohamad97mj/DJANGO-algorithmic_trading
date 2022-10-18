@@ -1,4 +1,8 @@
+import datetime
+
 from futures_trader.services.bot_handler import FuturesBotHandler
+from futures_trader.models.trade_zone import FuturesInclineSupportTradeZone, FuturesInclineResistanceTradeZone, \
+    FuturesFlatSupportTradeZone, FuturesFlatResistanceTradeZone
 from global_utils.custom_exception import CustomException
 
 bot_handler = FuturesBotHandler()
@@ -56,3 +60,32 @@ class FuturesBotTrader:
                 bot_id = bot_handler.find_active_bot_id_by_symbol(credential_id, symbol)
         if bot_id:
             return bot_handler.stop_bot(credential_id, bot_id)
+
+    @staticmethod
+    def create_trade_zone(symbol, slope_type, level_type, point1_stoploss, point1_date, point1_time, point1_price,
+                          point2_date=None, point2_time=None, point2_price=None):
+        tz_class = {
+            'FlatSupport': FuturesFlatSupportTradeZone,
+            'FlatResistance': FuturesFlatResistanceTradeZone,
+            'InclineSupport': FuturesInclineResistanceTradeZone,
+            'InclineResistance': FuturesInclineResistanceTradeZone,
+        }[slope_type + level_type]
+        kwargs = {}
+        if slope_type == 'Incline':
+            kwargs['point2_datetime'] = datetime.datetime(year=point2_date.year,
+                                                          month=point2_date.month,
+                                                          day=point2_date.day,
+                                                          hour=point2_time.hour,
+                                                          minute=point2_time.minute,
+                                                          second=point2_time.second)
+            kwargs['point2_price'] = point2_price
+        tz_class.objects.create(symbol=symbol,
+                                point1_stoploss=point1_stoploss,
+                                point1_datetime=datetime.datetime(year=point1_date.year,
+                                                                  month=point1_date.month,
+                                                                  day=point1_date.day,
+                                                                  hour=point1_time.hour,
+                                                                  minute=point1_time.minute,
+                                                                  second=point1_time.second),
+                                point1_price=point1_price,
+                                **kwargs)

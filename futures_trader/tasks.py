@@ -18,9 +18,9 @@ from candlestick import detect_patterns_in_two_previous_candles, has_long_candle
 myclient = create_client()
 
 
-def notify_in_telegram(message):
+def notify_in_telegram(message, entity):
     myclient.get_dialogs()
-    entity = myclient.get_entity('My alarms')
+    entity = myclient.get_entity(entity)
     myclient.send_message(entity, message)
 
 
@@ -30,20 +30,37 @@ def technical_auto_trade():
     if not myclient:
         myclient = create_client()
     appropriate_symbols = []
-    for symbol in symbols:
-        result = auto_trader_per_symbol(symbol)
+    data_logs = ''
+    for symbol in symbols[:3]:
+        result, data_log = auto_trader_per_symbol(symbol)
         if result:
             appropriate_symbols.append(result)
+        data_logs += data_log
         sleep(1)
 
     message = 'appropriate symbols:{}\n'.format(appropriate_symbols)
-    notify_in_telegram(message)
+    notify_in_telegram(message, 'My alarms')
+    notify_in_telegram(data_logs, 'My logs')
     gc.collect()
 
 
 @catch_all_exceptions()
 def auto_trader_per_symbol(symbol):
+    logger = my_get_logger()
     # spot_public_client = SpotPublicClient()
+    data_log = '''
+        .....................................................................
+        symbol: {},
+        prev_cci: {},
+        cci: {},
+        prev_macd: {},
+        macd: {},
+        bbd: {},
+        bbu: {},
+        rr: {},
+        previous_candle_patterns: {},
+        current_candle_patterns: {},
+        confirmations: {}'''
     cci, prev_cci = TechnicalAnalyser.get_cci(symbol)
     macd, prev_macd = TechnicalAnalyser.get_macd(symbol)
     bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol)
@@ -51,7 +68,8 @@ def auto_trader_per_symbol(symbol):
     close = FuturesPublicClient().fetch_ticker(symbol)
     confirmations = []
 
-    if prev_cci < -100:
+    rr = None
+    if prev_cci < -100 < cci:
         confirmations.append('CCI')
         side = 'buy'
         risk = (close - bbd) / close
@@ -66,7 +84,7 @@ def auto_trader_per_symbol(symbol):
         if has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
             confirmations.append('Candlestick')
 
-    elif prev_cci > 100:
+    elif prev_cci > 100 > cci:
         confirmations.append('CCI')
         side = 'sell'
         risk = (bbu - close) / close
@@ -80,6 +98,21 @@ def auto_trader_per_symbol(symbol):
             confirmations.append('Trend')
         if has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
             confirmations.append('Candlestick')
+    data_log = data_log.format(
+        symbol,
+        prev_cci,
+        cci,
+        prev_macd,
+        macd,
+        bbd,
+        bbu,
+        rr,
+        str(previous_candle_patterns),
+        str(current_candle_patterns),
+        str(confirmations),
+    )
+
+    logger.debug(data_log)
 
     if len(confirmations) == 4:
         # leverage = min(int(10 / (100 * risk)), 20)
@@ -104,7 +137,8 @@ def auto_trader_per_symbol(symbol):
         # FuturesBotTrader.create_bot(bot_data)
         # signal.status = 'confirmed'
         # signal.save()
-        return symbol
+        return True, data_log
+    return False, data_log
 
 
 @shared_task

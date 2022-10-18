@@ -23,11 +23,11 @@ BASE_DIR = Path(__file__).parents[2]
 SECRET_KEY = 'django-insecure-&twsc&-tp#2)*5z4-dr@k-3&daw9qd^4jcca+kgdn32&n60+#x'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 DEV = False
 
-ALLOWED_HOSTS = ['*', '185.110.188.188']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -40,7 +40,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'bootstrap5',
+    # 'bootstrap4',
+    # 'bootstrap_datepicker_plus',
     'django_tables2',
+    'widget_tweaks',
     'base',
     'spot_trader',
     'futures_trader',

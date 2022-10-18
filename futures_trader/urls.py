@@ -9,6 +9,10 @@ urlpatterns = [
          views.FuturesBotsView.as_view(),
          name='futures_bots'),
 
+    path('trade-zone-create/',
+         views.FuturesTradeZoneCreateView.as_view(),
+         name='futures_trade_zone_create'),
+
     path('bot-list/',
          views.FuturesBotListView.as_view(),
          name='futures_bot_list'),

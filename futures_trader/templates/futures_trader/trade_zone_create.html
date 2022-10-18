@@ -1,0 +1,25 @@
+{% extends 'base/base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<form class="" method="post">
+    {% csrf_token %}
+
+    {% for hidden in trade_zone_create_form.hidden_fields %}
+        {{ hidden }}
+    {% endfor %}
+
+    {% for field in trade_zone_create_form.visible_fields %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field|add_class:'form-control' }}
+            <span class="" id="{{ field.auto_id }}_help_text">{{ field.help_text }}</span>
+            {% for error in field.errors %}
+                <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-success mt-1">create</button>
+</form>
+
+{% endblock content %}
