@@ -9,6 +9,8 @@ class FuturesSignal(models.Model):
     # signal_id = models.CharField(max_length=100, unique=True)
 
     class Status(models.TextChoices):
+        WATCHING = 'watching'
+        UNWATCHED = 'unwatched'
         WAITING = 'waiting'
         CONFIRMED = 'confirmed'
         REJECTED = 'rejected'

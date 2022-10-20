@@ -8,7 +8,7 @@ class FuturesTradeZone(models.Model):
     point1_stoploss = models.FloatField()
     point1_datetime = models.DateTimeField()
     point1_price = models.FloatField()
-    is_valid = models.BooleanField()
+    is_valid = models.BooleanField(default=True)
 
     # point1_upper_price = models.FloatField()
     # point1_lower_price = models.FloatField()

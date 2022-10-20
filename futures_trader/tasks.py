@@ -49,94 +49,148 @@ def auto_trader_per_symbol(symbol):
     logger = my_get_logger()
     # spot_public_client = SpotPublicClient()
     data_log = '''symbol: {},
-prev_cci: {},
+prev cci: {},
 cci: {},
-prev_macd: {},
+prev macd: {},
 macd: {},
+previous candle patterns: {},
+current candle patterns: {},
 bbd: {},
 bbu: {},
 rr: {},
-previous_candle_patterns: {},
-current_candle_patterns: {},
 confirmations: {}'''
     cci, prev_cci = TechnicalAnalyser.get_cci(symbol)
     macd, prev_macd = TechnicalAnalyser.get_macd(symbol)
     bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol)
     previous_candle_patterns, current_candle_patterns = detect_patterns_in_two_previous_candles(symbol)
     close = FuturesPublicClient().fetch_ticker(symbol)
-    confirmations = []
 
-    rr = None
-    if prev_cci < -100 < cci:
-        confirmations.append('CCI')
-        side = 'buy'
-        risk = (close - bbd) / close
-        # stoploss = bbd
-        # tp1 = tp2 = close * (1 + 2 * risk)
-        reward = (bbu - close) / close
-        rr = risk / reward
-        if 0 < rr < 2:
-            confirmations.append('Bollinger Bands')
-        if macd > 0 and prev_macd > 0:
-            confirmations.append('Trend')
-        if has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
-            confirmations.append('Candlestick')
-
-    elif prev_cci > 100 > cci:
-        confirmations.append('CCI')
-        side = 'sell'
-        risk = (bbu - close) / close
-        # stoploss = bbu
-        # tp1 = tp2 = close * (1 - 2 * risk)
-        reward = (close - bbd) / close
-        rr = risk / reward
-        if 0 < rr < 2:
-            confirmations.append('Bollinger Bands')
-        if macd < 0 and prev_macd < 0:
-            confirmations.append('Trend')
-        if has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
-            confirmations.append('Candlestick')
     data_log = data_log.format(
         symbol,
         prev_cci,
         cci,
         prev_macd,
         macd,
-        bbd,
-        bbu,
-        rr,
         str(previous_candle_patterns),
         str(current_candle_patterns),
-        str(confirmations),
+        bbd,
+        bbu,
+        '{}',
+        '{}',
     )
 
-    logger.debug(data_log)
+    rr = None
+    confirmations = None
 
-    if len(confirmations) == 4:
-        # leverage = min(int(10 / (100 * risk)), 20)
-        signal_data = {'symbol': symbol,
-                       'side': side,
-                       'confirmations': confirmations}
-        FuturesSignal.objects.create(**signal_data)
-        # signal_data = {'obj': signal,
-        #                'steps': [{'entry_price': -1, }],
-        #                'targets': [{'tp_price': tp1}, {'tp_price': tp2}],
-        #                'stoploss': {'trigger_price': stoploss}}
-        # position_data = {
-        #     'signal': signal_data,
-        #     'margin': 25,
-        # }
-        # bot_data = {
-        #     'exchange_id': 'kucoin',
-        #     'credential_id': 'kucoin_main',
-        #     'strategy': 'manual',
-        #     'position': position_data,
-        # }
-        # FuturesBotTrader.create_bot(bot_data)
-        # signal.status = 'confirmed'
-        # signal.save()
-        return True, data_log
-    return False, data_log
+    watching_signal = FuturesSignal.objects.filter(symbol=symbol, status=FuturesSignal.Status.WATCHING.value).first()
+    if watching_signal:
+        if cci < -100 or cci > 100:
+            watching_signal.status = FuturesSignal.Status.UNWATCHED.value
+            watching_signal.save()
+            data_log.format(rr, confirmations)
+            data_log += '\nsignal watching status: {}'.format('unwatched')
+            return False, data_log
+        else:
+            if cci > -100:
+                risk = (close - bbd) / close
+                reward = (bbu - close) / close
+                rr = risk / reward
+                if macd > 0 and prev_macd > 0 and 0 < rr < 2 and has_long_candlestick_confirmation(
+                        previous_candle_patterns, current_candle_patterns):
+                    watching_signal.status = FuturesSignal.Status.WATCHING.value
+                    watching_signal.confirmations.append('Candlestick')
+                    watching_signal.save()
+                    data_log.format(rr, str(watching_signal.confirmations))
+                    data_log += '\nsignal watching status: {}'.format('waiting')
+                    return True, data_log
+                else:
+                    data_log.format(rr, confirmations)
+                    return False, data_log
+            else:
+                risk = (bbu - close) / close
+                reward = (close - bbd) / close
+                rr = risk / reward
+                if macd < 0 and prev_macd < 0 and 0 < rr < 2 and has_short_candlestick_confirmation(
+                        previous_candle_patterns, current_candle_patterns):
+                    watching_signal.status = FuturesSignal.Status.WATCHING.value
+                    watching_signal.confirmations.append('Candlestick')
+                    watching_signal.save()
+                    data_log.format(rr, str(watching_signal.confirmations))
+                    data_log += '\nsignal watching status: {}'.format('waiting')
+                    return True, data_log
+                else:
+                    data_log.format(rr, confirmations)
+                    return False, data_log
+
+    else:
+        if prev_cci < -100 < cci:
+            confirmations = ['CCI']
+            side = 'buy'
+            if macd > 0 and prev_macd > 0:
+                confirmations.append('Trend')
+            risk = (close - bbd) / close
+            reward = (bbu - close) / close
+            rr = risk / reward
+            if 0 < rr < 2:
+                confirmations.append('Bollinger Bands')
+            if has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
+                confirmations.append('Candlestick')
+            data_log = data_log.format(
+                rr,
+                str(confirmations),
+            )
+
+        elif prev_cci > 100 > cci:
+            confirmations = ['CCI']
+            side = 'sell'
+            if macd < 0 and prev_macd < 0:
+                confirmations.append('Trend')
+            risk = (bbu - close) / close
+            reward = (close - bbd) / close
+            rr = risk / reward
+            if 0 < rr < 2:
+                confirmations.append('Bollinger Bands')
+            if has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
+                confirmations.append('Candlestick')
+            data_log = data_log.format(
+                rr,
+                str(confirmations),
+            )
+
+        data_log = data_log.format(rr, confirmations)
+        logger.debug(data_log)
+
+        if confirmations and all(c in confirmations for c in ['CCI', 'Trend', 'Bollinger Bands']):
+            # leverage = min(int(10 / (100 * risk)), 20)
+            signal_data = {'symbol': symbol,
+                           'side': side,
+                           'confirmations': confirmations}
+            if 'Candlestick' in confirmations:
+                FuturesSignal.objects.create(**signal_data)
+                return True, data_log
+            else:
+                signal_data['status'] = FuturesSignal.Status.WATCHING.value
+                FuturesSignal.objects.create(**signal_data)
+                data_log += '\nsignal watching status: {}'.format('watching')
+                return False, data_log
+            # signal_data = {'obj': signal,
+            #                'steps': [{'entry_price': -1, }],
+            #                'targets': [{'tp_price': tp1}, {'tp_price': tp2}],
+            #                'stoploss': {'trigger_price': stoploss}}
+            # position_data = {
+            #     'signal': signal_data,
+            #     'margin': 25,
+            # }
+            # bot_data = {
+            #     'exchange_id': 'kucoin',
+            #     'credential_id': 'kucoin_main',
+            #     'strategy': 'manual',
+            #     'position': position_data,
+            # }
+            # FuturesBotTrader.create_bot(bot_data)
+            # signal.status = 'confirmed'
+            # signal.save()
+        return False, data_log
 
 
 @shared_task
