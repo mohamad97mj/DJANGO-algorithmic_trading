@@ -25,7 +25,7 @@ def notify_in_telegram(message, entity):
     myclient.send_message(entity, message)
 
 
-@shared_task
+# @shared_task
 def technical_auto_trade():
     global myclient
     if not myclient:
@@ -59,7 +59,7 @@ bbd: {},
 bbu: {},
 rr: {},
 confirmations: {}'''
-    cci, prev_cci = TechnicalAnalyser.get_cci(symbol)
+    cci, prev_cci = TechnicalAnalyser.get_two_previous_cci(symbol)
     macd, prev_macd = TechnicalAnalyser.get_macd(symbol)
     bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol)
     previous_candle_patterns, current_candle_patterns = detect_patterns_in_two_previous_candles(symbol)
@@ -91,7 +91,7 @@ confirmations: {}'''
             data_log += '\nsignal watching status: {}'.format('unwatched')
             return False, data_log
         else:
-            if cci > -100:
+            if watching_signal.side > -100:
                 risk = (close - bbd) / close
                 reward = (bbu - close) / close
                 rr = risk / reward

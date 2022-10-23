@@ -43,6 +43,13 @@ class TechnicalAnalyser:
         return None, None
 
     @staticmethod
+    def get_two_previous_cci(symbol, timeframe='1h', n=20, ohlcvs=None):
+        ccis = TechnicalAnalyser.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs, limit=n + 2)
+        if ccis:
+            return ccis[-2], ccis[-3]
+        return None, None
+
+    @staticmethod
     def get_heikin_ashi_candles(symbol, timeframe, last_open, ohlcvs=None):
         if not ohlcvs:
             ohlcvs = pb.fetch_ohlcv(symbol, timeframe=timeframe)

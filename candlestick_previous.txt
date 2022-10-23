@@ -1,0 +1,435 @@
+{
+   "1INCH/USDT": [
+      [],
+      []
+   ],
+   "AAVE/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "2_BULLISH_CDL3OUTSIDE",
+         "1_BULLISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "ADA/USDT": [
+      [],
+      []
+   ],
+   "ALGO/USDT": [
+      [],
+      []
+   ],
+   "APE/USDT": [
+      [
+         "1_BULLISH_CDLCLOSINGMARUBOZU",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      []
+   ],
+   "ATOM/USDT": [
+      [],
+      [
+         "1_BULLISH_CDLDOJI",
+         "2_BEARISH_CDLDOJISTAR",
+         "1_BEARISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLLONGLEGGEDDOJI",
+         "1_BEARISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "AVAX/USDT": [
+      [],
+      [
+         "1_BEARISH_CDLSHOOTINGSTAR"
+      ]
+   ],
+   "AXS/USDT": [
+      [],
+      [
+         "1_BULLISH_CDLDOJI",
+         "2_BEARISH_CDLDOJISTAR",
+         "1_BULLISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLLONGLEGGEDDOJI",
+         "1_BULLISH_CDLRICKSHAWMAN",
+         "1_BULLISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "BAT/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING"
+      ],
+      [
+         "2_BULLISH_CDL3OUTSIDE"
+      ]
+   ],
+   "BCH/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING"
+      ],
+      [
+         "1_BEARISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "BNB/USDT": [
+      [
+         "1_BULLISH_CDLBELTHOLD",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "1_BULLISH_CDLBELTHOLD"
+      ]
+   ],
+   "BTC/USDT": [
+      [],
+      [
+         "1_BEARISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "CELO/USDT": [
+      [
+         "1_BULLISH_CDLBELTHOLD"
+      ],
+      []
+   ],
+   "CHZ/USDT": [
+      [],
+      []
+   ],
+   "COMP/USDT": [
+      [
+         "1_BULLISH_CDLBELTHOLD",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "1_BULLISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "CRO/USDT": [
+      [],
+      [
+         "1_BEARISH_CDLHIGHWAVE",
+         "1_BEARISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "CRV/USDT": [
+      [
+         "1_BULLISH_CDLCLOSINGMARUBOZU",
+         "2_BULLISH_CDLENGULFING",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "1_BEARISH_CDLHARAMI"
+      ]
+   ],
+   "DASH/USDT": [
+      [
+         "1_BULLISH_CDLBELTHOLD"
+      ],
+      [
+         "1_BULLISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "DOGE/USDT": [
+      [
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      []
+   ],
+   "DOT/USDT": [
+      [],
+      []
+   ],
+   "EGLD/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING"
+      ],
+      []
+   ],
+   "ENJ/USDT": [
+      [],
+      []
+   ],
+   "EOS/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING"
+      ],
+      [
+         "2_BULLISH_CDL3OUTSIDE",
+         "1_BULLISH_CDLDOJI",
+         "2_BEARISH_CDLDOJISTAR",
+         "1_BEARISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLLONGLEGGEDDOJI",
+         "1_BULLISH_CDLRICKSHAWMAN",
+         "1_BEARISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "ETC/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING"
+      ],
+      [
+         "1_BEARISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "ETH/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING"
+      ],
+      [
+         "2_BULLISH_CDL3OUTSIDE",
+         "1_BULLISH_CDLDOJI",
+         "1_BULLISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLLONGLEGGEDDOJI",
+         "1_BULLISH_CDLRICKSHAWMAN",
+         "1_BULLISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "FIL/USDT": [
+      [
+         "1_BULLISH_CDLCLOSINGMARUBOZU",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      []
+   ],
+   "FLOW/USDT": [
+      [
+         "1_BULLISH_CDLBELTHOLD",
+         "2_BULLISH_CDLENGULFING",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "1_BULLISH_CDLDOJI",
+         "1_BULLISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLLONGLEGGEDDOJI",
+         "1_BULLISH_CDLRICKSHAWMAN",
+         "1_BULLISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "FTM/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "2_BULLISH_CDL3OUTSIDE",
+         "1_BULLISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "GRT/USDT": [
+      [
+         "1_BULLISH_CDLCLOSINGMARUBOZU",
+         "2_BULLISH_CDLENGULFING"
+      ],
+      [
+         "2_BULLISH_CDL3OUTSIDE"
+      ]
+   ],
+   "HBAR/USDT": [
+      [
+         "1_BULLISH_CDLBELTHOLD",
+         "1_BULLISH_CDLCLOSINGMARUBOZU",
+         "1_BULLISH_CDLLONGLINE",
+         "1_BULLISH_CDLMARUBOZU"
+      ],
+      [
+         "1_BEARISH_CDLHIGHWAVE",
+         "1_BEARISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "ICP/USDT": [
+      [],
+      [
+         "1_BEARISH_CDLCLOSINGMARUBOZU",
+         "1_BEARISH_CDLCOUNTERATTACK"
+      ]
+   ],
+   "KSM/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      []
+   ],
+   "LINK/USDT": [
+      [
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "1_BULLISH_CDLBELTHOLD"
+      ]
+   ],
+   "LRC/USDT": [
+      [],
+      [
+         "1_BULLISH_CDLDOJI",
+         "2_BEARISH_CDLDOJISTAR",
+         "1_BULLISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLLONGLEGGEDDOJI",
+         "1_BULLISH_CDLRICKSHAWMAN",
+         "1_BULLISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "LTC/USDT": [
+      [
+         "1_BULLISH_CDLBELTHOLD"
+      ],
+      [
+         "1_BEARISH_CDLHIGHWAVE",
+         "1_BEARISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "LUNA/USDT": [
+      [],
+      []
+   ],
+   "MANA/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      []
+   ],
+   "MATIC/USDT": [
+      [],
+      [
+         "1_BULLISH_CDLDOJI",
+         "2_BEARISH_CDLDOJISTAR",
+         "1_BEARISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLLONGLEGGEDDOJI",
+         "1_BULLISH_CDLRICKSHAWMAN",
+         "1_BEARISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "MKR/USDT": [
+      [],
+      [
+         "1_BULLISH_CDLDOJI",
+         "2_BEARISH_CDLDOJISTAR",
+         "1_BULLISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLLONGLEGGEDDOJI",
+         "1_BULLISH_CDLRICKSHAWMAN",
+         "1_BULLISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "NEAR/USDT": [
+      [],
+      []
+   ],
+   "NEO/USDT": [
+      [],
+      [
+         "1_BEARISH_CDLSHORTLINE"
+      ]
+   ],
+   "ONE/USDT": [
+      [
+         "1_BULLISH_CDLBELTHOLD"
+      ],
+      []
+   ],
+   "ROSE/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING"
+      ],
+      [
+         "2_BULLISH_CDL3OUTSIDE",
+         "1_BULLISH_CDLDOJI",
+         "2_BEARISH_CDLDOJISTAR",
+         "1_BULLISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLLONGLEGGEDDOJI",
+         "1_BULLISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "SAND/USDT": [
+      [
+         "2_BULLISH_CDLENGULFING",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "2_BULLISH_CDL3OUTSIDE",
+         "1_BULLISH_CDLDOJI",
+         "2_BEARISH_CDLDOJISTAR",
+         "1_BULLISH_CDLHIGHWAVE",
+         "1_BULLISH_CDLLONGLEGGEDDOJI",
+         "1_BULLISH_CDLRICKSHAWMAN",
+         "1_BULLISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "SOL/USDT": [
+      [
+         "2_BULLISH_CDL3INSIDE"
+      ],
+      [
+         "1_BEARISH_CDLSHOOTINGSTAR"
+      ]
+   ],
+   "SUSHI/USDT": [
+      [
+         "1_BULLISH_CDLCLOSINGMARUBOZU",
+         "2_BULLISH_CDLENGULFING",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "2_BULLISH_CDL3OUTSIDE",
+         "1_BULLISH_CDLBELTHOLD",
+         "1_BULLISH_CDLLONGLINE"
+      ]
+   ],
+   "THETA/USDT": [
+      [
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      []
+   ],
+   "TRX/USDT": [
+      [
+         "1_BULLISH_CDLBELTHOLD",
+         "1_BULLISH_CDLCLOSINGMARUBOZU",
+         "1_BULLISH_CDLLONGLINE",
+         "1_BULLISH_CDLMARUBOZU"
+      ],
+      [
+         "1_BEARISH_CDLSHORTLINE"
+      ]
+   ],
+   "UNI/USDT": [
+      [],
+      []
+   ],
+   "VET/USDT": [
+      [
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "1_BEARISH_CDLSPINNINGTOP"
+      ]
+   ],
+   "WAVES/USDT": [
+      [],
+      []
+   ],
+   "XLM/USDT": [
+      [
+         "1_BULLISH_CDLBELTHOLD",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "1_BEARISH_CDLCLOSINGMARUBOZU"
+      ]
+   ],
+   "ZEC/USDT": [
+      [
+         "1_BULLISH_CDLCLOSINGMARUBOZU",
+         "2_BULLISH_CDLENGULFING",
+         "1_BULLISH_CDLLONGLINE"
+      ],
+      [
+         "1_BEARISH_CDLHARAMI",
+         "1_BEARISH_CDLHIGHWAVE",
+         "1_BEARISH_CDLSPINNINGTOP"
+      ]
+   ]
+}

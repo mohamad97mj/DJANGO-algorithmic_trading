@@ -106,13 +106,13 @@ def detect_patterns():
 
 
 def detect_patterns_at_datetime(symbol, date: datetime):
-    since = int((date - timedelta(hours=10)).timestamp() * 1000)
+    since = int((date - timedelta(hours=20)).timestamp() * 1000)
     spot_public_client = SpotPublicClient()
-    ohlcvs = spot_public_client.fetch_ohlcv(symbol=symbol, timeframe='1h', since=since, limit=11)
+    ohlcvs = spot_public_client.fetch_ohlcv(symbol=symbol, timeframe='1h', since=since, limit=21)
     return detect_patterns_in_ohlcvs(ohlcvs=ohlcvs, patterns=PATTERNS.keys())
 
 
-def detect_patterns_in_two_previous_candles(symbol):
+def detect_patterns_in_current_and_previous_candles(symbol):
     now = datetime.now()
     detected_patterns = detect_patterns_at_datetime(symbol, now)
     now_minus_30 = now - timedelta(minutes=30)
@@ -124,11 +124,31 @@ def detect_patterns_in_two_previous_candles(symbol):
     return detected_patterns.get(one_hour_ago_str, []), detected_patterns.get(now_rounded_str, [])
 
 
+def detect_patterns_in_two_previous_candles(symbol):
+    now = datetime.now()
+    detected_patterns = detect_patterns_at_datetime(symbol, now)
+    now_minus_1_30 = now - timedelta(hours=1, minutes=30)
+    one_our_ago_rounded = datetime(year=now_minus_1_30.year, month=now_minus_1_30.month, day=now_minus_1_30.day,
+                                   hour=now_minus_1_30.hour, minute=30)
+    one_hour_ago_rounded_str = one_our_ago_rounded.strftime("%m/%d/%Y, %H:%M:%S")
+    two_hour_ago = one_our_ago_rounded - timedelta(hours=1)
+    two_hour_ago_str = two_hour_ago.strftime("%m/%d/%Y, %H:%M:%S")
+    return detected_patterns.get(two_hour_ago_str, []), detected_patterns.get(one_hour_ago_rounded_str, [])
+
+
+def detect_patterns_in_current_and_previous_candles_for_all_symbols():
+    detected_patterns = {}
+    for symbol in symbols:
+        detected_patterns[symbol] = detect_patterns_in_current_and_previous_candles(symbol)
+    f = open('candlestick_now.txt', 'w')
+    f.write(json.dumps(detected_patterns, indent=3))
+
+
 def detect_patterns_in_two_previous_candles_for_all_symbols():
     detected_patterns = {}
     for symbol in symbols:
         detected_patterns[symbol] = detect_patterns_in_two_previous_candles(symbol)
-    f = open('candlestick_now.txt', 'w')
+    f = open('candlestick_previous.txt', 'w')
     f.write(json.dumps(detected_patterns, indent=3))
 
 
