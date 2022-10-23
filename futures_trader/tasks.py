@@ -25,7 +25,7 @@ def notify_in_telegram(message, entity):
     myclient.send_message(entity, message)
 
 
-# @shared_task
+@shared_task
 def technical_auto_trade():
     global myclient
     if not myclient:
