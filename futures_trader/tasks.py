@@ -91,7 +91,7 @@ confirmations: {}'''
             data_log += '\nsignal watching status: {}'.format('unwatched')
             return False, data_log
         else:
-            if watching_signal.side > -100:
+            if watching_signal.side == 'buy':
                 risk = (close - bbd) / close
                 reward = (bbu - close) / close
                 rr = risk / reward
