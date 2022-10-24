@@ -39,6 +39,7 @@ class TechnicalAnalyser:
     def get_cci(symbol, timeframe='1h', n=20, ohlcvs=None):
         ccis = TechnicalAnalyser.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs, limit=n + 1)
         if ccis:
+
             return ccis[-1], ccis[-2]
         return None, None
 

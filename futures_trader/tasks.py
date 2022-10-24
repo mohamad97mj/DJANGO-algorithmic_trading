@@ -98,7 +98,7 @@ confirmations: {}'''
                 rr = risk / reward
                 if macd > 0 and prev_macd > 0 and 0 < rr < 2 and has_long_candlestick_confirmation(
                         previous_candle_patterns, current_candle_patterns):
-                    watching_signal.status = FuturesSignal.Status.WATCHING.value
+                    watching_signal.status = FuturesSignal.Status.WAITING.value
                     watching_signal.confirmations.append('Candlestick')
                     watching_signal.save()
                     data_log.format(rr, str(watching_signal.confirmations))
@@ -113,7 +113,7 @@ confirmations: {}'''
                 rr = risk / reward
                 if macd < 0 and prev_macd < 0 and 0 < rr < 2 and has_short_candlestick_confirmation(
                         previous_candle_patterns, current_candle_patterns):
-                    watching_signal.status = FuturesSignal.Status.WATCHING.value
+                    watching_signal.status = FuturesSignal.Status.WAITING.value
                     watching_signal.confirmations.append('Candlestick')
                     watching_signal.save()
                     data_log.format(rr, str(watching_signal.confirmations))
