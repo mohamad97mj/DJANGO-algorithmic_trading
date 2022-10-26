@@ -88,7 +88,7 @@ confirmations: {}'''
         if cci < -100 or cci > 100:
             watching_signal.status = FuturesSignal.Status.UNWATCHED.value
             watching_signal.save()
-            data_log.format(rr, confirmations)
+            data_log = data_log.format(rr, confirmations)
             data_log += '\nsignal watching status: {}'.format('unwatched')
             return False, data_log
         else:
@@ -101,11 +101,11 @@ confirmations: {}'''
                     watching_signal.status = FuturesSignal.Status.WAITING.value
                     watching_signal.confirmations.append('Candlestick')
                     watching_signal.save()
-                    data_log.format(rr, str(watching_signal.confirmations))
+                    data_log = data_log.format(rr, str(watching_signal.confirmations))
                     data_log += '\nsignal watching status: {}'.format('waiting')
                     return True, data_log
                 else:
-                    data_log.format(rr, confirmations)
+                    data_log = data_log.format(rr, confirmations)
                     return False, data_log
             else:
                 risk = (bbu - close) / close
@@ -116,11 +116,11 @@ confirmations: {}'''
                     watching_signal.status = FuturesSignal.Status.WAITING.value
                     watching_signal.confirmations.append('Candlestick')
                     watching_signal.save()
-                    data_log.format(rr, str(watching_signal.confirmations))
+                    data_log = data_log.format(rr, str(watching_signal.confirmations))
                     data_log += '\nsignal watching status: {}'.format('waiting')
                     return True, data_log
                 else:
-                    data_log.format(rr, confirmations)
+                    data_log = data_log.format(rr, confirmations)
                     return False, data_log
 
     else:
