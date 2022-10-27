@@ -3,6 +3,7 @@ import pandas
 import pandas as pd
 from ta.momentum import RSIIndicator
 from ta.trend import MACD, EMAIndicator
+from math import nan
 
 from ..clients.public_client import PublicClient
 from futures_trader.clients.public_client import PublicClient as FuturesPublicClient
@@ -46,7 +47,7 @@ class TechnicalAnalyser:
     def get_two_previous_cci(symbol, timeframe='1h', n=20, ohlcvs=None):
         ccis = TechnicalAnalyser.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs, limit=n + 2)
         if ccis:
-            if ccis[-3] and ccis[-3] != 'nan':
+            if ccis[-3] and ccis[-3] != nan:
                 return ccis[-2], ccis[-3]
             else:
                 return ccis[-1], ccis[-2]
