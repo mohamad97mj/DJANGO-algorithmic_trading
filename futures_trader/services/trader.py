@@ -67,7 +67,7 @@ class FuturesBotTrader:
         tz_class = {
             'FlatSupport': FuturesFlatSupportTradeZone,
             'FlatResistance': FuturesFlatResistanceTradeZone,
-            'InclineSupport': FuturesInclineResistanceTradeZone,
+            'InclineSupport': FuturesInclineSupportTradeZone,
             'InclineResistance': FuturesInclineResistanceTradeZone,
         }[slope_type + level_type]
         kwargs = {}

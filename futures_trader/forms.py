@@ -14,17 +14,20 @@ class DatetimePicker(forms.DateTimeInput):
 class FuturesTradeZoneCreateForm(forms.Form):
     symbol = forms.ChoiceField(widget=forms.Select({'class': 'form-select'}),
                                choices=zip(symbols, symbols))
+    is_major = forms.BooleanField(widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     slope_type = forms.ChoiceField(widget=forms.Select({'class': 'form-select'}),
                                    choices=[('Flat', 'Flat'), ('Incline', 'Incline')])
     level_type = forms.ChoiceField(widget=forms.Select({'class': 'form-select'}),
                                    choices=[('Support', 'Support'), ('Resistance', 'Resistance')])
-    point1_stoploss = forms.FloatField()
-    point1_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    point1_time = forms.TimeField(widget=widgets.AdminTimeWidget(attrs={'type': 'time'}))
-    point1_price = forms.FloatField()
-    point2_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
-    point2_time = forms.TimeField(widget=widgets.AdminTimeWidget(attrs={'type': 'time'}), required=False)
-    point2_price = forms.FloatField(required=False)
+    point1_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+    point1_time = forms.TimeField(widget=widgets.AdminTimeWidget(attrs={'type': 'time', 'class': 'form-control'}))
+    point1_price = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    point1_stoploss = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    point2_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+                                  required=False, disabled=True)
+    point2_time = forms.TimeField(widget=widgets.AdminTimeWidget(attrs={'type': 'time', 'class': 'form-control'}),
+                                  required=False, disabled=True)
+    point2_price = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), required=False, disabled=True)
 
     def clean(self):
         cleaned_data = super().clean()

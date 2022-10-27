@@ -5,6 +5,7 @@ from django.utils import timezone
 
 class FuturesTradeZone(models.Model):
     symbol = models.CharField(max_length=15)
+    is_major = models.BooleanField(default=False)
     point1_stoploss = models.FloatField()
     point1_datetime = models.DateTimeField()
     point1_price = models.FloatField()
@@ -26,6 +27,9 @@ class FuturesTradeZone(models.Model):
 class FuturesFlatTradeZone(FuturesTradeZone):
     def get_point_stoploss(self, date_time=None):
         return self.point1_stoploss
+
+    def get_point_price(self, date_time=None):
+        return self.point1_price
 
     class Meta:
         abstract = True
@@ -74,14 +78,14 @@ class FuturesInclineResistanceTradeZone(FuturesInclineTradeZone):
     pass
 
 
-def get_closest_point_stoploss(symbol, current_price, level_type, date_time=None):
+def get_closest_point_stoploss(symbol, point_price, signal_side, date_time=None):
     date_time = date_time or datetime.datetime.now()
-    if level_type == 'support':
+    if signal_side == 'buy':
         valid_flat_support_trade_zones = list(
-            FuturesFlatTradeZone.objects.filter(symbol=symbol, point1_stoploss__lte=current_price, is_valid=True))
+            FuturesFlatSupportTradeZone.objects.filter(symbol=symbol, point1_stoploss__lte=point_price, is_valid=True))
         valid_incline_support_trade_zones = list(
             FuturesInclineSupportTradeZone.objects.filter(symbol=symbol,
-                                                          point1_stoploss__lte=current_price, is_valid=True))
+                                                          point1_stoploss__lte=point_price, is_valid=True))
         closest_stoploss = 0
         for zone in valid_flat_support_trade_zones + valid_incline_support_trade_zones:
             zone_stoploss = zone.get_point_stoploss(date_time=date_time)
@@ -90,16 +94,45 @@ def get_closest_point_stoploss(symbol, current_price, level_type, date_time=None
         return closest_stoploss
     else:
         valid_flat_resistant_trade_zones = list(
-            FuturesFlatTradeZone.objects.filter(symbol=symbol, point1_stoploss__lte=current_price, is_valid=True))
+            FuturesFlatResistanceTradeZone.objects.filter(symbol=symbol, point1_stoploss__gte=point_price,
+                                                          is_valid=True))
         valid_incline_resistant_trade_zones = list(
-            FuturesInclineSupportTradeZone.objects.filter(symbol=symbol,
-                                                          point1_stoploss__lte=current_price, is_valid=True))
-        closest_stoploss = 0
+            FuturesInclineResistanceTradeZone.objects.filter(symbol=symbol,
+                                                             point1_stoploss__gte=point_price, is_valid=True))
+        closest_stoploss = 1000000
         for zone in valid_flat_resistant_trade_zones + valid_incline_resistant_trade_zones:
             zone_stoploss = zone.get_point_stoploss(date_time=date_time)
-            if zone_stoploss > closest_stoploss:
+            if zone_stoploss < closest_stoploss:
                 closest_stoploss = zone_stoploss
         return closest_stoploss
 
-def get_closest_point_price():
-    pass
+
+def get_closest_major_point_price(symbol, point_price, signal_side, date_time=None):
+    date_time = date_time or datetime.datetime.now()
+    if signal_side == 'sell':
+        valid_major_flat_support_trade_zones = list(
+            FuturesFlatSupportTradeZone.objects.filter(symbol=symbol, point1_price__lte=point_price, is_major=True,
+                                                       is_valid=True))
+        valid_major_incline_support_trade_zones = list(
+            FuturesInclineSupportTradeZone.objects.filter(symbol=symbol,
+                                                          point1_price__lte=point_price, is_major=True,
+                                                          is_valid=True))
+        closest_point_price = 0
+        for zone in valid_major_flat_support_trade_zones + valid_major_incline_support_trade_zones:
+            zone_point_price = zone.get_point_price(date_time=date_time)
+            if zone_point_price > closest_point_price:
+                closest_point_price = zone_point_price
+        return closest_point_price
+    else:
+        valid_major_flat_resistant_trade_zones = list(
+            FuturesFlatResistanceTradeZone.objects.filter(symbol=symbol, point1_price__gte=point_price, is_major=True
+                                                          , is_valid=True))
+        valid_major_incline_resistant_trade_zones = list(
+            FuturesInclineResistanceTradeZone.objects.filter(symbol=symbol, point1_price__gte=point_price,
+                                                             is_major=True, is_valid=True))
+        closest_point_price = 1000000
+        for zone in valid_major_flat_resistant_trade_zones + valid_major_incline_resistant_trade_zones:
+            zone_point_price = zone.get_point_price(date_time=date_time)
+            if zone_point_price < closest_point_price:
+                closest_point_price = zone_point_price
+        return closest_point_price
