@@ -33,12 +33,17 @@ def technical_auto_trade():
     datetime_str = datetime.datetime.now().strftime("%Y/%m/%d, %H") + ':30'
     notify_in_telegram(datetime_str, 'My logs')
     appropriate_symbols = []
+    data_logs = ''
+    i = 1
     for symbol in symbols:
         result, data_log = auto_trader_per_symbol(symbol)
+        data_logs += '\n\n' + data_log
         if result:
             appropriate_symbols.append(symbol)
-        notify_in_telegram(data_log, 'My logs')
-        sleep(3)
+        if i % 5 == 0 or i == len(symbols):
+            notify_in_telegram(data_logs, 'My logs')
+            data_logs = ''
+        i += 1
 
     message = 'appropriate symbols:{}\n'.format(appropriate_symbols)
     notify_in_telegram(message, 'My alarms')
