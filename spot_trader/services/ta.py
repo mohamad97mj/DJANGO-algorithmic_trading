@@ -45,12 +45,14 @@ class TechnicalAnalyser:
 
     @staticmethod
     def get_two_previous_cci(symbol, timeframe='1h', n=20, ohlcvs=None):
-        ccis = TechnicalAnalyser.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs, limit=n + 2)
+        ccis = TechnicalAnalyser.get_ccis(symbol, timeframe, n, ohlcvs=ohlcvs, limit=n + 5)
         if ccis:
             if ccis[-3] and ccis[-3] != nan:
                 return ccis[-2], ccis[-3]
-            else:
+            elif ccis[-2] and ccis[-2] != nan:
                 return ccis[-1], ccis[-2]
+            else:
+                return TechnicalAnalyser.get_two_previous_cci(symbol)
         return None, None
 
     @staticmethod
