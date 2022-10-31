@@ -150,6 +150,6 @@ class TechnicalAnalyser:
         return macds[-1], macds[-2]
 
     @staticmethod
-    def get_last5macds(symbol, timeframe='4h', ohlcvs=None):
+    def get_last4macds(symbol, timeframe='4h', ohlcvs=None):
         macds = TechnicalAnalyser.get_macds(symbol, timeframe, ohlcvs=ohlcvs)
-        return macds[-5:]
+        return macds[-4:]
