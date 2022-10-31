@@ -214,23 +214,25 @@ confirmations: {}'''
 
 def has_trend_short_confirmation(arr):
     maximum = max(arr)
-    max_index = arr.index(maximum)
-    if max_index not in (0, len(arr) - 1):
-        max_left = arr[:max_index]
-        max_right = arr[max_index + 1:]
-        if max_left == sorted(max_left) and max_right == sorted(max_right, reverse=True):
-            return True
+    if maximum > 0:
+        max_index = arr.index(maximum)
+        if max_index not in (0, len(arr) - 1):
+            max_left = arr[:max_index]
+            max_right = arr[max_index + 1:]
+            if max_left == sorted(max_left) and max_right == sorted(max_right, reverse=True):
+                return True
     return False
 
 
 def has_trend_long_confirmation(arr):
     minimum = min(arr)
-    min_index = arr.index(minimum)
-    if min_index not in (0, len(arr) - 1):
-        min_left = arr[:min_index]
-        min_right = arr[min_index + 1:]
-        if min_left == sorted(min_left, reverse=True) and min_right == sorted(min_right):
-            return True
+    if minimum < 0:
+        min_index = arr.index(minimum)
+        if min_index not in (0, len(arr) - 1):
+            min_left = arr[:min_index]
+            min_right = arr[min_index + 1:]
+            if min_left == sorted(min_left, reverse=True) and min_right == sorted(min_right):
+                return True
     return False
 
 
