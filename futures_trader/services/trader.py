@@ -62,7 +62,7 @@ class FuturesBotTrader:
             return bot_handler.stop_bot(credential_id, bot_id)
 
     @staticmethod
-    def create_trade_zone(symbol, slope_type, level_type, point1_stoploss, point1_date, point1_time, point1_price,
+    def create_trade_zone(symbol, slope_type, level_type, point1_date, point1_time, point1_price,
                           point2_date=None, point2_time=None, point2_price=None):
         tz_class = {
             'FlatSupport': FuturesFlatSupportTradeZone,
@@ -80,7 +80,6 @@ class FuturesBotTrader:
                                                           second=point2_time.second)
             kwargs['point2_price'] = point2_price
         tz_class.objects.create(symbol=symbol,
-                                point1_stoploss=point1_stoploss,
                                 point1_datetime=datetime.datetime(year=point1_date.year,
                                                                   month=point1_date.month,
                                                                   day=point1_date.day,

@@ -24,7 +24,6 @@ class FuturesTradeZoneCreateView(View):
                 symbol=cleaned_data.get('symbol'),
                 slope_type=cleaned_data.get('slope_type'),
                 level_type=cleaned_data.get('level_type'),
-                point1_stoploss=cleaned_data.get('point1_stoploss'),
                 point1_date=cleaned_data.get('point1_date'),
                 point1_time=cleaned_data.get('point1_time'),
                 point1_price=cleaned_data.get('point1_price'),
