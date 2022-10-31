@@ -100,7 +100,8 @@ confirmations: {}'''
                 risk = (close - bbd) / close
                 reward = (bbu - close) / close
                 rr = risk / reward
-                if ((macd > 0 and prev_macd > 0) or has_trend_long_confirmation(last4macds)) \
+                if ((macd > 0 and prev_macd > 0) or has_trend_long_confirmation(
+                        last4macds) or has_trend_long_confirmation(last4macds[1:])) \
                         and 0 < rr < 2 \
                         and has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
@@ -116,7 +117,8 @@ confirmations: {}'''
                 risk = (bbu - close) / close
                 reward = (close - bbd) / close
                 rr = risk / reward
-                if ((macd < 0 and prev_macd < 0) or has_trend_short_confirmation(last4macds)) \
+                if ((macd < 0 and prev_macd < 0) or has_trend_short_confirmation(
+                        last4macds) or has_trend_short_confirmation(last4macds[1:])) \
                         and 0 < rr < 2 \
                         and has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
@@ -130,7 +132,8 @@ confirmations: {}'''
                     return False, data_log
 
     else:
-        if prev_cci < -100 < cci or has_trend_long_confirmation(last4macds):
+        if prev_cci < -100 < cci or has_trend_long_confirmation(last4macds) or has_trend_long_confirmation(
+                last4macds[1:]):
             side = 'buy'
             if prev_cci < -100 < cci:
                 confirmations = ['CCI']
@@ -153,7 +156,8 @@ confirmations: {}'''
                 str(confirmations),
             )
 
-        elif prev_cci > 100 > cci or has_trend_short_confirmation(last4macds):
+        elif prev_cci > 100 > cci or has_trend_short_confirmation(last4macds) or has_trend_short_confirmation(
+                last4macds[1:]):
             side = 'sell'
             if prev_cci > 100 > cci:
                 confirmations = ['CCI']
