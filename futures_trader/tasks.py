@@ -100,8 +100,7 @@ confirmations: {}'''
                 risk = (close - bbd) / close
                 reward = (bbu - close) / close
                 rr = risk / reward
-                if ((macd > 0 and prev_macd > 0) or has_trend_long_confirmation(
-                        last4macds) or has_trend_long_confirmation(last4macds[1:])) \
+                if ((macd > 0 and prev_macd > 0) or has_trend_long_confirmation(last4macds)) \
                         and 0 < rr < 2 \
                         and has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
@@ -117,8 +116,7 @@ confirmations: {}'''
                 risk = (bbu - close) / close
                 reward = (close - bbd) / close
                 rr = risk / reward
-                if ((macd < 0 and prev_macd < 0) or has_trend_short_confirmation(
-                        last4macds) or has_trend_short_confirmation(last4macds[1:])) \
+                if ((macd < 0 and prev_macd < 0) or has_trend_short_confirmation(last4macds)) \
                         and 0 < rr < 2 \
                         and has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
@@ -132,8 +130,7 @@ confirmations: {}'''
                     return False, data_log
 
     else:
-        if prev_cci < -100 < cci or has_trend_long_confirmation(last4macds) or has_trend_long_confirmation(
-                last4macds[1:]):
+        if prev_cci < -100 < cci or has_trend_long_confirmation(last4macds):
             side = 'buy'
             if prev_cci < -100 < cci:
                 confirmations = ['CCI']
@@ -156,8 +153,7 @@ confirmations: {}'''
                 str(confirmations),
             )
 
-        elif prev_cci > 100 > cci or has_trend_short_confirmation(last4macds) or has_trend_short_confirmation(
-                last4macds[1:]):
+        elif prev_cci > 100 > cci or has_trend_short_confirmation(last4macds):
             side = 'sell'
             if prev_cci > 100 > cci:
                 confirmations = ['CCI']
@@ -220,7 +216,7 @@ def has_trend_short_confirmation(arr):
     maximum = max(arr)
     if maximum > 0:
         max_index = arr.index(maximum)
-        if max_index not in (0, len(arr) - 1):
+        if max_index == len(arr) - 2:
             max_left = arr[:max_index]
             max_right = arr[max_index + 1:]
             if max_left == sorted(max_left) and max_right == sorted(max_right, reverse=True):
@@ -232,7 +228,7 @@ def has_trend_long_confirmation(arr):
     minimum = min(arr)
     if minimum < 0:
         min_index = arr.index(minimum)
-        if min_index not in (0, len(arr) - 1):
+        if min_index == len(arr) - 2:
             min_left = arr[:min_index]
             min_right = arr[min_index + 1:]
             if min_left == sorted(min_left, reverse=True) and min_right == sorted(min_right):
