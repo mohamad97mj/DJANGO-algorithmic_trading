@@ -71,6 +71,9 @@ confirmations: {}'''
     previous_candle_patterns, current_candle_patterns = detect_patterns_in_two_previous_candles(symbol)
     close = FuturesPublicClient().fetch_ticker(symbol)
 
+    trend_long_confirmation = has_trend_long_confirmation(last4macds) or has_trend_long_confirmation(last4macds[1:])
+    trend_short_confirmation = has_trend_short_confirmation(last4macds or has_trend_short_confirmation(last4macds[1:]))
+
     data_log = data_log.format(
         symbol,
         prev_cci,
@@ -100,9 +103,7 @@ confirmations: {}'''
                 risk = (close - bbd) / close
                 reward = (bbu - close) / close
                 rr = risk / reward
-                if ((macd > 0 and prev_macd > 0) or has_trend_long_confirmation(last4macds) or
-                    has_trend_long_confirmation(last4macds[1:])) \
-                        and 0 < rr < 2 \
+                if ((macd > 0 and prev_macd > 0) or trend_long_confirmation) and 0 < rr < 2 \
                         and has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
                     watching_signal.confirmations.append('Candlestick')
@@ -117,9 +118,7 @@ confirmations: {}'''
                 risk = (bbu - close) / close
                 reward = (close - bbd) / close
                 rr = risk / reward
-                if ((macd < 0 and prev_macd < 0) or has_trend_short_confirmation(last4macds) or
-                    has_trend_short_confirmation(last4macds[1:])) \
-                        and 0 < rr < 2 \
+                if ((macd < 0 and prev_macd < 0) or trend_short_confirmation) and 0 < rr < 2 \
                         and has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
                     watching_signal.confirmations.append('Candlestick')
@@ -132,16 +131,16 @@ confirmations: {}'''
                     return False, data_log
 
     else:
-        if prev_cci < -100 < cci or has_trend_long_confirmation(last4macds) or \
-                has_trend_long_confirmation(last4macds[1:]):
+
+        if prev_cci < -100 < cci or trend_long_confirmation:
             side = 'buy'
             if prev_cci < -100 < cci:
                 confirmations = ['CCI']
                 if macd > 0 and prev_macd > 0:
                     confirmations.append('Trend')
-            else:
+            if trend_long_confirmation:
                 confirmations = ['Trend']
-                if cci > -100:
+                if cci > -100 and 'CCI' not in confirmations:
                     confirmations.append('CCI')
 
             risk = (close - bbd) / close
@@ -156,16 +155,15 @@ confirmations: {}'''
                 str(confirmations),
             )
 
-        elif prev_cci > 100 > cci or has_trend_short_confirmation(last4macds) or \
-                has_trend_short_confirmation(last4macds[1:]):
+        elif prev_cci > 100 > cci or trend_short_confirmation:
             side = 'sell'
             if prev_cci > 100 > cci:
                 confirmations = ['CCI']
                 if macd < 0 and prev_macd < 0:
                     confirmations.append('Trend')
-            else:
+            if trend_short_confirmation:
                 confirmations = ['Trend']
-                if cci < 100:
+                if cci < 100 and 'CCI' not in confirmations:
                     confirmations.append('CCI')
 
             risk = (bbu - close) / close
