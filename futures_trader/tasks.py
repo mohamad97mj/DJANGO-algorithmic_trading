@@ -57,7 +57,7 @@ def auto_trader_per_symbol(symbol):
     data_log = '''symbol: {},
 prev cci: {},
 cci: {},
-last 3 macds: {},
+last 4 macds: {},
 previous candle patterns: {},
 current candle patterns: {},
 bbd: {},
@@ -65,8 +65,8 @@ bbu: {},
 rr: {},
 confirmations: {}'''
     cci, prev_cci = TechnicalAnalyser.get_two_previous_cci(symbol)
-    last3macds = TechnicalAnalyser.get_last3macds(symbol)
-    macd, prev_macd = last3macds[-1], last3macds[-2]
+    last4macds = TechnicalAnalyser.get_last3macds(symbol)
+    macd, prev_macd = last4macds[-1], last4macds[-2]
     bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol)
     previous_candle_patterns, current_candle_patterns = detect_patterns_in_two_previous_candles(symbol)
     close = FuturesPublicClient().fetch_ticker(symbol)
@@ -75,7 +75,7 @@ confirmations: {}'''
         symbol,
         prev_cci,
         cci,
-        str(last3macds),
+        str(last4macds),
         str(previous_candle_patterns),
         str(current_candle_patterns),
         bbd,
@@ -100,7 +100,8 @@ confirmations: {}'''
                 risk = (close - bbd) / close
                 reward = (bbu - close) / close
                 rr = risk / reward
-                if ((macd > 0 and prev_macd > 0) or has_trend_long_confirmation(last3macds)) \
+                if ((macd > 0 and prev_macd > 0) or has_trend_long_confirmation(last4macds) or
+                    has_trend_long_confirmation(last4macds[1:])) \
                         and 0 < rr < 2 \
                         and has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
@@ -116,7 +117,8 @@ confirmations: {}'''
                 risk = (bbu - close) / close
                 reward = (close - bbd) / close
                 rr = risk / reward
-                if ((macd < 0 and prev_macd < 0) or has_trend_short_confirmation(last3macds)) \
+                if ((macd < 0 and prev_macd < 0) or has_trend_short_confirmation(last4macds) or
+                    has_trend_short_confirmation(last4macds[1:])) \
                         and 0 < rr < 2 \
                         and has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
@@ -130,7 +132,8 @@ confirmations: {}'''
                     return False, data_log
 
     else:
-        if prev_cci < -100 < cci or has_trend_long_confirmation(last3macds):
+        if prev_cci < -100 < cci or has_trend_long_confirmation(last4macds) or \
+                has_trend_long_confirmation(last4macds[1:]):
             side = 'buy'
             if prev_cci < -100 < cci:
                 confirmations = ['CCI']
@@ -153,7 +156,8 @@ confirmations: {}'''
                 str(confirmations),
             )
 
-        elif prev_cci > 100 > cci or has_trend_short_confirmation(last3macds):
+        elif prev_cci > 100 > cci or has_trend_short_confirmation(last4macds) or \
+                has_trend_short_confirmation(last4macds[1:]):
             side = 'sell'
             if prev_cci > 100 > cci:
                 confirmations = ['CCI']
@@ -216,7 +220,7 @@ def has_trend_short_confirmation(arr):
     maximum = max(arr)
     if maximum > 0:
         max_index = arr.index(maximum)
-        if max_index == len(arr) - 2:
+        if max_index not in (0, len(arr) - 1):
             max_left = arr[:max_index]
             max_right = arr[max_index + 1:]
             if max_left == sorted(max_left) and max_right == sorted(max_right, reverse=True):
@@ -228,7 +232,7 @@ def has_trend_long_confirmation(arr):
     minimum = min(arr)
     if minimum < 0:
         min_index = arr.index(minimum)
-        if min_index == len(arr) - 2:
+        if min_index not in (0, len(arr) - 1):
             min_left = arr[:min_index]
             min_right = arr[min_index + 1:]
             if min_left == sorted(min_left, reverse=True) and min_right == sorted(min_right):
