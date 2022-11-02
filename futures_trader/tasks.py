@@ -65,7 +65,7 @@ bbu: {},
 rr: {},
 confirmations: {}'''
     cci, prev_cci = TechnicalAnalyser.get_two_previous_cci(symbol)
-    last4macds = TechnicalAnalyser.get_last3macds(symbol)
+    last4macds = TechnicalAnalyser.get_last4macds(symbol)
     macd, prev_macd = last4macds[-1], last4macds[-2]
     bbd, bbu = TechnicalAnalyser.get_bollinger_band(symbol)
     previous_candle_patterns, current_candle_patterns = detect_patterns_in_two_previous_candles(symbol)
