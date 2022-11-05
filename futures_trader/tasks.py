@@ -71,8 +71,8 @@ confirmations: {}'''
     previous_candle_patterns, current_candle_patterns = detect_patterns_in_two_previous_candles(symbol)
     close = FuturesPublicClient().fetch_ticker(symbol)
 
-    trend_long_confirmation = has_trend_long_confirmation(last4macds) or has_trend_long_confirmation(last4macds[1:])
-    trend_short_confirmation = has_trend_short_confirmation(last4macds or has_trend_short_confirmation(last4macds[1:]))
+    trend_changed2long = has_trend_changed2long(last4macds) or has_trend_changed2long(last4macds[1:])
+    trend_changed2short = has_trend_changed2short(last4macds or has_trend_changed2short(last4macds[1:]))
 
     data_log = data_log.format(
         symbol,
@@ -103,7 +103,7 @@ confirmations: {}'''
                 risk = (close - bbd) / close
                 reward = (bbu - close) / close
                 rr = risk / reward
-                if ((macd > 0 and prev_macd > 0) or trend_long_confirmation) and 0 < rr < 2 \
+                if ((macd > 0 and prev_macd > 0) or macd > prev_macd or trend_changed2long) and 0 < rr < 2 \
                         and has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
                     watching_signal.confirmations.append('Candlestick')
@@ -118,7 +118,7 @@ confirmations: {}'''
                 risk = (bbu - close) / close
                 reward = (close - bbd) / close
                 rr = risk / reward
-                if ((macd < 0 and prev_macd < 0) or trend_short_confirmation) and 0 < rr < 2 \
+                if ((macd < 0 and prev_macd < 0) or macd < prev_macd or trend_changed2short) and 0 < rr < 2 \
                         and has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
                     watching_signal.confirmations.append('Candlestick')
@@ -132,13 +132,13 @@ confirmations: {}'''
 
     else:
 
-        if prev_cci < -100 < cci or trend_long_confirmation:
+        if prev_cci < -100 < cci or trend_changed2long:
             side = 'buy'
             if prev_cci < -100 < cci:
                 confirmations = ['CCI']
-                if macd > 0 and prev_macd > 0:
+                if (macd > 0 and prev_macd > 0) or macd > prev_macd:
                     confirmations.append('Trend')
-            if trend_long_confirmation:
+            if trend_changed2long:
                 confirmations = ['Trend']
                 if cci > -100 and 'CCI' not in confirmations:
                     confirmations.append('CCI')
@@ -155,13 +155,13 @@ confirmations: {}'''
                 str(confirmations),
             )
 
-        elif prev_cci > 100 > cci or trend_short_confirmation:
+        elif prev_cci > 100 > cci or trend_changed2short:
             side = 'sell'
             if prev_cci > 100 > cci:
                 confirmations = ['CCI']
-                if macd < 0 and prev_macd < 0:
+                if macd < 0 and prev_macd < 0 or macd < prev_macd:
                     confirmations.append('Trend')
-            if trend_short_confirmation:
+            if trend_changed2short:
                 confirmations = ['Trend']
                 if cci < 100 and 'CCI' not in confirmations:
                     confirmations.append('CCI')
@@ -214,7 +214,7 @@ confirmations: {}'''
         return False, data_log
 
 
-def has_trend_short_confirmation(arr):
+def has_trend_changed2short(arr):
     maximum = max(arr)
     if maximum > 0:
         max_index = arr.index(maximum)
@@ -226,7 +226,7 @@ def has_trend_short_confirmation(arr):
     return False
 
 
-def has_trend_long_confirmation(arr):
+def has_trend_changed2long(arr):
     minimum = min(arr)
     if minimum < 0:
         min_index = arr.index(minimum)
