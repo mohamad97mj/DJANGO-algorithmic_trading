@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'base',
     'spot_trader',
     'futures_trader',
+    'forex_trader',
 ]
 
 MIDDLEWARE = [

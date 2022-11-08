@@ -194,23 +194,6 @@ confirmations: {}'''
                 FuturesSignal.objects.create(**signal_data)
                 data_log += '\nsignal watching status: {}'.format('watching')
                 return False, data_log
-            # signal_data = {'obj': signal,
-            #                'steps': [{'entry_price': -1, }],
-            #                'targets': [{'tp_price': tp1}, {'tp_price': tp2}],
-            #                'stoploss': {'trigger_price': stoploss}}
-            # position_data = {
-            #     'signal': signal_data,
-            #     'margin': 25,
-            # }
-            # bot_data = {
-            #     'exchange_id': 'kucoin',
-            #     'credential_id': 'kucoin_main',
-            #     'strategy': 'manual',
-            #     'position': position_data,
-            # }
-            # FuturesBotTrader.create_bot(bot_data)
-            # signal.status = 'confirmed'
-            # signal.save()
         return False, data_log
 
 

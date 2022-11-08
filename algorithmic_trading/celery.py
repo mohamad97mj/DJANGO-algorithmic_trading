@@ -19,17 +19,17 @@ app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
     'auto-trade': {
-        'task': 'futures_trader.tasks.technical_auto_trade',
+        'task': 'forex_trader.tasks.generate_technical_signals',
         'schedule': crontab(minute=30),
         'options': {
             'expires': 30.0,
         },
     },
-    'cancel-orders': {
-        'task': 'futures_trader.tasks.cancel_remaining_orders',
-        'schedule': crontab(),
-        'options': {
-            'expires': 30.0,
-        },
-    }
+    # 'cancel-orders': {
+    #     'task': 'futures_trader.tasks.cancel_remaining_orders',
+    #     'schedule': crontab(),
+    #     'options': {
+    #         'expires': 30.0,
+    #     },
+    # }
 }

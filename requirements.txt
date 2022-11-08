@@ -10,13 +10,13 @@ websockets~=10.1
 aiohttp~=3.8.1
 requests~=2.26.0
 Telethon~=1.24.0
-numpy
+numpy~=1.23.3
 pandas~=1.4.1
 ta~=0.9.0
 celery~=5.2.3
 redis~=4.2.1
 django_tables2
-django-filter
+django-filter~=22.1
 django-bootstrap-v5
 
 pip~=20.0.2
@@ -55,7 +55,16 @@ pyaes~=1.6.1
 pyparsing~=3.0.7
 pycparser~=2.21
 wrapt~=1.14.0
-plotly
+plotly~=5.10.0
 
 django-bootstrap-datepicker-plus
 django-widget-tweaks
+Pillow~=9.2.0
+beautifulsoup4~=4.11.1
+soupsieve~=2.3.2.post1
+matplotlib~=3.5.3
+tenacity~=8.0.1
+fonttools~=4.37.1
+cycler~=0.11.0
+kiwisolver~=1.4.4
+mplfinance~=0.12.9b5
