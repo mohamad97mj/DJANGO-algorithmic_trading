@@ -190,10 +190,10 @@ def detect_patterns_in_ohlcs(ohlcs, patterns):
     return detected_patterns
 
 
-def notify_in_telegram(message, entity):
-    myclient.get_dialogs()
-    entity = myclient.get_entity(entity)
-    myclient.send_message(entity, message)
+def notify_in_telegram(client, message, entity):
+    client.get_dialogs()
+    entity = client.get_entity(entity)
+    client.send_message(entity, message)
 
 
 def has_trend_changed2short(arr):
@@ -223,10 +223,9 @@ def has_trend_changed2long(arr):
 @shared_task
 def generate_technical_signals():
     global myclient
-    if not myclient:
-        myclient = create_client()
+    myclient = create_client()
     datetime_str = datetime.now().strftime("%Y/%m/%d, %H") + ':30'
-    notify_in_telegram(datetime_str, 'My logs')
+    notify_in_telegram(myclient, datetime_str, 'My logs')
     appropriate_symbols = []
     data_logs = ''
     i = 1
@@ -236,12 +235,13 @@ def generate_technical_signals():
         if result:
             appropriate_symbols.append(symbol)
         if i % 5 == 0 or i == len(symbols):
-            notify_in_telegram(data_logs, 'My logs')
+            notify_in_telegram(myclient, data_logs, 'My logs')
             data_logs = ''
         i += 1
 
     message = 'appropriate symbols:{}\n'.format(appropriate_symbols)
-    notify_in_telegram(message, 'My alarms')
+    notify_in_telegram(myclient, message, 'My alarms')
+    myclient.disconnect()
 
 
 @catch_all_exceptions()
