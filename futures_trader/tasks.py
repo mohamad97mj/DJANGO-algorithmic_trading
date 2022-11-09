@@ -17,7 +17,6 @@ from candlestick import detect_patterns_in_two_previous_candles, has_long_candle
     has_short_candlestick_confirmation
 
 
-
 def notify_in_telegram(message, entity):
     myclient.get_dialogs()
     entity = myclient.get_entity(entity)

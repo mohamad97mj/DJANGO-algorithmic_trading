@@ -14,11 +14,10 @@ from datetime import datetime, timedelta
 from mplfinance.original_flavor import candlestick_ohlc
 from ta.trend import MACD
 from candlestick import has_long_candlestick_confirmation, has_short_candlestick_confirmation
-from futures_trader.services.external_signal_trader.auto_trader import create_client
+from futures_trader.services.external_signal_trader.auto_trader import myclient
 from futures_trader.models import FuturesSignal
 from global_utils.my_logging import my_get_logger
 from global_utils.catch_all_exceptions import catch_all_exceptions
-
 
 PATTERNS = {
     'CDL2CROWS': 1,  # Two Crows,
@@ -221,7 +220,7 @@ def has_trend_changed2long(arr):
 
 @shared_task
 def generate_technical_signals():
-    myclient = create_client()
+    myclient.connect()
     datetime_str = datetime.now().strftime("%Y/%m/%d, %H") + ':30'
     notify_in_telegram(myclient, datetime_str, 'My logs')
     appropriate_symbols = []

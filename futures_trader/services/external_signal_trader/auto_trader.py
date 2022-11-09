@@ -38,6 +38,11 @@ def create_client():
         except EOFError:
             pass
     return client
+
+
+myclient = create_client()
+myclient.disconnect()
+
 #
 #
 # signal_data_extractor_mapping = {
