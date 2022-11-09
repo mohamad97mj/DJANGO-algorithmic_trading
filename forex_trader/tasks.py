@@ -244,7 +244,11 @@ def generate_technical_signals():
 
 @catch_all_exceptions()
 def check_symbol_for_signal(symbol):
-    data = pandas.DataFrame(yf.download(symbol, interval='1h', period='1mo')[:-2])
+    data = pandas.DataFrame(yf.download(symbol, interval='1h', period='1mo')[:-1])
+    last_index_hour = data.tail(1).index.item().hour
+    now_hour = datetime.now().hour
+    if now_hour - 1 < last_index_hour:
+        data = data[:-1]
     data_4h = data.resample('4H', offset='2H').agg(
         OrderedDict([
             ('Open', 'first'),
