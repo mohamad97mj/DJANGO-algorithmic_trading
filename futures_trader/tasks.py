@@ -16,7 +16,6 @@ from spot_trader.clients import PublicClient as SpotPublicClient
 from candlestick import detect_patterns_in_two_previous_candles, has_long_candlestick_confirmation, \
     has_short_candlestick_confirmation
 
-myclient = create_client()
 
 
 def notify_in_telegram(message, entity):
@@ -27,9 +26,7 @@ def notify_in_telegram(message, entity):
 
 @shared_task
 def technical_auto_trade():
-    global myclient
-    if not myclient:
-        myclient = create_client()
+    myclient = create_client()
     datetime_str = datetime.datetime.now().strftime("%Y/%m/%d, %H") + ':30'
     notify_in_telegram(datetime_str, 'My logs')
     appropriate_symbols = []
@@ -48,6 +45,7 @@ def technical_auto_trade():
     message = 'appropriate symbols:{}\n'.format(appropriate_symbols)
     notify_in_telegram(message, 'My alarms')
     gc.collect()
+    myclient.disconnect()
 
 
 @catch_all_exceptions()

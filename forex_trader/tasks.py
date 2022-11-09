@@ -19,7 +19,6 @@ from futures_trader.models import FuturesSignal
 from global_utils.my_logging import my_get_logger
 from global_utils.catch_all_exceptions import catch_all_exceptions
 
-myclient = create_client()
 
 PATTERNS = {
     'CDL2CROWS': 1,  # Two Crows,
@@ -222,7 +221,6 @@ def has_trend_changed2long(arr):
 
 @shared_task
 def generate_technical_signals():
-    global myclient
     myclient = create_client()
     datetime_str = datetime.now().strftime("%Y/%m/%d, %H") + ':30'
     notify_in_telegram(myclient, datetime_str, 'My logs')
