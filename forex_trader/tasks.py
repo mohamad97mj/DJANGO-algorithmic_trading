@@ -242,8 +242,6 @@ def generate_technical_signals():
 
     message = 'appropriate symbols:{}\n'.format(appropriate_symbols)
     notify_in_telegram(message, 'My alarms')
-    gc.collect()
-    time.sleep(1)
 
 
 @catch_all_exceptions()
