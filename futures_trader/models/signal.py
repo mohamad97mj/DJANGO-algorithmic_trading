@@ -24,6 +24,7 @@ class FuturesSignal(models.Model):
     created_at = models.DateTimeField(default=timezone.now, blank=True)
     setup_mode = models.CharField(max_length=50, null=True, blank=True)
     confirmations = ArrayField(models.CharField(max_length=20), blank=True, null=True)
+    triggered_at = models.DateTimeField(null=True)
     status = models.CharField(max_length=10, default=Status.WAITING.value)
 
     def __init__(self, *args, **kwargs):

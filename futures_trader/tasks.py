@@ -135,10 +135,15 @@ confirmations: {}'''
                 confirmations = ['CCI']
                 if (macd > 0 and prev_macd > 0) or macd > prev_macd:
                     confirmations.append('Trend')
+                    triggered_at = get_rounded_now()
+                    data_log += '\ntriggered at: {}'.format(str(triggered_at))
+
             if trend_changed2long:
                 confirmations = ['Trend']
                 if cci > -100 and 'CCI' not in confirmations:
                     confirmations.append('CCI')
+                    triggered_at = get_trand_changed2long_at(last4macds)
+                    data_log += '\ntriggered at: {}'.format(str(triggered_at))
 
             risk = (close - bbd) / close
             reward = (bbu - close) / close
@@ -158,10 +163,15 @@ confirmations: {}'''
                 confirmations = ['CCI']
                 if macd < 0 and prev_macd < 0 or macd < prev_macd:
                     confirmations.append('Trend')
+                    triggered_at = get_rounded_now()
+                    data_log += '\ntriggered at: {}'.format(str(triggered_at))
+
             if trend_changed2short:
                 confirmations = ['Trend']
                 if cci < 100 and 'CCI' not in confirmations:
                     confirmations.append('CCI')
+                    triggered_at = get_trand_changed2short_at(last4macds)
+                    data_log += '\ntriggered at: {}'.format(str(triggered_at))
 
             risk = (bbu - close) / close
             reward = (close - bbd) / close
@@ -178,11 +188,13 @@ confirmations: {}'''
         data_log = data_log.format(rr, confirmations)
         logger.debug(data_log)
 
-        if confirmations and all(c in confirmations for c in ['CCI', 'Trend', 'Bollinger Bands']):
+        if confirmations and all(c in confirmations for c in ['CCI', 'Trend', 'Bollinger Bands']) \
+                and not FuturesSignal.objects.filter(symbol=symbol, triggered_at=triggered_at).exists():
             # leverage = min(int(10 / (100 * risk)), 20)
             signal_data = {'symbol': symbol,
                            'side': side,
-                           'confirmations': confirmations}
+                           'confirmations': confirmations,
+                           'triggered_at': triggered_at}
             if 'Candlestick' in confirmations:
                 FuturesSignal.objects.create(**signal_data)
                 return True, data_log
@@ -192,6 +204,11 @@ confirmations: {}'''
                 data_log += '\nsignal watching status: {}'.format('watching')
                 return False, data_log
         return False, data_log
+
+
+def get_rounded_now():
+    now = datetime.datetime.now()
+    return datetime.datetime(year=now.year, month=now.month, day=now.day, hour=now.hour)
 
 
 def has_trend_changed2short(arr):
@@ -206,6 +223,15 @@ def has_trend_changed2short(arr):
     return False
 
 
+def get_trand_changed2short_at(arr):
+    max_index = arr.index(max(arr))
+    now = datetime.datetime.now()
+    hour_delta = {0: 2, 1: 3, 2: 0, 3: 1}[now.hour % 4]
+    trend_changed2short_at = datetime.datetime.now() - datetime.timedelta(
+        hours=(hour_delta + (len(arr) - 2 - max_index) * 4))
+    return trend_changed2short_at
+
+
 def has_trend_changed2long(arr):
     minimum = min(arr)
     if minimum < 0:
@@ -216,6 +242,15 @@ def has_trend_changed2long(arr):
             if min_left == sorted(min_left, reverse=True) and min_right == sorted(min_right):
                 return True
     return False
+
+
+def get_trand_changed2long_at(arr):
+    min_index = arr.index(min(arr))
+    now = datetime.datetime.now()
+    hour_delta = {0: 2, 1: 3, 2: 0, 3: 1}[now.hour % 4]
+    trend_changed2long_at = datetime.datetime.now() - datetime.timedelta(
+        hours=(hour_delta + (len(arr) - 2 - min_index) * 4))
+    return trend_changed2long_at
 
 
 @shared_task

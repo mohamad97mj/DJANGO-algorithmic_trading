@@ -218,6 +218,35 @@ def has_trend_changed2long(arr):
     return False
 
 
+def get_rounded_now():
+    now = datetime.now()
+    return datetime(year=now.year, month=now.month, day=now.day, hour=now.hour)
+
+
+def get_trand_changed2short_at(arr):
+    max_index = arr.index(max(arr))
+    now = datetime.now()
+    hour_delta = {0: 2, 1: 3, 2: 0, 3: 1}[now.hour % 4]
+    trend_changed2short_at = datetime.now() - timedelta(
+        hours=(hour_delta + (len(arr) - 2 - max_index) * 4))
+    return datetime(trend_changed2short_at.year,
+                    trend_changed2short_at.month,
+                    trend_changed2short_at.day,
+                    trend_changed2short_at.hour)
+
+
+def get_trand_changed2long_at(arr):
+    min_index = arr.index(min(arr))
+    now = datetime.now()
+    hour_delta = {0: 2, 1: 3, 2: 0, 3: 1}[now.hour % 4]
+    trend_changed2long_at = datetime.now() - timedelta(
+        hours=(hour_delta + (len(arr) - 2 - min_index) * 4))
+    return datetime(trend_changed2long_at.year,
+                    trend_changed2long_at.month,
+                    trend_changed2long_at.day,
+                    trend_changed2long_at.hour)
+
+
 @shared_task
 def generate_technical_signals():
     myclient.connect()
@@ -345,14 +374,18 @@ confirmations: {}'''
 
         if prev_cci < -100 < cci or trend_changed2long:
             side = 'buy'
-            if prev_cci < -100 < cci:
+            if trend_changed2long:
+                confirmations = ['Trend']
+                if cci > -100:
+                    confirmations.append('CCI')
+                    triggered_at = get_trand_changed2long_at(last4macds)
+                    data_log += '\ntriggered at: {}'.format(str(triggered_at))
+            else:
                 confirmations = ['CCI']
                 if (macd > 0 and prev_macd > 0) or macd > prev_macd:
                     confirmations.append('Trend')
-            if trend_changed2long:
-                confirmations = ['Trend']
-                if cci > -100 and 'CCI' not in confirmations:
-                    confirmations.append('CCI')
+                    triggered_at = get_rounded_now()
+                    data_log += '\ntriggered at: {}'.format(str(triggered_at))
 
             risk = (close - bbd) / close
             reward = (bbu - close) / close
@@ -368,14 +401,18 @@ confirmations: {}'''
 
         elif prev_cci > 100 > cci or trend_changed2short:
             side = 'sell'
-            if prev_cci > 100 > cci:
+            if trend_changed2short:
+                confirmations = ['Trend']
+                if cci < 100 and 'CCI':
+                    confirmations.append('CCI')
+                    triggered_at = get_trand_changed2short_at(last4macds)
+                    data_log += '\ntriggered at: {}'.format(str(triggered_at))
+            else:
                 confirmations = ['CCI']
                 if macd < 0 and prev_macd < 0 or macd < prev_macd:
                     confirmations.append('Trend')
-            if trend_changed2short:
-                confirmations = ['Trend']
-                if cci < 100 and 'CCI' not in confirmations:
-                    confirmations.append('CCI')
+                    triggered_at = get_rounded_now()
+                    data_log += '\ntriggered at: {}'.format(str(triggered_at))
 
             risk = (bbu - close) / close
             reward = (close - bbd) / close
@@ -392,11 +429,13 @@ confirmations: {}'''
         data_log = data_log.format(rr, confirmations)
         logger.debug(data_log)
 
-        if confirmations and all(c in confirmations for c in ['CCI', 'Trend', 'Bollinger Bands']):
+        if confirmations and all(c in confirmations for c in ['CCI', 'Trend', 'Bollinger Bands']) \
+                and not FuturesSignal.objects.filter(symbol=symbol, triggered_at=triggered_at).exists():
             # leverage = min(int(10 / (100 * risk)), 20)
             signal_data = {'symbol': symbol,
                            'side': side,
-                           'confirmations': confirmations}
+                           'confirmations': confirmations,
+                           'triggered_at': triggered_at}
             if 'Candlestick' in confirmations:
                 FuturesSignal.objects.create(**signal_data)
                 return True, data_log
