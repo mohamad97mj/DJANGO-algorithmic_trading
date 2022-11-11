@@ -345,7 +345,7 @@ confirmations: {}'''
                 risk = (close - bbd) / close
                 reward = (bbu - close) / close
                 rr = risk / reward
-                if ((macd > 0 and prev_macd > 0) or macd > prev_macd or trend_changed2long) and 0 < rr < 2 \
+                if ((macd > 0 and prev_macd > 0) or macd > prev_macd or trend_changed2long) and 0 < rr < 3 \
                         and has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
                     watching_signal.confirmations.append('Candlestick')
@@ -360,7 +360,7 @@ confirmations: {}'''
                 risk = (bbu - close) / close
                 reward = (close - bbd) / close
                 rr = risk / reward
-                if ((macd < 0 and prev_macd < 0) or macd < prev_macd or trend_changed2short) and 0 < rr < 2 \
+                if ((macd < 0 and prev_macd < 0) or macd < prev_macd or trend_changed2short) and 0 < rr < 3 \
                         and has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                     watching_signal.status = FuturesSignal.Status.WAITING.value
                     watching_signal.confirmations.append('Candlestick')
@@ -392,7 +392,7 @@ confirmations: {}'''
             risk = (close - bbd) / close
             reward = (bbu - close) / close
             rr = risk / reward
-            if 0 < rr < 2:
+            if 0 < rr < 3:
                 confirmations.append('Bollinger Bands')
             if has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                 confirmations.append('Candlestick')
@@ -419,7 +419,7 @@ confirmations: {}'''
             risk = (bbu - close) / close
             reward = (close - bbd) / close
             rr = risk / reward
-            if 0 < rr < 2:
+            if 0 < rr < 3:
                 confirmations.append('Bollinger Bands')
             if has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
                 confirmations.append('Candlestick')
