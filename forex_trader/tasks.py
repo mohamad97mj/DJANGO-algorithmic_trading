@@ -258,7 +258,7 @@ def generate_technical_signals():
     data_logs = ''
     i = 1
     for symbol in symbols:
-        result, data_log = check_symbol_for_signal(symbol)
+        result, data_log = check_symbol_for_signal2(symbol)
         data_logs += '\n\n' + data_log
         if result:
             appropriate_symbols.append(symbol)
@@ -415,6 +415,167 @@ confirmations: {}'''
                     confirmations.append('Trend')
                     triggered_at = get_rounded_now()
                     data_log += '\ntriggered at: {}'.format(str(triggered_at))
+
+            risk = (bbu - close) / close
+            reward = (close - bbd) / close
+            rr = risk / reward
+            if 0 < rr < 2:
+                confirmations.append('Bollinger Bands')
+            if has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
+                confirmations.append('Candlestick')
+            data_log = data_log.format(
+                rr,
+                str(confirmations),
+            )
+
+        data_log = data_log.format(rr, confirmations)
+        logger.debug(data_log)
+
+        if confirmations and all(c in confirmations for c in ['CCI', 'Trend', 'Bollinger Bands']) \
+                and not FuturesSignal.objects.filter(symbol=symbol, triggered_at=triggered_at).exists():
+            # leverage = min(int(10 / (100 * risk)), 20)
+            signal_data = {'symbol': symbol,
+                           'side': side,
+                           'confirmations': confirmations,
+                           'triggered_at': triggered_at}
+            if 'Candlestick' in confirmations:
+                FuturesSignal.objects.create(**signal_data)
+                return True, data_log
+            else:
+                signal_data['status'] = FuturesSignal.Status.WATCHING.value
+                FuturesSignal.objects.create(**signal_data)
+                data_log += '\nsignal watching status: {}'.format('watching')
+                return False, data_log
+        return False, data_log
+
+
+@catch_all_exceptions()
+def check_symbol_for_signal2(symbol):
+    data = pandas.DataFrame(yf.download(symbol, interval='1h', period='1mo')[:-1])
+    last_index_hour = data.tail(1).index.item().hour
+    now_hour = datetime.now().hour
+    if now_hour - 1 < last_index_hour:
+        data = data[:-1]
+    data_4h = data.resample('4H', offset='2H').agg(
+        OrderedDict([
+            ('Open', 'first'),
+            ('High', 'max'),
+            ('Low', 'min'),
+            ('Close', 'last'),
+        ]),
+    ).dropna()
+
+    ohlcs = data.values.tolist()
+    ccis = get_ccis(ohlcs)
+    macds = get_macds(data_4h)
+    bollinger_bands = get_bollinger_bands(data_4h)
+    patterns = detect_patterns_in_ohlcs(ohlcs, PATTERNS)
+
+    logger = my_get_logger()
+    data_log = '''
+symbol: {},
+prev cci: {},
+cci: {},
+prev macd: {},
+macd: {},
+previous candle patterns: {},
+current candle patterns: {},
+bbd: {},
+bbu: {},
+rr: {},
+confirmations: {}'''
+    cci, prev_cci = ccis[-1], ccis[-2]
+    macd, prev_macd = macds[-1], macds[-2]
+    bbd, bbu = bollinger_bands[-1]
+    current_candle_patterns, previous_candle_patterns = patterns[-1], patterns[-2]
+    close = ohlcs[-1][3]
+
+    data_log = data_log.format(
+        symbol,
+        prev_cci,
+        cci,
+        macd,
+        prev_macd,
+        str(previous_candle_patterns),
+        str(current_candle_patterns),
+        bbd,
+        bbu,
+        '{}',
+        '{}',
+    )
+
+    rr = None
+    confirmations = None
+
+    watching_signal = FuturesSignal.objects.filter(symbol=symbol, status=FuturesSignal.Status.WATCHING.value).first()
+    if watching_signal:
+        if cci < -100 or cci > 100:
+            watching_signal.status = FuturesSignal.Status.UNWATCHED.value
+            watching_signal.save()
+            data_log = data_log.format(rr, confirmations)
+            data_log += '\nsignal watching status: {}'.format('unwatched')
+            return False, data_log
+        else:
+            if watching_signal.side == 'buy':
+                risk = (close - bbd) / close
+                reward = (bbu - close) / close
+                rr = risk / reward
+                if macd > 0 and prev_macd > 0 and 0 < rr < 2 \
+                        and has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
+                    watching_signal.status = FuturesSignal.Status.WAITING.value
+                    watching_signal.confirmations.append('Candlestick')
+                    watching_signal.save()
+                    data_log = data_log.format(rr, str(watching_signal.confirmations))
+                    data_log += '\nsignal watching status: {}'.format('waiting')
+                    return True, data_log
+                else:
+                    data_log = data_log.format(rr, confirmations)
+                    return False, data_log
+            else:
+                risk = (bbu - close) / close
+                reward = (close - bbd) / close
+                rr = risk / reward
+                if macd < 0 and prev_macd < 0 and 0 < rr < 2 \
+                        and has_short_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
+                    watching_signal.status = FuturesSignal.Status.WAITING.value
+                    watching_signal.confirmations.append('Candlestick')
+                    watching_signal.save()
+                    data_log = data_log.format(rr, str(watching_signal.confirmations))
+                    data_log += '\nsignal watching status: {}'.format('waiting')
+                    return True, data_log
+                else:
+                    data_log = data_log.format(rr, confirmations)
+                    return False, data_log
+
+    else:
+
+        if prev_cci < -100 < cci:
+            side = 'buy'
+            confirmations = ['CCI']
+            if macd > 0 and prev_macd > 0:
+                confirmations.append('Trend')
+                triggered_at = get_rounded_now()
+                data_log += '\ntriggered at: {}'.format(str(triggered_at))
+
+            risk = (close - bbd) / close
+            reward = (bbu - close) / close
+            rr = risk / reward
+            if 0 < rr < 2:
+                confirmations.append('Bollinger Bands')
+            if has_long_candlestick_confirmation(previous_candle_patterns, current_candle_patterns):
+                confirmations.append('Candlestick')
+            data_log = data_log.format(
+                rr,
+                str(confirmations),
+            )
+
+        elif prev_cci > 100 > cci:
+            side = 'sell'
+            confirmations = ['CCI']
+            if macd < 0 and prev_macd < 0:
+                confirmations.append('Trend')
+                triggered_at = get_rounded_now()
+                data_log += '\ntriggered at: {}'.format(str(triggered_at))
 
             risk = (bbu - close) / close
             reward = (close - bbd) / close
