@@ -220,19 +220,20 @@ def has_trend_changed2long(arr):
 
 def get_rounded_now():
     now = datetime.now()
-    return datetime(year=now.year, month=now.month, day=now.day, hour=now.hour)
+    return datetime(year=now.year, month=now.month, day=now.day, hour=now.hour, minute=30)
 
 
 def get_trand_changed2short_at(arr):
     max_index = arr.index(max(arr))
     now = datetime.now()
-    hour_delta = {0: 2, 1: 3, 2: 0, 3: 1}[now.hour % 4]
+    hour_delta = {0: 2, 1: 3, 2: 4, 3: 1}[now.hour % 4]
     trend_changed2short_at = datetime.now() - timedelta(
         hours=(hour_delta + (len(arr) - 2 - max_index) * 4))
     return datetime(trend_changed2short_at.year,
                     trend_changed2short_at.month,
                     trend_changed2short_at.day,
-                    trend_changed2short_at.hour)
+                    trend_changed2short_at.hour,
+                    minute=30)
 
 
 def get_trand_changed2long_at(arr):
@@ -244,7 +245,8 @@ def get_trand_changed2long_at(arr):
     return datetime(trend_changed2long_at.year,
                     trend_changed2long_at.month,
                     trend_changed2long_at.day,
-                    trend_changed2long_at.hour)
+                    trend_changed2long_at.hour,
+                    minute=30)
 
 
 @shared_task
